@@ -6,6 +6,7 @@ cryptography==43.0.3
 Django==5.1.1
 django-allauth==65.1.0
 idna==3.10
+psycopg2-binary==2.9.10
 pycparser==2.22
 PyJWT==2.9.0
 python-dotenv==1.0.1
