@@ -15,7 +15,7 @@ class UserProfile(models.Model):
     def get_by_email(cls, email):
         return cls.objects.get(user__email=email)
 
-class Buyer(UserProfile):
+class Buyer(UserProfile,models.Model):
     # Buyer-specific fields (if any) can go here
 
     @classmethod
