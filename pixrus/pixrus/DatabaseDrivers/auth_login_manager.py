@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.utils import timezone
-from models import Buyer, Seller, UserProfile, UserSession
+from models import Buyer, Seller, UserSession
 
 def register_or_update_user(user_auth_data, user_meta_data, is_buyer):
     """
@@ -12,12 +12,12 @@ def register_or_update_user(user_auth_data, user_meta_data, is_buyer):
     google_id = user_auth_data.get('google_id')
     
     # Get or create the user
-    user, created = User.objects.get_or_create(username=google_id, defaults={
+    user, created = User.objects.get_or_create(id=google_id, defaults={
         'email': email,  
         'first_name': first_name,
         'last_name': last_name,
     })
-    
+    user_profile = None
     # Get or create the user profile based on is_buyer flag
     if is_buyer:
         user_profile, _ = Buyer.objects.get_or_create(user=user, defaults={
@@ -28,8 +28,7 @@ def register_or_update_user(user_auth_data, user_meta_data, is_buyer):
             'meta_data': user_meta_data
         })
     update_user_session_login(user_profile=user_profile)
-
-    return user_profile
+    return user_profile, created 
 
 def update_user_session_login(user_profile):
     """
@@ -39,7 +38,7 @@ def update_user_session_login(user_profile):
         user_profile (UserProfile): A user profile, either Buyer or Seller.
     """
     # Get or create the UserSession and update the timestamp and online status
-    session, _ = UserSession.objects.get_or_create(user=user_profile.user)
+    session, _ = UserSession.objects.get_or_create(user=user_profile)
     session.last_logged_in = timezone.now()
     session.is_online = True
     session.save()

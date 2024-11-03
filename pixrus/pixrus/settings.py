@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'pixrus'
+    'pixrus.DatabaseDrivers',
 ]
 
 MIDDLEWARE = [
@@ -79,9 +79,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'picks_dev',
         'USER': 'picks_admin',
-        'PASSWORD': 'whatisobamaslastname',
-        'HOST': 'localhost',  # Or your database server IP
-        'PORT': '5432',       # Default PostgreSQL port
+        'PASSWORD': 'your_password',
+        'HOST': 'localhost',
+        'PORT': '5432'
     }
 }
 

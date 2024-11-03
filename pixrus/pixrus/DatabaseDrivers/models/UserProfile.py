@@ -8,6 +8,7 @@ class UserProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     meta_data = models.JSONField(null=True, blank=True)  # Shared metadata field
 
+
     class Meta:
         abstract = True  # Makes this an abstract base class
 
@@ -44,9 +45,6 @@ class Buyer(UserProfile,models.Model):
 
 class Seller(UserProfile):
 
-
-    def __str__(self):
-        return f"Seller: {self.store_name}"
 
     @classmethod
     def get_store_name(cls, id=None, email=None):
