@@ -1,5 +1,5 @@
-from .models import Pick,Buyer,Seller
-
+from .models.Products import Pick,EventResult
+from .models.UserProfile import Buyer, Seller
 from django.utils import timezone
 
 def add_pick(api_id, api_vendor_id, seller, meta_data, event_time):
@@ -55,6 +55,27 @@ def _get_picks(user, user_type, has_happened):
         return Pick.objects.none()
 
     return picks
+
+def update_pick_with_result(pick, result_data):
+    """
+    Updates the given pick with event results and sets has_happened to True.
+
+    Args:
+        pick (Pick): The pick instance to update.
+        result_data (dict): The result data to store in EventResult.
+    """
+    # Step 1: Update or create an EventResult for the pick
+    event_result, created = EventResult.objects.update_or_create(
+        pick=pick,
+        defaults={'result_data': result_data}
+    )
+    
+    # Step 2: Update the pick to mark it as happened
+    pick.has_happened = True
+    pick.save()
+
+    return event_result, created 
+    
 
 
      
