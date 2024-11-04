@@ -1,6 +1,6 @@
-from .models.Products import Pick,EventResult
-from .models.UserProfile import Buyer, Seller
-from django.utils import timezone
+from ..models.Products import Pick,EventResult
+from ..models.UserProfile import Buyer, Seller
+
 
 def add_pick(api_id, api_vendor_id, seller, meta_data):
     """

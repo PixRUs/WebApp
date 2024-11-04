@@ -3,7 +3,7 @@ from datetime import datetime
 from pixrus.DatabaseDrivers.models import Pick, Seller,Buyer
 from django.contrib.auth.models import User
 
-from pixrus.DatabaseDrivers.pick_manager import add_pick, get_all_pending_picks_for_buyer, get_all_processed_picks_for_seller, get_all_pending_picks_for_seller,get_all_processed_picks_for_buyer,give_buyer_access_to_pick,update_pick_with_result
+from pixrus.DatabaseDrivers.service.pick_manager import add_pick, get_all_pending_picks_for_buyer, get_all_processed_picks_for_seller, get_all_pending_picks_for_seller,get_all_processed_picks_for_buyer,give_buyer_access_to_pick,update_pick_with_result
 
 class PickModelTest(TestCase):
     
