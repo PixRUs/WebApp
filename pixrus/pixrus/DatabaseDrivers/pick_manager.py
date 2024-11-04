@@ -2,17 +2,13 @@ from .models.Products import Pick,EventResult
 from .models.UserProfile import Buyer, Seller
 from django.utils import timezone
 
-def add_pick(api_id, api_vendor_id, seller, meta_data, event_time):
+def add_pick(api_id, api_vendor_id, seller, meta_data):
     """
     Creates and saves a new Pick instance to the database.
     """
-    # Ensure event_time is timezone-aware
-    if timezone.is_naive(event_time):
-        event_time = timezone.make_aware(event_time)
 
     pick = Pick.objects.create(
         api_id=api_id,
-        event_time=event_time,
         api_vendor_id=api_vendor_id,
         seller=seller,
         meta_data=meta_data

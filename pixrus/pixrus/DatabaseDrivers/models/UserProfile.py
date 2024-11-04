@@ -44,8 +44,6 @@ class Buyer(UserProfile,models.Model):
         return user_profile.created_at
 
 class Seller(UserProfile):
-
-
     @classmethod
     def get_store_name(cls, id=None, email=None):
         if not (id or email):  # Ensure at least one identifier is provided

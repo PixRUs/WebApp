@@ -50,7 +50,6 @@ class PickModelTest(TestCase):
             api_id="unique_api_id_123",
             api_vendor_id="vendor_123",
             seller=self.seller, 
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         
@@ -67,7 +66,6 @@ class PickModelTest(TestCase):
         self.assertEqual(retrieved_pick.api_id, pick.api_id)
         self.assertEqual(retrieved_pick.api_vendor_id, pick.api_vendor_id)
         self.assertEqual(retrieved_pick.seller, pick.seller)
-        self.assertEqual(retrieved_pick.event_time, pick.event_time)
         self.assertEqual(retrieved_pick.has_happened, pick.has_happened)
         self.assertEqual(retrieved_pick.meta_data, pick.meta_data)
         
@@ -76,7 +74,6 @@ class PickModelTest(TestCase):
             api_id="unique_api_id_123",
             api_vendor_id="vendor_123",
             seller=self.seller, 
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         give_buyer_access_to_pick(self.buyer,pick=pick)
@@ -93,7 +90,6 @@ class PickModelTest(TestCase):
         self.assertEqual(retrieved_pick.api_id, pick.api_id)
         self.assertEqual(retrieved_pick.api_vendor_id, pick.api_vendor_id)
         self.assertEqual(retrieved_pick.seller, pick.seller)
-        self.assertEqual(retrieved_pick.event_time, pick.event_time)
         self.assertEqual(retrieved_pick.has_happened, pick.has_happened)
         self.assertEqual(retrieved_pick.meta_data, pick.meta_data)
     
@@ -103,28 +99,24 @@ class PickModelTest(TestCase):
             api_id="unique_api_id_123",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         pick2 = add_pick(
             api_id="unique_api_id_124",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         pick3 = add_pick(
             api_id="unique_api_id_125",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         pick4 = add_pick(
             api_id="unique_api_id_126",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
 
@@ -143,7 +135,6 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.event_time, expected_pick.event_time)
             self.assertEqual(retrieved_pick.has_happened, expected_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
 
@@ -154,28 +145,24 @@ class PickModelTest(TestCase):
             api_id="unique_api_id_123",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         pick2 = add_pick(
             api_id="unique_api_id_124",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         pick3 = add_pick(
             api_id="unique_api_id_125",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         pick4 = add_pick(
             api_id="unique_api_id_126",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         give_buyer_access_to_pick(self.buyer,pick=pick2)
@@ -194,7 +181,6 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.event_time, expected_pick.event_time)
             self.assertEqual(retrieved_pick.has_happened, expected_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
     
@@ -204,28 +190,24 @@ class PickModelTest(TestCase):
             api_id="unique_api_id_123",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         pick2 = add_pick(
             api_id="unique_api_id_124",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         pick3 = add_pick(
             api_id="unique_api_id_125",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         pick4 = add_pick(
             api_id="unique_api_id_126",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
 
@@ -244,7 +226,6 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.event_time, expected_pick.event_time)
             self.assertEqual(retrieved_pick.has_happened, expected_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
 
@@ -257,7 +238,6 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.event_time, expected_pick.event_time)
             self.assertEqual(retrieved_pick.has_happened, expected_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
 
@@ -270,28 +250,24 @@ class PickModelTest(TestCase):
             api_id="unique_api_id_123",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         pick2 = add_pick(
             api_id="unique_api_id_124",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         pick3 = add_pick(
             api_id="unique_api_id_125",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         pick4 = add_pick(
             api_id="unique_api_id_126",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
 
@@ -315,7 +291,6 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.event_time, expected_pick.event_time)
             self.assertEqual(retrieved_pick.has_happened, expected_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
 
@@ -328,7 +303,6 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.event_time, expected_pick.event_time)
             self.assertEqual(retrieved_pick.has_happened, expected_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
 
@@ -342,28 +316,24 @@ class PickModelTest(TestCase):
             api_id="unique_api_id_123",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         pick2 = add_pick(
             api_id="unique_api_id_124",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         pick3 = add_pick(
             api_id="unique_api_id_125",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         pick4 = add_pick(
             api_id="unique_api_id_126",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
 
@@ -399,7 +369,6 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.event_time, expected_pick.event_time)
             self.assertTrue(retrieved_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
             # Assert result data matches expected values
@@ -415,7 +384,6 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.event_time, expected_pick.event_time)
             self.assertFalse(retrieved_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
     def test_multiple_picks_and_retrieving_off_seller_3(self):
@@ -424,28 +392,24 @@ class PickModelTest(TestCase):
             api_id="unique_api_id_123",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         pick2 = add_pick(
             api_id="unique_api_id_124",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         pick3 = add_pick(
             api_id="unique_api_id_125",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
         pick4 = add_pick(
             api_id="unique_api_id_126",
             api_vendor_id="vendor_123",
             seller=self.seller,
-            event_time=datetime.now(),
             meta_data=self.meta_data
         )
 
@@ -477,7 +441,6 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.event_time, expected_pick.event_time)
             self.assertTrue(retrieved_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
             # Assert result data matches expected values
@@ -493,7 +456,6 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.event_time, expected_pick.event_time)
             self.assertFalse(retrieved_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
 
