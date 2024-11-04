@@ -79,7 +79,7 @@ def update_user_session_login(user_profile:UserProfile,google_id=None,user_meta_
     session.save()
     return session.id
 
-def update_user_session_logout(user_profile):
+def update_user_session_logout(user_profile:UserProfile):
     """
     Updates the UserSession database when the user logs out.
 
