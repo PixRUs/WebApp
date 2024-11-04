@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+{% load static %}
+{% load socialaccount %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Google OAuth Example</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+<div class="container">
+    <h1>Welcome to Our Application</h1>
+    <p>Please log in to access the content.</p>
+    <br>
+    <a href="{% url 'userlogin' %}" class="button">Login</a>
+    <br>
+    <a href="{% url 'usersignup' %}" class="button">Sign Up</a>
+    <br>
+    <a href="{% url 'account_logout' %}" class="button">Logout</a>
+    <br>
+    <a href="{% provider_login_url 'google' %}" class="button">Login with Google</a>
+</div>
+</body>
+</html>
