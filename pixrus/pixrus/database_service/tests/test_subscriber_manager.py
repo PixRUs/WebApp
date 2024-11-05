@@ -1,9 +1,9 @@
 from django.test import TestCase
 from django.utils import timezone
 from datetime import timedelta
-from pixrus.DatabaseDrivers.models.UserProfile import Buyer, Seller
-from pixrus.DatabaseDrivers.models.Products import Subscription
-from pixrus.DatabaseDrivers.service.subscriber_manager import create_new_subscription, end_current_subscription
+from pixrus.database_service.models.UserProfile import Buyer, Seller
+from pixrus.database_service.models.Products import Subscription
+from pixrus.database_service.service.subscriber_manager import create_new_subscription, end_current_subscription
 from django.contrib.auth.models import User
 
 

@@ -1,5 +1,5 @@
-from pixrus.DatabaseDrivers.models.UserProfile import Buyer, Seller, UserProfile
-from pixrus.DatabaseDrivers.models.Products import Subscription
+from pixrus.database_service.models.UserProfile import Buyer, Seller, UserProfile
+from pixrus.database_service.models.Products import Subscription
 from django.utils import timezone
 
 def create_new_subscription(start_time, end_time, buyer, seller, meta_data):
@@ -48,8 +48,7 @@ def end_current_subscription(buyer, seller):
         if not subscription:
             return False
         # End the subscription by setting `subscribed_until` to the current time
-        subscription.subscribed_until = timezone.now()
-        subscription.save()
+        subscription.delete()
         return True
 
     except Subscription.DoesNotExist:

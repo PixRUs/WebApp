@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.utils import timezone
-from  pixrus.DatabaseDrivers.models.UserProfile import Buyer,Seller,UserSession,UserProfile
+from  pixrus.database_service.models.UserProfile import Buyer,Seller,UserSession,UserProfile
 
 def register_or_update_user(user_auth_data, user_meta_data, type_of_user):
     """

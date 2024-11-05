@@ -1,6 +1,6 @@
 from django.test import TestCase
-from pixrus.DatabaseDrivers.service.auth_login_manager import register_or_update_user
-from pixrus.DatabaseDrivers.models import Buyer, Seller 
+from pixrus.database_service.service.auth_login_manager import register_or_update_user
+from pixrus.database_service.models import Buyer, Seller 
 
 class UserProfileTests(TestCase):
     def setUp(self):

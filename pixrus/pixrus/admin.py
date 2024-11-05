@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .DatabaseDrivers.models import Seller, Buyer, Pick, Subscription
+from .database_service.models import Seller, Buyer, Pick, Subscription
 
 admin.site.register(Seller)
 admin.site.register(Buyer)
