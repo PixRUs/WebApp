@@ -2,12 +2,13 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class UserProfile(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    google_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='%(class)s_profile')
     created_at = models.DateTimeField(auto_now_add=True)
-    meta_data = models.JSONField(null=True, blank=True)  # Shared metadata field
-
+    meta_data = models.JSONField(null=True, blank=True)
 
     class Meta:
         abstract = True  # Makes this an abstract base class
@@ -16,9 +17,8 @@ class UserProfile(models.Model):
     def get_by_email(cls, email):
         return cls.objects.get(user__email=email)
 
-class Buyer(UserProfile,models.Model):
+class Buyer(UserProfile):
     # Buyer-specific fields (if any) can go here
-
     @classmethod
     def get_user_name(cls, id=None, email=None):
         if not (id or email):  # Ensure at least one identifier is provided
@@ -55,3 +55,11 @@ class Seller(UserProfile):
             seller = cls.get_by_email(email=email)
         
         return seller.store_name
+
+class UserSession(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='session')  # Use User directly
+    last_logged_in = models.DateTimeField(null=True, blank=True)
+    is_online = models.BooleanField(default=False)
+
+
+
