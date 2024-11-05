@@ -1,5 +1,4 @@
 from django.test import TestCase
-from django.contrib.auth.models import User
 from pixrus.DatabaseDrivers.service.auth_login_manager import register_or_update_user
 from pixrus.DatabaseDrivers.models import Buyer, Seller 
 

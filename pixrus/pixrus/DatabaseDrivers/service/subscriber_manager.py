@@ -28,9 +28,6 @@ def create_new_subscription(start_time, end_time, buyer, seller, meta_data):
     
     return subscription
 
-from django.utils import timezone
-from pixrus.DatabaseDrivers.models.Products import Subscription
-from pixrus.DatabaseDrivers.models.UserProfile import Buyer, Seller
 
 def end_current_subscription(buyer, seller):
     """
@@ -48,6 +45,8 @@ def end_current_subscription(buyer, seller):
             subscribed_until__gt=timezone.now()
         ).latest('subscribed_at')  # Get the latest active subscription
         
+        if not subscription:
+            return False
         # End the subscription by setting `subscribed_until` to the current time
         subscription.subscribed_until = timezone.now()
         subscription.save()
