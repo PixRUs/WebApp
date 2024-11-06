@@ -122,7 +122,7 @@ class Seller(UserProfile):
 
 class UserSession(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='session')  # Use User directly
-    last_logged_in = models.DateTimeField(null=True, blank=True)
+    last_logged_in = models.DateTimeField(null=True, blank=True, default=timezone.now)
     is_online = models.BooleanField(default=False)
 
 

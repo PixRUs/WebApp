@@ -3,25 +3,47 @@ https://serpapi.com/sports-results -> this API.
 Now we are pertaining only to team vs team h2h
 """
 from datetime import datetime
-from serpapi import GoogleSearch 
-def has_game_happened(meta_data, game_result_data = None):
+from serpapi import GoogleSearch
 
+def has_game_happened(meta_data, game_result_data=None):
     if not game_result_data:
         team_1 = meta_data['team_1']
         team_2 = meta_data['team_2']
         event_date = meta_data['event_time']
         q = team_1 + " vs " + team_2 + " " + event_date.strftime("%B %d")
+        print(q)
         
         params = {
-        "q":q,
-        "location": "austin, texas, united states",
-        "api_key": "_"
+            "api_key": "da9ec7582c440b3cab4c7e18feeb7114e57895337bf4b3489a5de130f48a0aa9",
+            "engine": "google",
+            "q": q,
+            "location": "Austin, Texas, United States",
+            "google_domain": "google.com",
+            "gl": "us",
+            "hl": "en"
         }
 
         search = GoogleSearch(params)
-        game_result_data = search.get_dict()['sports_results']
-    is_final = 'status' in game_result_data['game_spotlight'] and game_result_data['game_spotlight']['status'].lower() == 'final'
-    return is_final,game_result_data
+        search_results = search.get_dict()
+        is_final = False
+
+        if 'sports_results' in search_results: 
+            game_result_data = search_results['sports_results']
+            is_final = 'status' in game_result_data['game_spotlight'] and game_result_data['game_spotlight']['status'].lower() == 'final'
+            
+        elif 'search_information' in search_results and 'spelling_fix' in search_results['search_information']:
+            # Retry with corrected spelling
+            corrected_query = search_results['search_information']['spelling_fix']
+            params["q"] = corrected_query
+            search = GoogleSearch(params)
+            search_results = search.get_dict()
+            if 'sports_results' in search_results: 
+                game_result_data = search_results['sports_results']
+                is_final = 'status' in game_result_data['game_spotlight'] and game_result_data['game_spotlight']['status'].lower() == 'final'
+            else: 
+                return False, {}
+    return is_final, game_result_data
+
 
 def score_result(game_query_data,game_result_data = None):
     if not game_result_data:

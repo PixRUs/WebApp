@@ -24,6 +24,7 @@ class ActivePick(models.Model):
         )
         historical_pick.buyers_with_access.set(self.buyers_with_access.all())
         self.delete()
+        return historical_pick
 
     def give_buyer_access(self, buyer):
         if not self.buyers_with_access.filter(id=buyer.id).exists():
@@ -46,13 +47,16 @@ class ActivePick(models.Model):
 
 
 class HistoricalPick(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, editable=False)
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, related_name='historical_pick_seller')
     posted_at = models.DateTimeField()
     meta_data = models.JSONField(null=True, blank=True)
     event_time_done = models.DateTimeField(auto_now_add=True)
     event_result = models.JSONField(null=True)
     buyers_with_access = models.ManyToManyField(Buyer, related_name='historical_pick_buyer', blank=True)
+    
+    def has_access(self, buyer):
+        return self.buyers_with_access.filter(id=buyer.id).exists()
 
     @classmethod
     def get_historical_picks_for_buyer(cls, buyer):
@@ -109,7 +113,6 @@ class Subscription(models.Model):
         return cls.objects.create(
             seller=seller,
             buyer=buyer,
-            subscribed_at=start_time,
             subscribed_until=end_time,
             meta_data=meta_data
         )
