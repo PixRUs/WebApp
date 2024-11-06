@@ -1,9 +1,10 @@
 from django.test import TestCase
 from datetime import datetime
-from pixrus.database_service.models import Pick, Seller,Buyer
+from pixrus.database_service.models import Seller,Buyer
+from pixrus.database_service.models.Products import ActivePick,HistoricalPick
 from django.contrib.auth.models import User
 
-from pixrus.database_service.service.pick_manager import add_pick, get_all_pending_picks_for_buyer, get_all_processed_picks_for_seller, get_all_pending_picks_for_seller,get_all_processed_picks_for_buyer,give_buyer_access_to_pick,update_pick_with_result
+from pixrus.database_service.service.pick_manager import add_active_pick, get_all_pending_picks_for_buyer, get_all_processed_picks_for_seller, get_all_pending_picks_for_seller,get_all_processed_picks_for_buyer,give_buyer_access_to_pick,update_pick_with_result_by_pick
 
 class PickModelTest(TestCase):
     
@@ -46,7 +47,7 @@ class PickModelTest(TestCase):
         """
         # Create a new Pick instance
 
-        pick = add_pick(
+        pick = add_active_pick(
             api_id="unique_api_id_123",
             api_vendor_id="vendor_123",
             seller=self.seller, 
@@ -58,7 +59,6 @@ class PickModelTest(TestCase):
         self.assertEqual(retrieved_seller_proccessed_picks.count(), 0)
         
         retrieved_seller_unproccessed_picks = get_all_pending_picks_for_seller(self.seller)
-        self.assertFalse(any(pick.has_happened for pick in retrieved_seller_unproccessed_picks))
         self.assertEqual(retrieved_seller_unproccessed_picks.count(), 1)
         
         retrieved_pick = retrieved_seller_unproccessed_picks[0]
@@ -66,23 +66,21 @@ class PickModelTest(TestCase):
         self.assertEqual(retrieved_pick.api_id, pick.api_id)
         self.assertEqual(retrieved_pick.api_vendor_id, pick.api_vendor_id)
         self.assertEqual(retrieved_pick.seller, pick.seller)
-        self.assertEqual(retrieved_pick.has_happened, pick.has_happened)
         self.assertEqual(retrieved_pick.meta_data, pick.meta_data)
         
     def test_add_pick_and_retrieving_based_off_buyer(self):
-        pick = add_pick(
+        pick = add_active_pick(
             api_id="unique_api_id_123",
             api_vendor_id="vendor_123",
             seller=self.seller, 
             meta_data=self.meta_data
         )
-        give_buyer_access_to_pick(self.buyer,pick=pick)
+        give_buyer_access_to_pick(self.buyer,active_pick=pick)
         
         retrieved_buyer_proccessed_picks = get_all_processed_picks_for_buyer(self.buyer)
         self.assertEqual(retrieved_buyer_proccessed_picks.count(), 0)
         
         retrieved_buyer_unproccessed_picks = get_all_pending_picks_for_buyer(self.buyer)
-        self.assertFalse(any(pick.has_happened for pick in retrieved_buyer_unproccessed_picks))
         self.assertEqual(retrieved_buyer_unproccessed_picks.count(), 1)   
         
         retrieved_pick = retrieved_buyer_unproccessed_picks[0]
@@ -90,30 +88,29 @@ class PickModelTest(TestCase):
         self.assertEqual(retrieved_pick.api_id, pick.api_id)
         self.assertEqual(retrieved_pick.api_vendor_id, pick.api_vendor_id)
         self.assertEqual(retrieved_pick.seller, pick.seller)
-        self.assertEqual(retrieved_pick.has_happened, pick.has_happened)
         self.assertEqual(retrieved_pick.meta_data, pick.meta_data)
     
     def test_multiple_picks_and_retrieving_off_seller_1(self):
     # Create 4 picks with unique API IDs
-        pick1 = add_pick(
+        pick1 = add_active_pick(
             api_id="unique_api_id_123",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        pick2 = add_pick(
+        pick2 = add_active_pick(
             api_id="unique_api_id_124",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        pick3 = add_pick(
+        pick3 = add_active_pick(
             api_id="unique_api_id_125",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        pick4 = add_pick(
+        pick4 = add_active_pick(
             api_id="unique_api_id_126",
             api_vendor_id="vendor_123",
             seller=self.seller,
@@ -135,45 +132,42 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.has_happened, expected_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
 
-        self.assertFalse(any(pick.has_happened for pick in retrieved_seller_unprocessed_picks))
         
     def test_multiple_picks_and_retrieving_off_buyer_1(self):
-        pick1 = add_pick(
+        pick1 = add_active_pick(
             api_id="unique_api_id_123",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        pick2 = add_pick(
+        pick2 = add_active_pick(
             api_id="unique_api_id_124",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        pick3 = add_pick(
+        pick3 = add_active_pick(
             api_id="unique_api_id_125",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        pick4 = add_pick(
+        pick4 = add_active_pick(
             api_id="unique_api_id_126",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        give_buyer_access_to_pick(self.buyer,pick=pick2)
-        give_buyer_access_to_pick(self.buyer,pick=pick3)
-        give_buyer_access_to_pick(self.buyer,pick=pick4)
-        give_buyer_access_to_pick(self.buyer,pick=pick1)
+        give_buyer_access_to_pick(self.buyer,active_pick=pick2)
+        give_buyer_access_to_pick(self.buyer,active_pick=pick3)
+        give_buyer_access_to_pick(self.buyer,active_pick=pick4)
+        give_buyer_access_to_pick(self.buyer,active_pick=pick1)
         retrieved_buyer_proccessed_picks = get_all_processed_picks_for_buyer(self.buyer)
         self.assertEqual(retrieved_buyer_proccessed_picks.count(), 0)
         
         retrieved_buyer_unproccessed_picks = get_all_pending_picks_for_buyer(self.buyer).order_by('api_id')
-        self.assertFalse(any(pick.has_happened for pick in retrieved_buyer_unproccessed_picks))
         self.assertEqual(retrieved_buyer_unproccessed_picks.count(), 4)   
         expected_picks = sorted([pick1, pick2, pick3, pick4], key=lambda x: x.api_id)
 
@@ -181,30 +175,29 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.has_happened, expected_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
     
     def test_multiple_picks_and_retrieving_off_seller_2(self):
     # Create 4 picks with unique API IDs
-        pick1 = add_pick(
+        pick1 = add_active_pick(
             api_id="unique_api_id_123",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        pick2 = add_pick(
+        pick2 = add_active_pick(
             api_id="unique_api_id_124",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        pick3 = add_pick(
+        pick3 = add_active_pick(
             api_id="unique_api_id_125",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        pick4 = add_pick(
+        pick4 = add_active_pick(
             api_id="unique_api_id_126",
             api_vendor_id="vendor_123",
             seller=self.seller,
@@ -212,10 +205,7 @@ class PickModelTest(TestCase):
         )
 
         # Mark some picks as processed
-        pick1.has_happened = True
-        pick1.save()
-        pick3.has_happened = True
-        pick3.save()
+
 
         # Retrieve processed picks and assert their count and data
         retrieved_seller_processed_picks = get_all_processed_picks_for_seller(self.seller).order_by('api_id')
@@ -226,7 +216,6 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.has_happened, expected_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
 
         # Retrieve unprocessed picks and assert their count and data
@@ -238,43 +227,38 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.has_happened, expected_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
 
         # Final assertion to confirm no picks in the unprocessed list have happened
-        self.assertFalse(any(pick.has_happened for pick in retrieved_seller_unprocessed_picks))
  
     def test_multiple_picks_and_retrieving_off_buyer_2(self):
     # Create 4 picks with unique API IDs
-        pick1 = add_pick(
+        pick1 = add_active_pick(
             api_id="unique_api_id_123",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        pick2 = add_pick(
+        pick2 = add_active_pick(
             api_id="unique_api_id_124",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        pick3 = add_pick(
+        pick3 = add_active_pick(
             api_id="unique_api_id_125",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        pick4 = add_pick(
+        pick4 = add_active_pick(
             api_id="unique_api_id_126",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
 
-        pick1.has_happened = True
-        pick1.save()
-        pick3.has_happened = True
-        pick3.save()
+
 
         # Grant buyer access to all picks
         give_buyer_access_to_pick(self.buyer, pick1)
@@ -291,7 +275,6 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.has_happened, expected_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
 
         # Retrieve unprocessed picks for the buyer and assert count and data
@@ -303,34 +286,32 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.has_happened, expected_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
 
         # Final assertion to confirm no picks in the unprocessed list have happened
-        self.assertFalse(any(pick.has_happened for pick in retrieved_buyer_unprocessed_picks))
 
     def test_multiple_picks_and_retrieving_off_buyer_3(self):
         
         # Create 4 picks with unique API IDs
-        pick1 = add_pick(
+        pick1 = add_active_pick(
             api_id="unique_api_id_123",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        pick2 = add_pick(
+        pick2 = add_active_pick(
             api_id="unique_api_id_124",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        pick3 = add_pick(
+        pick3 = add_active_pick(
             api_id="unique_api_id_125",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        pick4 = add_pick(
+        pick4 = add_active_pick(
             api_id="unique_api_id_126",
             api_vendor_id="vendor_123",
             seller=self.seller,
@@ -369,7 +350,6 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertTrue(retrieved_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
             # Assert result data matches expected values
             self.assertEqual(retrieved_pick.event_result.result_data, expected_pick.event_result.result_data)
@@ -384,29 +364,28 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertFalse(retrieved_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
     def test_multiple_picks_and_retrieving_off_seller_3(self):
         # Create 4 picks with unique API IDs
-        pick1 = add_pick(
+        pick1 = add_active_pick(
             api_id="unique_api_id_123",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        pick2 = add_pick(
+        pick2 = add_active_pick(
             api_id="unique_api_id_124",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        pick3 = add_pick(
+        pick3 = add_active_pick(
             api_id="unique_api_id_125",
             api_vendor_id="vendor_123",
             seller=self.seller,
             meta_data=self.meta_data
         )
-        pick4 = add_pick(
+        pick4 = add_active_pick(
             api_id="unique_api_id_126",
             api_vendor_id="vendor_123",
             seller=self.seller,
@@ -441,7 +420,6 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertTrue(retrieved_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
             # Assert result data matches expected values
             self.assertEqual(retrieved_pick.event_result.result_data, expected_pick.event_result.result_data)
@@ -456,10 +434,8 @@ class PickModelTest(TestCase):
             self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
             self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
             self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertFalse(retrieved_pick.has_happened)
             self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
 
         # Final assertion to confirm no picks in the unprocessed list have happened
-        self.assertFalse(any(pick.has_happened for pick in retrieved_seller_unprocessed_picks))
 
                 
