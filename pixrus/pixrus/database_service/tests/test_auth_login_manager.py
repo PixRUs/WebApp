@@ -1,132 +1,127 @@
 from django.test import TestCase
-from pixrus.database_service.service.auth_login_manager import register_or_update_user
-from pixrus.database_service.models import Buyer, Seller 
+from django.contrib.auth.models import User
+from django.utils import timezone
+from pixrus.database_service.models.UserProfile import Buyer, Seller, UserSession
+
 
 class UserProfileTests(TestCase):
+
     def setUp(self):
-        # Buyer and Seller setup data
-        self.buyer_type = "buyer"
-        self.buyer_auth_data = {
-            "email": "buyer@example.com",
-            "first_name": "John",
-            "last_name": "Doe",
-            "google_id": "1234567890"
+        self.user_auth_data = {
+            'email': 'testuser@example.com',
+            'first_name': 'Test',
+            'last_name': 'User',
+            'google_id': 'test_google_id',
         }
-        self.buyer_meta_data = {
-            "Preferences": "Basketball",
-            "Profile_picture": "/image.png",
-            "username": "buyerDothan"
+        self.user_meta_data = {
+            'username': 'testuser'
         }
 
-        self.seller_type = "seller"
-        self.seller_auth_data = {
-            "email": "seller@example.com",
-            "first_name": "Jane",
-            "last_name": "Smith",
-            "google_id": "987654321"
-        }
-        self.seller_meta_data = {
-            "Preferences": "Basketball",
-            "Profile_picture": "/image.png",
-            "username": "sellerSmith"
-        }
+    def test_register_buyer(self):
+        # Register a new buyer
+        user_profile, created = Buyer.register_or_update_user(
+            user_auth_data=self.user_auth_data,
+            user_meta_data=self.user_meta_data,
+            type_of_user='buyer'
+        )
+        self.assertTrue(created)
+        self.assertIsInstance(user_profile, Buyer)
+        self.assertEqual(user_profile.user.email, 'testuser@example.com')
+        self.assertEqual(user_profile.user.first_name, 'Test')
+        self.assertEqual(user_profile.user.last_name, 'User')
+        self.assertEqual(user_profile.user.username, 'testuser')
+        self.assertEqual(user_profile.google_id, 'test_google_id')
+        self.assertEqual(user_profile.meta_data, self.user_meta_data)
 
-    def test_register_or_update_buyer(self):
-        # Register buyer and verify
-        buyer = register_or_update_user(
-            user_auth_data=self.buyer_auth_data,
-            user_meta_data=self.buyer_meta_data,
-            type_of_user=self.buyer_type
-        )[0]
-        
-        # Verify buyer is created with correct details
-        self.assertIsInstance(buyer, Buyer)
-        self.assertEqual(buyer.user.email, self.buyer_auth_data["email"])
-        self.assertEqual(buyer.user.first_name, self.buyer_auth_data["first_name"])
-        self.assertEqual(buyer.user.last_name, self.buyer_auth_data["last_name"])
-        self.assertEqual(buyer.meta_data["Preferences"], self.buyer_meta_data["Preferences"])
-        self.assertEqual(buyer.meta_data["Profile_picture"], self.buyer_meta_data["Profile_picture"])
-        self.assertEqual(buyer.meta_data["username"], self.buyer_meta_data["username"])
+    def test_register_seller(self):
+        # Register a new seller
+        user_profile, created = Seller.register_or_update_user(
+            user_auth_data=self.user_auth_data,
+            user_meta_data=self.user_meta_data,
+            type_of_user='seller'
+        )
+        self.assertTrue(created)
+        self.assertIsInstance(user_profile, Seller)
+        self.assertEqual(user_profile.user.email, 'testuser@example.com')
+        self.assertEqual(user_profile.user.first_name, 'Test')
+        self.assertEqual(user_profile.user.last_name, 'User')
+        self.assertEqual(user_profile.user.username, 'testuser')
+        self.assertEqual(user_profile.google_id, 'test_google_id')
+        self.assertEqual(user_profile.meta_data, self.user_meta_data)
 
-    def test_register_or_update_seller(self):
-        # Register seller and verify
-        seller = register_or_update_user(
-            user_auth_data=self.seller_auth_data,
-            user_meta_data=self.seller_meta_data,
-            type_of_user=self.seller_type
-        )[0]
-        
-        # Verify seller is created with correct details
-        self.assertIsInstance(seller, Seller)
-        self.assertEqual(seller.user.email, self.seller_auth_data["email"])
-        self.assertEqual(seller.user.first_name, self.seller_auth_data["first_name"])
-        self.assertEqual(seller.user.last_name, self.seller_auth_data["last_name"])
-        self.assertEqual(seller.meta_data["Preferences"], self.seller_meta_data["Preferences"])
-        self.assertEqual(seller.meta_data["Profile_picture"], self.seller_meta_data["Profile_picture"])
-        self.assertEqual(seller.meta_data["username"], self.seller_meta_data["username"])
-
-    def test_update_existing_buyer(self):
-        # Register buyer, then update
-        buyer = register_or_update_user(
-            user_auth_data=self.buyer_auth_data,
-            user_meta_data=self.buyer_meta_data,
-            type_of_user=self.buyer_type
+    def test_update_user_profile(self):
+        # Register a new buyer
+        user_profile, created = Buyer.register_or_update_user(
+            user_auth_data=self.user_auth_data,
+            user_meta_data=self.user_meta_data,
+            type_of_user='buyer'
         )
 
-        updated_auth_data = {
-            "email": "buyer@example.com",  # same email to update the existing record
-            "first_name": "UpdatedFirst",
-            "last_name": "UpdatedLast",
-            "google_id": "1234567890"
-        }
-        updated_meta_data = {
-            "Preferences": "Soccer",
-            "Profile_picture": "/updated_image.png",
-            "username": "updatedBuyer"
-        }
-
-        buyer = register_or_update_user(
+        # Update the user's first name and last name
+        updated_auth_data = self.user_auth_data.copy()
+        updated_auth_data['first_name'] = 'Updated'
+        updated_auth_data['last_name'] = 'Name'
+        user_profile, created = Buyer.register_or_update_user(
             user_auth_data=updated_auth_data,
-            user_meta_data=updated_meta_data,
-            type_of_user=self.buyer_type
-        )[0]
-
-        # Verify the update
-        self.assertEqual(buyer.user.first_name, updated_auth_data["first_name"])
-        self.assertEqual(buyer.user.last_name, updated_auth_data["last_name"])
-        self.assertEqual(buyer.meta_data["Preferences"], updated_meta_data["Preferences"])
-        self.assertEqual(buyer.meta_data["Profile_picture"], updated_meta_data["Profile_picture"])
-        self.assertEqual(buyer.meta_data["username"], updated_meta_data["username"])
-
-    def test_update_existing_seller(self):
-        # Register seller, then update
-        seller = register_or_update_user(
-            user_auth_data=self.seller_auth_data,
-            user_meta_data=self.seller_meta_data,
-            type_of_user=self.seller_type
+            user_meta_data=self.user_meta_data,
+            type_of_user='buyer'
         )
+        self.assertFalse(created)
+        self.assertEqual(user_profile.user.first_name, 'Updated')
+        self.assertEqual(user_profile.user.last_name, 'Name')
 
-        updated_auth_data = {
-            "email": "seller@example.com",  # same email to update the existing record
-            "first_name": "UpdatedJane",
-            "last_name": "UpdatedSmith",
-            "google_id": "987654321"
-        }
-        updated_meta_data = {
-            "Preferences": "Tennis",
-            "Profile_picture": "/updated_image.png",
-            "username": "updatedSeller"
-        }
+    def test_user_session_login(self):
+        # Register a new buyer and log in
+        user_profile, _ = Buyer.register_or_update_user(
+            user_auth_data=self.user_auth_data,
+            user_meta_data=self.user_meta_data,
+            type_of_user='buyer'
+        )
+        session_id = user_profile.update_user_session_login(
+            google_id='new_google_id',
+            user_meta_data=self.user_meta_data
+        )
+        
+        # Check session attributes
+        session = UserSession.objects.get(id=session_id)
+        self.assertEqual(session.user, user_profile.user)
+        self.assertTrue(session.is_online)
+        self.assertAlmostEqual(session.last_logged_in, timezone.now(), delta=timezone.timedelta(seconds=5))
 
-        seller = register_or_update_user(
-            user_auth_data=updated_auth_data,
-            user_meta_data=updated_meta_data,
-            type_of_user=self.seller_type
-        )[0]
+    def test_user_session_logout(self):
+        # Register a new buyer, log in, and log out
+        user_profile, _ = Buyer.register_or_update_user(
+            user_auth_data=self.user_auth_data,
+            user_meta_data=self.user_meta_data,
+            type_of_user='buyer'
+        )
+        user_profile.update_user_session_login(
+            google_id='new_google_id',
+            user_meta_data=self.user_meta_data
+        )
+        
+        session_id = user_profile.update_user_session_logout()
+        
+        # Check session attributes after logout
+        session = UserSession.objects.get(id=session_id)
+        self.assertFalse(session.is_online)
 
-        # Verify the update
-        self.assertEqual(seller.user.first_name, updated_auth_data["first_name"])
-        self.assertEqual(seller.user.last_name, updated_auth_data["last_name"])
-        self.assertEqual(seller.meta_data["Preferences"], updated_meta_data["Preferences"])
-        self.assertEqual(seller.meta_data["Profile_picture"], updated_meta_data["Profile_picture"])
-        self.assertEqual(seller.meta_data["username"], updated_meta_data["username"])
+    def test_get_user_profile_by_email(self):
+        # Register a new buyer and retrieve by email
+        Buyer.register_or_update_user(
+            user_auth_data=self.user_auth_data,
+            user_meta_data=self.user_meta_data,
+            type_of_user='buyer'
+        )
+        user_profile = Buyer.get_by_email('testuser@example.com')
+        self.assertEqual(user_profile.user.email, 'testuser@example.com')
+
+    def test_get_user_creation_date(self):
+        # Register a new buyer and retrieve creation date
+        user_profile, _ = Buyer.register_or_update_user(
+            user_auth_data=self.user_auth_data,
+            user_meta_data=self.user_meta_data,
+            type_of_user='buyer'
+        )
+        creation_date = Buyer.get_user_creation_date(email='testuser@example.com')
+        self.assertEqual(creation_date, user_profile.created_at)

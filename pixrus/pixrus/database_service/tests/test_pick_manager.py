@@ -1,441 +1,372 @@
+# pixrus/database_service/tests.py
+
+import uuid
 from django.test import TestCase
-from datetime import datetime
-from pixrus.database_service.models import Seller,Buyer
-from pixrus.database_service.models.Products import ActivePick,HistoricalPick
 from django.contrib.auth.models import User
+from django.utils import timezone
+from django.db import IntegrityError
+from pixrus.database_service.models.UserProfile import (
+    Buyer,
+    Seller,
+    UserSession,
+)
+from pixrus.database_service.models.Products import (
+    Subscription,
+    ActivePick,
+    HistoricalPick,
+    VendorApiRequest
+)
 
-from pixrus.database_service.service.pick_manager import add_active_pick, get_all_pending_picks_for_buyer, get_all_processed_picks_for_seller, get_all_pending_picks_for_seller,get_all_processed_picks_for_buyer,give_buyer_access_to_pick,update_pick_with_result_by_pick
 
-class PickModelTest(TestCase):
-    
+class UserProfileTests(TestCase):
     def setUp(self):
-        # Create a sample Seller instance for testing
-        self.seller_user = User.objects.create_user(
-            username="dummy seller",
-            email="testuser@example.com",
-            first_name="Test",
-            last_name="Seller",
-            password=""
+        # Create Users
+        self.user1 = User.objects.create_user(
+            username='buyer1',
+            email='buyer1@example.com',
+            first_name='Buyer',
+            last_name='One',
+            password='password123'
         )
-        self.seller = Seller.objects.create(
-            user = self.seller_user, 
-            meta_data = {"Favorite books": "BET365"},
+        self.user2 = User.objects.create_user(
+            username='seller1',
+            email='seller1@example.com',
+            first_name='Seller',
+            last_name='One',
+            password='password123'
         )
+        
+        # Create Buyer and Seller profiles
+        self.buyer1 = Buyer.objects.create(user=self.user1, meta_data={'info': 'buyer1 meta'})
+        self.seller1 = Seller.objects.create(user=self.user2, meta_data={'info': 'seller1 meta'})
+
+    def test_create_buyer(self):
+        self.assertEqual(self.buyer1.user.email, 'buyer1@example.com')
+        self.assertEqual(self.buyer1.meta_data, {'info': 'buyer1 meta'})
+    
+    def test_create_seller(self):
+        self.assertEqual(self.seller1.user.email, 'seller1@example.com')
+        self.assertEqual(self.seller1.meta_data, {'info': 'seller1 meta'})
+    
+    def test_unique_google_id(self):
+        # Attempt to create another Buyer with the same google_id
+        with self.assertRaises(IntegrityError):
+            Buyer.objects.create(
+                user=self.user1,
+                google_id='duplicate_google_id',
+                meta_data={'info': 'duplicate'}
+            )
+    
+    def test_user_session_creation(self):
+        # Initially, no session exists
+        with self.assertRaises(UserSession.DoesNotExist):
+            UserSession.objects.get(user=self.user1)
+        
+        # Create session
+        session = UserSession.objects.create(user=self.user1, is_online=True)
+        self.assertTrue(session.is_online)
+        self.assertIsNotNone(session.last_logged_in)
+    
+    def test_user_session_login(self):
+        # Simulate user login
+        self.buyer1.update_user_session_login(google_id='buyer1_google_id', user_meta_data={'info': 'updated meta'})
+        session = UserSession.objects.get(user=self.user1)
+        self.assertTrue(session.is_online)
+        self.assertIsNotNone(session.last_logged_in)
+    
+    def test_user_session_logout(self):
+        # Simulate user login and then logout
+        self.buyer1.update_user_session_login(google_id='buyer1_google_id', user_meta_data={'info': 'updated meta'})
+        session_id = self.buyer1.update_user_session_logout()
+        session = UserSession.objects.get(id=session_id)
+        self.assertFalse(session.is_online)
+    
+    def test_get_user_profile_by_email(self):
+        retrieved_buyer = Buyer.get_by_email('buyer1@example.com')
+        self.assertEqual(retrieved_buyer, self.buyer1)
+    
+    def test_get_user_creation_date(self):
+        creation_date = Buyer.get_user_creation_date(email='buyer1@example.com')
+        self.assertEqual(creation_date, self.buyer1.created_at)
+    
+    def test_get_user_name(self):
+        user_name = Buyer.get_user_name(email='buyer1@example.com')
+        self.assertEqual(user_name, 'Buyer O')  # 'O' is the first letter of last name 'One'
+
+
+class ActivePickTests(TestCase):
+    def setUp(self):
+        # Create Users
         self.user_buyer = User.objects.create_user(
-            username="dummy Buyer",
-            email="testBuyer@example.com",
-            first_name="Test",
-            last_name="Buyer",
-            password=""
+            username='buyer2',
+            email='buyer2@example.com',
+            first_name='Buyer',
+            last_name='Two',
+            password='password123'
         )
-        self.buyer = Buyer.objects.create(user=self.user_buyer, 
-            meta_data= {"Picks won" : 4})
-        self.meta_data = {
-            "book" : "BET365", 
-            "sport": "basketball", 
-            "type_of_bet": "moneyline",
-            "team1": "Lakers",
-            "team2": "Celtics", 
-            "team1_odds": "-220", 
-            "team2_odds": "+540", 
-            "event_time": datetime.now().isoformat()
-        }
-
-    def test_add_pick_and_retrieving_based_off_seller(self):
-        """
-        Test adding a Pick instance to the database.
-        """
-        # Create a new Pick instance
-
-        pick = add_active_pick(
-            api_id="unique_api_id_123",
-            api_vendor_id="vendor_123",
-            seller=self.seller, 
-            meta_data=self.meta_data
+        self.user_seller = User.objects.create_user(
+            username='seller2',
+            email='seller2@example.com',
+            first_name='Seller',
+            last_name='Two',
+            password='password123'
         )
         
-        # Fetch the pick from the database
-        retrieved_seller_proccessed_picks = get_all_processed_picks_for_seller(self.seller)
-        self.assertEqual(retrieved_seller_proccessed_picks.count(), 0)
+        # Create Buyer and Seller profiles
+        self.buyer2 = Buyer.objects.create(user=self.user_buyer, meta_data={'info': 'buyer2 meta'})
+        self.seller2 = Seller.objects.create(user=self.user_seller, meta_data={'info': 'seller2 meta'})
         
-        retrieved_seller_unproccessed_picks = get_all_pending_picks_for_seller(self.seller)
-        self.assertEqual(retrieved_seller_unproccessed_picks.count(), 1)
-        
-        retrieved_pick = retrieved_seller_unproccessed_picks[0]
-        self.assertEqual(retrieved_pick.id, pick.id)
-        self.assertEqual(retrieved_pick.api_id, pick.api_id)
-        self.assertEqual(retrieved_pick.api_vendor_id, pick.api_vendor_id)
-        self.assertEqual(retrieved_pick.seller, pick.seller)
-        self.assertEqual(retrieved_pick.meta_data, pick.meta_data)
-        
-    def test_add_pick_and_retrieving_based_off_buyer(self):
-        pick = add_active_pick(
-            api_id="unique_api_id_123",
-            api_vendor_id="vendor_123",
-            seller=self.seller, 
-            meta_data=self.meta_data
+        # Create ActivePick
+        self.active_pick1 = ActivePick.objects.create(
+            seller=self.seller2,
+            meta_data={'pick_info': 'active_pick1'}
         )
-        give_buyer_access_to_pick(self.buyer,active_pick=pick)
+        self.active_pick2 = ActivePick.objects.create(
+            seller=self.seller2,
+            meta_data={'pick_info': 'active_pick2'}
+        )
         
-        retrieved_buyer_proccessed_picks = get_all_processed_picks_for_buyer(self.buyer)
-        self.assertEqual(retrieved_buyer_proccessed_picks.count(), 0)
+    def test_give_buyer_access(self):
+        # Grant access to buyer2 for active_pick1
+        result = self.active_pick1.give_buyer_access(self.buyer2)
+        self.assertTrue(result)
+        self.assertTrue(self.active_pick1.has_access(self.buyer2))
         
-        retrieved_buyer_unproccessed_picks = get_all_pending_picks_for_buyer(self.buyer)
-        self.assertEqual(retrieved_buyer_unproccessed_picks.count(), 1)   
-        
-        retrieved_pick = retrieved_buyer_unproccessed_picks[0]
-        self.assertEqual(retrieved_pick.id, pick.id)
-        self.assertEqual(retrieved_pick.api_id, pick.api_id)
-        self.assertEqual(retrieved_pick.api_vendor_id, pick.api_vendor_id)
-        self.assertEqual(retrieved_pick.seller, pick.seller)
-        self.assertEqual(retrieved_pick.meta_data, pick.meta_data)
+        # Attempt to grant access again (should not duplicate)
+        result = self.active_pick1.give_buyer_access(self.buyer2)
+        self.assertTrue(result)
+        self.assertEqual(self.active_pick1.buyers_with_access.count(), 1)
     
-    def test_multiple_picks_and_retrieving_off_seller_1(self):
-    # Create 4 picks with unique API IDs
-        pick1 = add_active_pick(
-            api_id="unique_api_id_123",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
-        )
-        pick2 = add_active_pick(
-            api_id="unique_api_id_124",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
-        )
-        pick3 = add_active_pick(
-            api_id="unique_api_id_125",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
-        )
-        pick4 = add_active_pick(
-            api_id="unique_api_id_126",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
-        )
-
-        # Retrieve processed and unprocessed picks
-        retrieved_seller_processed_picks = get_all_processed_picks_for_seller(self.seller)
-        self.assertEqual(retrieved_seller_processed_picks.count(), 0)  # No processed picks
-
-        # Retrieve unprocessed picks and assert their count
-        retrieved_seller_unprocessed_picks = get_all_pending_picks_for_seller(self.seller).order_by('api_id')
-        self.assertEqual(retrieved_seller_unprocessed_picks.count(), 4)  # 4 unprocessed picks
-
-        # Assert each pick's data individually
-        expected_picks = sorted([pick1, pick2, pick3, pick4], key=lambda x: x.api_id)
-
-        for retrieved_pick, expected_pick in zip(retrieved_seller_unprocessed_picks, expected_picks):
-            self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
-            self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
-            self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
-
+    def test_make_historical(self):
+        # Grant access before making historical
+        self.active_pick1.give_buyer_access(self.buyer2)
         
-    def test_multiple_picks_and_retrieving_off_buyer_1(self):
-        pick1 = add_active_pick(
-            api_id="unique_api_id_123",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
-        )
-        pick2 = add_active_pick(
-            api_id="unique_api_id_124",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
-        )
-        pick3 = add_active_pick(
-            api_id="unique_api_id_125",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
-        )
-        pick4 = add_active_pick(
-            api_id="unique_api_id_126",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
-        )
-        give_buyer_access_to_pick(self.buyer,active_pick=pick2)
-        give_buyer_access_to_pick(self.buyer,active_pick=pick3)
-        give_buyer_access_to_pick(self.buyer,active_pick=pick4)
-        give_buyer_access_to_pick(self.buyer,active_pick=pick1)
-        retrieved_buyer_proccessed_picks = get_all_processed_picks_for_buyer(self.buyer)
-        self.assertEqual(retrieved_buyer_proccessed_picks.count(), 0)
+        # Make historical
+        historical_pick = self.active_pick1.make_historical(event_result={'result': 'success'})
         
-        retrieved_buyer_unproccessed_picks = get_all_pending_picks_for_buyer(self.buyer).order_by('api_id')
-        self.assertEqual(retrieved_buyer_unproccessed_picks.count(), 4)   
-        expected_picks = sorted([pick1, pick2, pick3, pick4], key=lambda x: x.api_id)
-
-        for retrieved_pick, expected_pick in zip(retrieved_buyer_unproccessed_picks, expected_picks):
-            self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
-            self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
-            self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
+        # Check that HistoricalPick exists
+        self.assertIsInstance(historical_pick, HistoricalPick)
+        self.assertEqual(historical_pick.id, self.active_pick1.id)
+        self.assertEqual(historical_pick.seller, self.active_pick1.seller)
+        self.assertEqual(historical_pick.meta_data, self.active_pick1.meta_data)
+        self.assertEqual(historical_pick.event_result, {'result': 'success'})
+        
+        # Check buyers_with_access transferred
+        self.assertTrue(historical_pick.buyers_with_access.filter(id=self.buyer2.id).exists())
+        
+        # Check ActivePick deleted
+        with self.assertRaises(ActivePick.DoesNotExist):
+            ActivePick.objects.get(id=self.active_pick1.id)
     
-    def test_multiple_picks_and_retrieving_off_seller_2(self):
-    # Create 4 picks with unique API IDs
-        pick1 = add_active_pick(
-            api_id="unique_api_id_123",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
-        )
-        pick2 = add_active_pick(
-            api_id="unique_api_id_124",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
-        )
-        pick3 = add_active_pick(
-            api_id="unique_api_id_125",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
-        )
-        pick4 = add_active_pick(
-            api_id="unique_api_id_126",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
-        )
-
-        # Mark some picks as processed
-
-
-        # Retrieve processed picks and assert their count and data
-        retrieved_seller_processed_picks = get_all_processed_picks_for_seller(self.seller).order_by('api_id')
-        self.assertEqual(retrieved_seller_processed_picks.count(), 2)  # 2 processed picks
-
-        expected_processed_picks = sorted([pick1, pick3], key=lambda x: x.api_id)
-        for retrieved_pick, expected_pick in zip(retrieved_seller_processed_picks, expected_processed_picks):
-            self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
-            self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
-            self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
-
-        # Retrieve unprocessed picks and assert their count and data
-        retrieved_seller_unprocessed_picks = get_all_pending_picks_for_seller(self.seller).order_by('api_id')
-        self.assertEqual(retrieved_seller_unprocessed_picks.count(), 2)  # 2 unprocessed picks
-
-        expected_unprocessed_picks = sorted([pick2, pick4], key=lambda x: x.api_id)
-        for retrieved_pick, expected_pick in zip(retrieved_seller_unprocessed_picks, expected_unprocessed_picks):
-            self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
-            self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
-            self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
-
-        # Final assertion to confirm no picks in the unprocessed list have happened
- 
-    def test_multiple_picks_and_retrieving_off_buyer_2(self):
-    # Create 4 picks with unique API IDs
-        pick1 = add_active_pick(
-            api_id="unique_api_id_123",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
-        )
-        pick2 = add_active_pick(
-            api_id="unique_api_id_124",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
-        )
-        pick3 = add_active_pick(
-            api_id="unique_api_id_125",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
-        )
-        pick4 = add_active_pick(
-            api_id="unique_api_id_126",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
-        )
-
-
-
-        # Grant buyer access to all picks
-        give_buyer_access_to_pick(self.buyer, pick1)
-        give_buyer_access_to_pick(self.buyer, pick2)
-        give_buyer_access_to_pick(self.buyer, pick3)
-        give_buyer_access_to_pick(self.buyer, pick4)
-
-        # Retrieve processed picks for the buyer and assert count and data
-        retrieved_buyer_processed_picks = get_all_processed_picks_for_buyer(self.buyer).order_by('api_id')
-        self.assertEqual(retrieved_buyer_processed_picks.count(), 2)  # 2 processed picks
-
-        expected_processed_picks = sorted([pick1, pick3], key=lambda x: x.api_id)
-        for retrieved_pick, expected_pick in zip(retrieved_buyer_processed_picks, expected_processed_picks):
-            self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
-            self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
-            self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
-
-        # Retrieve unprocessed picks for the buyer and assert count and data
-        retrieved_buyer_unprocessed_picks = get_all_pending_picks_for_buyer(self.buyer).order_by('api_id')
-        self.assertEqual(retrieved_buyer_unprocessed_picks.count(), 2)  # 2 unprocessed picks
-
-        expected_unprocessed_picks = sorted([pick2, pick4], key=lambda x: x.api_id)
-        for retrieved_pick, expected_pick in zip(retrieved_buyer_unprocessed_picks, expected_unprocessed_picks):
-            self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
-            self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
-            self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
-
-        # Final assertion to confirm no picks in the unprocessed list have happened
-
-    def test_multiple_picks_and_retrieving_off_buyer_3(self):
+    def test_get_active_picks_for_buyer(self):
+        # Initially, buyer2 has no access
+        active_picks = ActivePick.get_active_picks_for_buyer(self.buyer2)
+        self.assertEqual(active_picks.count(), 0)
         
-        # Create 4 picks with unique API IDs
-        pick1 = add_active_pick(
-            api_id="unique_api_id_123",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
+        # Grant access to active_pick1
+        self.active_pick1.give_buyer_access(self.buyer2)
+        active_picks = ActivePick.get_active_picks_for_buyer(self.buyer2)
+        self.assertEqual(active_picks.count(), 1)
+        self.assertIn(self.active_pick1, active_picks)
+    
+    def test_get_active_picks_for_seller(self):
+        active_picks = ActivePick.get_active_picks_for_seller(self.seller2)
+        self.assertEqual(active_picks.count(), 2)
+        self.assertIn(self.active_pick1, active_picks)
+        self.assertIn(self.active_pick2, active_picks)
+
+
+class HistoricalPickTests(TestCase):
+    def setUp(self):
+        # Create Users
+        self.user_buyer = User.objects.create_user(
+            username='buyer3',
+            email='buyer3@example.com',
+            first_name='Buyer',
+            last_name='Three',
+            password='password123'
         )
-        pick2 = add_active_pick(
-            api_id="unique_api_id_124",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
+        self.user_seller = User.objects.create_user(
+            username='seller3',
+            email='seller3@example.com',
+            first_name='Seller',
+            last_name='Three',
+            password='password123'
         )
-        pick3 = add_active_pick(
-            api_id="unique_api_id_125",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
+        
+        # Create Buyer and Seller profiles
+        self.buyer3 = Buyer.objects.create(user=self.user_buyer, meta_data={'info': 'buyer3 meta'})
+        self.seller3 = Seller.objects.create(user=self.user_seller, meta_data={'info': 'seller3 meta'})
+        
+        # Create ActivePick and make it historical
+        self.active_pick3 = ActivePick.objects.create(
+            seller=self.seller3,
+            meta_data={'pick_info': 'active_pick3'}
         )
-        pick4 = add_active_pick(
-            api_id="unique_api_id_126",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
+        self.active_pick3.give_buyer_access(self.buyer3)
+        self.historical_pick1 = self.active_pick3.make_historical(event_result={'result': 'completed'})
+    
+    def test_get_historical_picks_for_buyer(self):
+        historical_picks = HistoricalPick.get_historical_picks_for_buyer(self.buyer3)
+        self.assertEqual(historical_picks.count(), 1)
+        self.assertIn(self.historical_pick1, historical_picks)
+    
+    def test_get_historical_picks_for_seller(self):
+        historical_picks = HistoricalPick.get_historical_picks_for_seller(self.seller3)
+        self.assertEqual(historical_picks.count(), 1)
+        self.assertIn(self.historical_pick1, historical_picks)
+    
+    def test_historical_pick_attributes(self):
+        self.assertEqual(self.historical_pick1.seller, self.seller3)
+        self.assertEqual(self.historical_pick1.meta_data, {'pick_info': 'active_pick3'})
+        self.assertEqual(self.historical_pick1.event_result, {'result': 'completed'})
+        self.assertTrue(self.historical_pick1.has_access(self.buyer3))
+
+
+class VendorApiRequestTests(TestCase):
+    def test_create_vendor_api_request(self):
+        # Create a VendorApiRequest
+        api_request = VendorApiRequest.objects.create(
+            vendor='VendorA',
+            endpoint='/api/v1/resource/',
+            response_status=200,
+            response_data={'key': 'value'},
+            delta=45
         )
-
-        # Define result data for processed picks and update them
-        pick1_result_data = {
-            "Sport": "Basketball",
-            "Team winner": "Lakers",
-            "Team loser": "Clippers",
-            "Point differential": "12"
-        }
-        pick4_result_data = {
-            "Sport": "Baseball",
-            "Team winner": "Yankees",
-            "Team loser": "Mets",
-            "Point differential": "1"
-        }
-
-        # Update pick1 and pick4 with result data, marking them as processed
-        update_pick_with_result(pick1, result_data=pick1_result_data)
-        update_pick_with_result(pick4, result_data=pick4_result_data)
-
-        # Grant buyer access to all picks
-        for pick in [pick1, pick2, pick3, pick4]:
-            give_buyer_access_to_pick(self.buyer, pick)
-
-        # Retrieve processed picks for the buyer and assert count and data
-        retrieved_buyer_processed_picks = get_all_processed_picks_for_buyer(self.buyer).order_by('api_id')
-        self.assertEqual(retrieved_buyer_processed_picks.count(), 2)  # 2 processed picks
-
-        # Check that the processed picks have expected data and results
-        expected_processed_picks = sorted([pick1, pick4], key=lambda x: x.api_id)
-        for retrieved_pick, expected_pick in zip(retrieved_buyer_processed_picks, expected_processed_picks):
-            self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
-            self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
-            self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
-            # Assert result data matches expected values
-            self.assertEqual(retrieved_pick.event_result.result_data, expected_pick.event_result.result_data)
-
-        # Retrieve unprocessed picks for the buyer and assert count and data
-        retrieved_buyer_unprocessed_picks = get_all_pending_picks_for_buyer(self.buyer).order_by('api_id')
-        self.assertEqual(retrieved_buyer_unprocessed_picks.count(), 2)  # 2 unprocessed picks
-
-        # Check that the unprocessed picks have expected data
-        expected_unprocessed_picks = sorted([pick2, pick3], key=lambda x: x.api_id)
-        for retrieved_pick, expected_pick in zip(retrieved_buyer_unprocessed_picks, expected_unprocessed_picks):
-            self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
-            self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
-            self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
-    def test_multiple_picks_and_retrieving_off_seller_3(self):
-        # Create 4 picks with unique API IDs
-        pick1 = add_active_pick(
-            api_id="unique_api_id_123",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
+        self.assertEqual(api_request.vendor, 'VendorA')
+        self.assertEqual(api_request.endpoint, '/api/v1/resource/')
+        self.assertEqual(api_request.response_status, 200)
+        self.assertEqual(api_request.response_data, {'key': 'value'})
+        self.assertEqual(api_request.delta, 45)
+    
+    def test_vendor_api_request_ordering(self):
+        # Create multiple VendorApiRequests
+        VendorApiRequest.objects.create(
+            vendor='VendorB',
+            endpoint='/api/v1/resource2/',
+            response_status=404,
+            response_data={'error': 'Not Found'},
+            delta=30
         )
-        pick2 = add_active_pick(
-            api_id="unique_api_id_124",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
+        VendorApiRequest.objects.create(
+            vendor='VendorC',
+            endpoint='/api/v1/resource3/',
+            response_status=500,
+            response_data={'error': 'Server Error'},
+            delta=60
         )
-        pick3 = add_active_pick(
-            api_id="unique_api_id_125",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
+        
+        # Test ordering by request_time descending
+        api_requests = VendorApiRequest.objects.all()
+        self.assertEqual(api_requests[0].vendor, 'VendorC')
+        self.assertEqual(api_requests[1].vendor, 'VendorB')
+        self.assertEqual(api_requests[2].vendor, 'VendorA')
+
+
+class SubscriptionTests(TestCase):
+    def setUp(self):
+        # Create Users
+        self.user_buyer = User.objects.create_user(
+            username='buyer4',
+            email='buyer4@example.com',
+            first_name='Buyer',
+            last_name='Four',
+            password='password123'
         )
-        pick4 = add_active_pick(
-            api_id="unique_api_id_126",
-            api_vendor_id="vendor_123",
-            seller=self.seller,
-            meta_data=self.meta_data
+        self.user_seller = User.objects.create_user(
+            username='seller4',
+            email='seller4@example.com',
+            first_name='Seller',
+            last_name='Four',
+            password='password123'
         )
-
-        # Define result data for processed picks and update them
-        pick1_result_data = {
-            "Sport": "Basketball",
-            "Team winner": "Lakers",
-            "Team loser": "Clippers",
-            "Point differential": "12"
-        }
-        pick4_result_data = {
-            "Sport": "Baseball",
-            "Team winner": "Yankees",
-            "Team loser": "Mets",
-            "Point differential": "1"
-        }
-
-        # Update pick1 and pick4 with result data, marking them as processed
-        update_pick_with_result(pick1, result_data=pick1_result_data)
-        update_pick_with_result(pick4, result_data=pick4_result_data)
-
-        # Retrieve processed picks for the seller and assert count and data
-        retrieved_seller_processed_picks = get_all_processed_picks_for_seller(self.seller).order_by('api_id')
-        self.assertEqual(retrieved_seller_processed_picks.count(), 2)  # 2 processed picks
-
-        # Check that the processed picks have expected data and results
-        expected_processed_picks = sorted([pick1, pick4], key=lambda x: x.api_id)
-        for retrieved_pick, expected_pick in zip(retrieved_seller_processed_picks, expected_processed_picks):
-            self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
-            self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
-            self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
-            # Assert result data matches expected values
-            self.assertEqual(retrieved_pick.event_result.result_data, expected_pick.event_result.result_data)
-
-        # Retrieve unprocessed picks for the seller and assert count and data
-        retrieved_seller_unprocessed_picks = get_all_pending_picks_for_seller(self.seller).order_by('api_id')
-        self.assertEqual(retrieved_seller_unprocessed_picks.count(), 2)  # 2 unprocessed picks
-
-        # Check that the unprocessed picks have expected data
-        expected_unprocessed_picks = sorted([pick2, pick3], key=lambda x: x.api_id)
-        for retrieved_pick, expected_pick in zip(retrieved_seller_unprocessed_picks, expected_unprocessed_picks):
-            self.assertEqual(retrieved_pick.api_id, expected_pick.api_id)
-            self.assertEqual(retrieved_pick.api_vendor_id, expected_pick.api_vendor_id)
-            self.assertEqual(retrieved_pick.seller, expected_pick.seller)
-            self.assertEqual(retrieved_pick.meta_data, expected_pick.meta_data)
-
-        # Final assertion to confirm no picks in the unprocessed list have happened
-
-                
+        
+        # Create Buyer and Seller profiles
+        self.buyer4 = Buyer.objects.create(user=self.user_buyer, meta_data={'info': 'buyer4 meta'})
+        self.seller4 = Seller.objects.create(user=self.user_seller, meta_data={'info': 'seller4 meta'})
+    
+    def test_create_new_subscription(self):
+        start_time = timezone.now()
+        end_time = start_time + timezone.timedelta(days=30)
+        
+        subscription = Subscription.create_new_subscription(
+            start_time=start_time,
+            end_time=end_time,
+            buyer=self.buyer4,
+            seller=self.seller4,
+            meta_data={'plan': 'premium'}
+        )
+        
+        self.assertIsInstance(subscription, Subscription)
+        self.assertEqual(subscription.buyer, self.buyer4)
+        self.assertEqual(subscription.seller, self.seller4)
+        self.assertEqual(subscription.subscribed_at, start_time)
+        self.assertEqual(subscription.subscribed_until, end_time)
+        self.assertEqual(subscription.meta_data, {'plan': 'premium'})
+    
+    def test_create_subscription_with_invalid_dates(self):
+        start_time = timezone.now()
+        end_time = start_time - timezone.timedelta(days=1)  # Invalid: end_time before start_time
+        
+        with self.assertRaises(ValueError):
+            Subscription.create_new_subscription(
+                start_time=start_time,
+                end_time=end_time,
+                buyer=self.buyer4,
+                seller=self.seller4,
+                meta_data={'plan': 'basic'}
+            )
+    
+    def test_end_current_subscription(self):
+        # Create an active subscription
+        start_time = timezone.now() - timezone.timedelta(days=10)
+        end_time = timezone.now() + timezone.timedelta(days=20)
+        subscription = Subscription.create_new_subscription(
+            start_time=start_time,
+            end_time=end_time,
+            buyer=self.buyer4,
+            seller=self.seller4,
+            meta_data={'plan': 'standard'}
+        )
+        
+        # End the subscription
+        result = Subscription.end_current_subscription(
+            buyer=self.buyer4,
+            seller=self.seller4
+        )
+        self.assertTrue(result)
+        
+        # Ensure the subscription is deleted
+        with self.assertRaises(Subscription.DoesNotExist):
+            Subscription.objects.get(id=subscription.id)
+    
+    def test_end_nonexistent_subscription(self):
+        # Attempt to end a subscription that doesn't exist
+        result = Subscription.end_current_subscription(
+            buyer=self.buyer4,
+            seller=self.seller4
+        )
+        self.assertFalse(result)
+    
+    def test_is_active(self):
+        # Create an active subscription
+        start_time = timezone.now() - timezone.timedelta(days=5)
+        end_time = timezone.now() + timezone.timedelta(days=5)
+        subscription = Subscription.create_new_subscription(
+            start_time=start_time,
+            end_time=end_time,
+            buyer=self.buyer4,
+            seller=self.seller4,
+            meta_data={'plan': 'gold'}
+        )
+        self.assertTrue(subscription.is_active())
+        
+        # Create an expired subscription
+        expired_subscription = Subscription.create_new_subscription(
+            start_time=start_time - timezone.timedelta(days=20),
+            end_time=start_time - timezone.timedelta(days=10),
+            buyer=self.buyer4,
+            seller=self.seller4,
+            meta_data={'plan': 'silver'}
+        )
+        self.assertFalse(expired_subscription.is_active())
