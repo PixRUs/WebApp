@@ -1,0 +1,212 @@
+import datetime
+import requests
+from serpapi import GoogleSearch
+
+import requests
+#api_key_SERP-API
+SERP_KEY = 'a024009b966e529676d4497b8bb73928ca784ba41e9f66e21adeb13f28f6c3a7'
+#api_key_ODDS-API
+API_KEY = '8f728c878478b83769b2172e2117df17'
+BASE_URL = 'https://api.the-odds-api.com/v4/sports'    
+    
+
+
+def get_upcoming_odds(sport='basketball_nba', regions='us', odds_format='decimal', markets='h2h', date_format='iso'):
+    url = f"{BASE_URL}/{sport}/odds"
+    params = {
+        'apiKey': API_KEY,
+        'regions': regions,
+        'oddsFormat': odds_format,
+        'markets': markets,
+        'dateFormat': date_format,
+    }
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        return response.json()  # odds data
+    else:
+        print(f"Error: {response.status_code} - {response.json()}")
+        return None
+# testing section
+if __name__ == "__main__":
+    odds_data = get_upcoming_odds()
+    if odds_data:
+        print("Upcoming Odds:\n")
+        for game in odds_data:
+            print(f"Game: {game['home_team']} vs {game['away_team']}")
+            print(f"Start Time: {game['commence_time']}")
+            for bookmaker in game['bookmakers']:
+                print(f"Bookmaker: {bookmaker['title']}")
+                for market in bookmaker['markets']:
+                    for outcome in market['outcomes']:
+                        print(f" - {outcome['name']}: {outcome['price']}")
+            print("\n" + "-" * 20 + "\n")
+    else:
+        print("No data received.")
+
+
+def get_available_sports():
+    url = f"{BASE_URL}/"
+    params = {'apiKey': API_KEY}
+    response = requests.get(url, params=params) 
+    if response.status_code == 200:
+        return response.json()  # list of sports
+    else:
+        print(f"Error: {response.status_code} - {response.json()}")
+        return None
+
+def get_in_play_odds(sport='basketball_nba', regions='us'):
+    url = f"{BASE_URL}/{sport}/odds"
+    params = {
+        'apiKey': API_KEY,
+        'regions': regions,
+        'markets': 'h2h',
+        'oddsFormat': 'decimal',
+        'dateFormat': 'iso',
+    }
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        return [game for game in response.json() if game['commence_time'] <= datetime.now().isoformat()]
+    else:
+        print(f"Error: {response.status_code} - {response.json()}")
+        return None
+    
+
+
+def get_future_event_odds(sport='basketball_nba', regions='us', days_ahead=7):
+    url = f"{BASE_URL}/{sport}/odds"
+    future_date = (datetime.now() + timedelta(days=days_ahead)).isoformat()
+    params = {
+        'apiKey': API_KEY,
+        'regions': regions,
+        'markets': 'h2h',
+        'oddsFormat': 'decimal',
+        'dateFormat': 'iso',
+    }
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        return [game for game in response.json() if game['commence_time'] > future_date]
+    else:
+        print(f"Error: {response.status_code} - {response.json()}")
+        return None
+
+
+
+# def get_sportsOdds_data():
+#     url = "https://api.the-odds-api.com/v4/sports/?apiKey=YOUR_API_KEY"  # Replace with your API endpoint
+#     headers = {
+#         "Authorization": "Bearer yourapikey"
+#     }
+#     response = requests.get(url, headers=headers)
+#     return response.json() if response.status_code == 200 else None
+
+def get_sportsResults_data():
+    params = {
+    "q": "Manchester United F.C.",
+    "location": "austin, texas, united states",
+    "api_key": SERP_KEY
+    }
+
+    search = GoogleSearch(params)
+    results = search.get_dict()
+    sports_results = results["sports_results"]
+    
+    
+def get_upcoming_nba_games():
+    params = {
+        "q": "NBA schedule",
+        "location": "austin, texas, united states",
+        "api_key": SERP_KEY
+    }
+
+    search = GoogleSearch(params)
+    results = search.get_dict()
+
+    if 'sports_results' in results:
+        sports_results = results['sports_results']
+
+        if 'games' in sports_results:
+            games = sports_results['games']
+
+            # extract the next x upcoming games
+            upcoming_games = games[:6]
+
+            # print the upcoming gamess
+            for game in upcoming_games:
+                teams = game.get('teams', [])
+                if len(teams) == 2:
+                    team1 = teams[0].get('name', 'Unknown Team 1')
+                    team2 = teams[1].get('name', 'Unknown Team 2')
+                    date = game.get('date', 'Unknown Date')
+                    print(f"{team1} vs {team2} on {date}")
+        else:
+            print("No games information found in sports results.")
+    else:
+        print("No sports results found.")
+
+
+#get_upcoming_nba_games()
+
+    
+    
+
+def get_sport_schedule_UI():
+    # List of supported sports and leagues for validation
+    supported_sports = ["nba", "soccer", "tennis", "baseball"]
+    soccer_leagues = ["Premier League", "La Liga", "Serie A", "Bundesliga", "Ligue 1"]
+
+    # Ask the user for the sport they are interested in
+    sport = input("Enter the sport you want to see the schedule for (e.g., NBA, Soccer, Tennis, Baseball): ").strip().lower()
+
+    # Check if the sport is supported
+    if sport not in supported_sports:
+        print("Sport not recognized or unsupported. Please check your input and try again.")
+        return
+
+    # Special handling for soccer, asking for a specific league
+    if sport == "soccer":
+        print("Available soccer leagues: Premier League, La Liga, Serie A, Bundesliga, Ligue 1")
+        league = input("Please specify the league you want to see the schedule for: ").strip()
+
+        # Validate if the league is one of the known options
+        if league not in soccer_leagues:
+            print("League not recognized. Please enter a valid league name.")
+            return
+
+        # Modify the search query to include the league name
+        query = f"{league} schedule"
+    else:
+        # For other sports, set the query directly
+        query = f"{sport.upper()} schedule"
+
+    # Set up parameters for the search
+    params = {
+        "q": query,
+        "location": "austin, texas, united states",
+        "api_key": SERP_KEY
+    }
+    
+    # Perform the search
+    search = GoogleSearch(params)
+    results = search.get_dict()
+
+    # Check if 'sports_results' is in the results
+    if 'sports_results' in results and 'games' in results['sports_results']:
+        games = results['sports_results']['games']
+        
+        print(f"Total games found: {len(games)}")
+
+        # Display the upcoming games
+        print(f"\nUpcoming {query} for next 6 games:")
+        for game in games[:6]:  # Limit to the next 8 games
+            teams = game.get('teams', [])
+            if len(teams) == 2:
+                team1 = teams[0].get('name', 'Unknown Team 1')
+                team2 = teams[1].get('name', 'Unknown Team 2')
+                date = game.get('date', 'Unknown Date')
+                print(f"{team1} vs {team2} on {date}")
+    else:
+        print("No games found for the specified sport or league.")
+    
+
+
+#get_sport_schedule_UI()   
