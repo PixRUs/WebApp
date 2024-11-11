@@ -19,7 +19,7 @@
     <br>
     <a href="{% url 'account_logout' %}" class="button">Logout</a>
     <br>
-    <a href="{% provider_login_url 'google' %}" class="button">Login with Google</a>
+    <a href="{% provider_login_url 'google' process='login' action='reauthenticate' %}" class="button">Login with Google</a>
 </div>
 </body>
 </html>
