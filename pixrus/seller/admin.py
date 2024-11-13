@@ -1,3 +1,4 @@
 from django.contrib import admin
+from .models import Seller  # Import the models from the same app
 
-# Register your models here.
+admin.site.register(Seller)  # Register each model individually
