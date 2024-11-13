@@ -6,16 +6,15 @@ from django.shortcuts import render, redirect
 
 # Create your views here.
 def signup_view(request):
-    if request.method == 'POST':
-        form = SignupForm(request.POST)  # Bind data from the request
-        if form.is_valid():
-            form.save(request)  # Save the user
-            messages.success(request, 'Your account has been created!')
-            return redirect('userlogin')  # Redirect to the login page or any other page
-        else:
-            form = SignupForm()  # Create new instance of the form
+    form = SignupForm(request.POST)  # Bind data from the request
+    if form.is_valid():
+        form.save(request)  # Save the user
+        messages.success(request, 'Your account has been created!')
+        return redirect('userlogin')  # Redirect to the login page or any other page
+    else:
+        form = SignupForm()  # Create new instance of the form
 
-        return render(request, 'signup.html', {'form': form})
+    return render(request, 'signup.html', {'form': form})
 
 
 def login_view(request):
