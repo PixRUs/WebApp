@@ -2,8 +2,8 @@
 import uuid
 from django.db import models
 from django.utils import timezone
-from pixrus.database_service.models.UserProfile import Seller, Buyer  # pylint: disable=import-error
-
+from buyer.models import Buyer
+from seller.models import Seller
 
 class ActivePick(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
