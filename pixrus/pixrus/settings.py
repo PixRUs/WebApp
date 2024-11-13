@@ -38,13 +38,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'pixrus.database_service',
     'django.contrib.sites',  # Required for allauth
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',  # Google provider for OAuth
     'accounts',
+    'buyer',
+    'seller',
+    'product',
 ]
 
 SITE_ID = 1  # Add this line as required by allauth

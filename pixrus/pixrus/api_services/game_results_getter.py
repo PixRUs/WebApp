@@ -72,31 +72,6 @@ def score_result(game_query_data,game_result_data = None):
     ]
     return output
         
-    
-meta_data_game_has_happened1 = {
-    "bet_type": "h2h",
-    "team_1": "Portland Trailblazers",
-    "team_2": "New Orleans Pelicans",
-    "event_time": datetime(2024, 11, 4)
-}
-meta_data_game_has_not_happened = {
-    "bet_type": "h2h",
-    "team_1": "Los Angeles Lakers",
-    "team_2": "Dallas Mavericks",
-    "event_time": datetime(2025, 1, 7)
-}
-meta_data_game_has_happened2 = {
-    "bet_type": "h2h",
-    "team_1": "Los Angeles Lakers",
-    "team_2": "Sacramento Kings",
-    "event_time": datetime(2024, 10, 26)
-} 
 
     
-    
-print("GAME DIFFERENTIAL FOR GAMES THAT HAVE HAPPENED ")
-print(score_result(meta_data_game_has_happened1))
-print(score_result(meta_data_game_has_happened2))
-print("GAME DIFFERENTIAL FOR GAMES THAT HAVE NOT HAPPEND")
-print(score_result(meta_data_game_has_not_happened))
 
