@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'pixrus.DatabaseDrivers',
+    'pixrus.database_service',
     'django.contrib.sites',  # Required for allauth
     'allauth',
     'allauth.account',
