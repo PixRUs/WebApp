@@ -1,7 +1,9 @@
+
 import uuid
 from django.db import models
 from django.utils import timezone
-from pixrus.database_service.models.UserProfile import Seller, Buyer # pylint: disable=import-error
+from pixrus.database_service.models.UserProfile import Seller, Buyer  # pylint: disable=import-error
+
 
 class ActivePick(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -54,7 +56,7 @@ class HistoricalPick(models.Model):
     event_time_done = models.DateTimeField(auto_now_add=True)
     event_result = models.JSONField(null=True)
     buyers_with_access = models.ManyToManyField(Buyer, related_name='historical_pick_buyer', blank=True)
-    
+
     def has_access(self, buyer):
         return self.buyers_with_access.filter(id=buyer.id).exists()
 
@@ -86,6 +88,7 @@ class VendorApiRequest(models.Model):
         verbose_name_plural = "Vendor API Requests"
         ordering = ['-request_time']
 
+
 class Subscription(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, related_name='subscriptions')
@@ -93,12 +96,12 @@ class Subscription(models.Model):
     subscribed_at = models.DateTimeField(auto_now_add=True)
     subscribed_until = models.DateTimeField()
     meta_data = models.JSONField(null=True, blank=True)
-    
+
     @classmethod
     def create_new_subscription(cls, start_time, end_time, buyer, seller, meta_data=None):
         """
         Creates a new subscription for a buyer and seller with a specified start and end time.
-        
+
         :param start_time: The start time of the subscription (datetime object).
         :param end_time: The end time of the subscription (datetime object).
         :param buyer: Buyer instance (Buyer model).
@@ -108,7 +111,7 @@ class Subscription(models.Model):
         """
         if end_time <= start_time:
             raise ValueError("End time must be after start time.")
-        
+
         # Create and return the subscription
         return cls.objects.create(
             seller=seller,
@@ -121,7 +124,7 @@ class Subscription(models.Model):
     def end_current_subscription(cls, buyer, seller):
         """
         Ends the current active subscription for the specified buyer and seller.
-        
+
         :param buyer: Buyer instance (Buyer model).
         :param seller: Seller instance (Seller model).
         :return: True if the subscription was successfully ended, False if no active subscription was found.
@@ -133,7 +136,7 @@ class Subscription(models.Model):
                 seller=seller,
                 subscribed_until__gt=timezone.now()
             ).latest('subscribed_at')
-            
+
             # Delete the active subscription if found
             subscription.delete()
             return True
@@ -144,6 +147,3 @@ class Subscription(models.Model):
 
     def is_active(self):
         return self.subscribed_until > timezone.now()
-
-
-
