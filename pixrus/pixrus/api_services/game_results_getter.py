@@ -64,9 +64,9 @@ def score_result(game_query_data,game_result_data = None):
     differential_team1 = team1_score - team2_score
     differential_team2 = team2_score - team1_score
     if team2_score > team1_score:
-        team_winner = teams[1]
+        team_winner = teams[1]['name']
     elif team1_score > team2_score:
-        team_winner = teams[0]
+        team_winner = teams[0]['name']
     else: 
         team_winner = "Draw"
     
