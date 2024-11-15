@@ -10,7 +10,8 @@ class ActivePick(models.Model):
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, related_name='active_pick_seller')
     posted_at = models.DateTimeField(auto_now_add=True)
     event_start = models.DateTimeField(auto_now_add=True)
-    event_data = models.JSONField(null=True, blank=True)
+    pick_data = models.JSONField(null=True, blank=True)
+    game_data = models.JSONField(null=True, blank=True)
     buyers_with_access = models.ManyToManyField(Buyer, related_name='active_picks_buyer_access', blank=True)
 
     def has_access(self, buyer):

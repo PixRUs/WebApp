@@ -6,6 +6,7 @@ class Buyer(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user_name = models.CharField(max_length=255)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='%(class)s_profile')
+    stats = models.JSONField(null=True, blank=True)
     meta_data = models.JSONField(null=True, blank=True)
 
 
