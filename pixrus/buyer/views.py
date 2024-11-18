@@ -1,19 +1,17 @@
 from django.shortcuts import render
 from pixrus.utils.decorators import role_required
+from product.models import ActivePick, HistoricalPick
+from buyer.models import Buyer
 
 @role_required(required_role='buyer')
 def buyer_landing(request):
-    """
-    try:
-        seller = request.user.seller
-    except AttributeError:
-        return render(request, '403.html', status=403)  
-    active_picks = ActivePick.objects.filter(seller=seller)
-    historical_picks = HistoricalPick.objects.filter(seller=seller)
+    buyer = Buyer.objects.get(user=request.user)
+    active_picks = ActivePick.get_active_picks_for_buyer(buyer)
+    historical_picks = HistoricalPick.get_historical_picks_for_buyer(buyer)
     context = {
-        'seller': seller,
+        'buyer': buyer,
         'active_picks': active_picks,
         'historical_picks': historical_picks,
-    """
-    return render(request, 'buyer_landing.html')
+    }
+    return render(request, 'buyer_landing.html',context)
 
