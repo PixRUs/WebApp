@@ -14,9 +14,6 @@
     <p>Please log in to access the content.</p>
     <br>
     <a href="{% url 'userlogin' %}" class="button">Login</a>
-    <br>
-    <a href="{% url 'usersignup' %}" class="button">Sign Up</a>
-    <br>
     <a href="{% url 'account_logout' %}" class="button">Logout</a>
     <br>
     <a href="{% provider_login_url 'google' process='login' action='reauthenticate' %}" class="button">Login with Google</a>

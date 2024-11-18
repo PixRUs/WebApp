@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Dashboard</title>
+</head>
+<body>
+    <h1>Welcome, {{ seller.user.username }}</h1>
+
+    <h2>Active Picks</h2>
+    <ul>
+        {% for pick in active_picks %}
+            <li>{{ pick.name }} - {{ pick.details }}</li>
+        {% empty %}
+            <li>No active picks found.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Historical Picks</h2>
+    <ul>
+        {% for pick in historical_picks %}
+            <li>{{ pick.name }} - {{ pick.details }}</li>
+        {% empty %}
+            <li>No historical picks found.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -1,31 +1,55 @@
-from allauth.account.forms import SignupForm, LoginForm
 from django.contrib import messages
+from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from pixrus.utils.decorators import role_required
+from .forms import ProfileCompletionForm
+from buyer.models import Buyer
+from seller.models import Seller
+from django.views.decorators.cache import never_cache
 
 
-# Create your views here.
-def signup_view(request):
-    form = SignupForm(request.POST)  # Bind data from the request
-    if form.is_valid():
-        form.save(request)  # Save the user
-        messages.success(request, 'Your account has been created!')
-        return redirect('userlogin')  # Redirect to the login page or any other page
-    else:
-        form = SignupForm()  # Create new instance of the form
-
-    return render(request, 'signup.html', {'form': form})
-
-
-def login_view(request):
-    form = LoginForm()
-    return render(request, 'login.html', {'form': form})
-
-
+# Landing page or any publicly accessible entry point
 def landing(request):
     return render(request, 'landing.html')
+
+# Redirect directly to Google login
+def login_view(request):
+    # Redirect to the Google login URL
+    return redirect('google_login')
 
 
 @login_required
 def home(request):
-    return render(request, 'home.html', {'user': request.user})
+    # Check if the user is associated with the Buyer model
+    if Buyer.objects.filter(user=request.user).exists():
+        return redirect('buyer_dashboard')  # Replace with the actual buyer dashboard URL name
+    # Check if the user is associated with the Seller model
+    elif Seller.objects.filter(user=request.user).exists():
+        return redirect('seller_dashboard')  
+    return redirect('profile_completion')
+
+@never_cache
+@login_required
+def profile_completion(request):
+    if Buyer.objects.filter(user=request.user).exists():
+        return redirect('buyer_dashboard')  # Replace with the actual buyer dashboard URL name
+    # Check if the user is associated with the Seller model
+    elif Seller.objects.filter(user=request.user).exists():
+        return redirect('seller_dashboard')  # Replace with the actual seller dashboard URL name  
+    if request.method == 'POST':
+        form = ProfileCompletionForm(request.POST)
+        if form.is_valid():
+            role = form.cleaned_data.get('role')
+            if role == 'seller':
+                Seller.objects.get_or_create(user=request.user)
+                return redirect('seller_dashboard')  # Redirect to seller dashboard
+            elif role == 'buyer':
+                Buyer.objects.get_or_create(user=request.user)
+                return redirect('buyer_dashboard')  # Redirect to buyer dashboard
+        else:
+            # Show errors if form is invalid
+            return render(request, 'profile_completion.html', {'form': form})
+
+    else:
+        form = ProfileCompletionForm()  # Display an empty form for GET requests
+        return render(request, 'profile_completion.html', {'form': form})
