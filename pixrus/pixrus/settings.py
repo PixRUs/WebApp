@@ -69,10 +69,12 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'pixrus.urls'
 
+import os  # Required to resolve the BASE_DIR
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Add your global templates directory here
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -84,6 +86,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'pixrus.wsgi.application'
 
