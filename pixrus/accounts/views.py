@@ -1,7 +1,6 @@
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
-from pixrus.utils.decorators import role_required
 from .forms import ProfileCompletionForm
 from buyer.models import Buyer
 from seller.models import Seller
@@ -14,7 +13,7 @@ def landing(request):
 
 # Redirect directly to Google login
 def login_view(request):
-    # Redirect to the Google login URL
+    # Redirect to tshe Google login URL
     return redirect('google_login')
 
 
@@ -40,11 +39,20 @@ def profile_completion(request):
         form = ProfileCompletionForm(request.POST)
         if form.is_valid():
             role = form.cleaned_data.get('role')
+            user_name = form.cleaned_data.get('username')
             if role == 'seller':
-                Seller.objects.get_or_create(user=request.user)
+                Seller.objects.get_or_create(user=request.user,
+                defaults={'user_name': user_name,
+                'meta_data': {},
+                'stats': {}}
+                )
                 return redirect('seller_dashboard')  # Redirect to seller dashboard
             elif role == 'buyer':
-                Buyer.objects.get_or_create(user=request.user)
+                Buyer.objects.get_or_create(user=request.user,
+                defaults={'user_name':user_name,
+                          'meta_data':{},
+                          'stats':{}}
+                )
                 return redirect('buyer_dashboard')  # Redirect to buyer dashboard
         else:
             # Show errors if form is invalid
