@@ -12,12 +12,6 @@ from django.views.decorators.cache import never_cache
 def landing(request):
     return render(request, 'landing.html')
 
-# Redirect directly to Google login
-def login_view(request):
-    # Redirect to the Google login URL
-    return redirect('google_login')
-
-
 @login_required
 def home(request):
     # Check if the user is associated with the Buyer model
