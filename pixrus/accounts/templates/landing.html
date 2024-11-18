@@ -13,10 +13,9 @@
     <h1>Welcome to Our Application</h1>
     <p>Please log in to access the content.</p>
     <br>
-    <a href="{% url 'userlogin' %}" class="button">Login</a>
-    <a href="{% url 'account_logout' %}" class="button">Logout</a>
-    <br>
     <a href="{% provider_login_url 'google' process='login' action='reauthenticate' %}" class="button">Login with Google</a>
+    <br>
+    <a href="{% url 'account_logout' %}" class="button">Logout</a>
 </div>
 </body>
 </html>
