@@ -50,7 +50,7 @@ class ActivePick(models.Model):
 
 
 class HistoricalPick(models.Model):
-    id = models.UUIDField(primary_key=True, editable=False)
+    id = models.UUIDField(primary_key=True, editable=True)
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, related_name='historical_pick_seller')
     posted_at = models.DateTimeField()
     event_time_done = models.DateTimeField(auto_now_add=True)
