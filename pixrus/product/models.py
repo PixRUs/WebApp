@@ -11,6 +11,7 @@ class ActivePick(models.Model):
     posted_at = models.DateTimeField(auto_now_add=True)
     event_start = models.DateTimeField(auto_now_add=True)
     pick_data = models.JSONField(null=True, blank=True)
+    type_of_pick = models.CharField(max_length=25, null=True, blank=True)
     game_data = models.JSONField(null=True, blank=True)
     buyers_with_access = models.ManyToManyField(Buyer, related_name='active_picks_buyer_access', blank=True)
 
@@ -52,9 +53,10 @@ class HistoricalPick(models.Model):
     id = models.UUIDField(primary_key=True, editable=False)
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, related_name='historical_pick_seller')
     posted_at = models.DateTimeField()
-    meta_data = models.JSONField(null=True, blank=True)
     event_time_done = models.DateTimeField(auto_now_add=True)
-    event_result = models.JSONField(null=True)
+    game_event_result = models.JSONField(null=True)
+    pick_data = models.JSONField(null=True, blank=True)
+    type_of_pick = models.CharField(max_length=10, null=True, blank=True)
     buyers_with_access = models.ManyToManyField(Buyer, related_name='historical_pick_buyer', blank=True)
 
     def has_access(self, buyer):
