@@ -8,8 +8,9 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 1%;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: flex-start;
             background-color: #f4f4f4;
@@ -70,35 +71,31 @@
         <h2>Historical Picks</h2>
         {% for historical_pick in historical_picks %}
         <div class="card">
-            <h3></h3>
+            <h3>{{ historical_pick.game_event_result.team_1 }} : {{ historical_pick.game_event_result.team_1_points }} vs. {{ historical_pick.game_event_result.team_2 }} : {{ historical_pick.game_event_result.team_2_points }}</h3>
+            <p>Finished at: {{ historical_pick.event_time_done }}</p>
+            <p>Original Pick: {{ historical_pick.type_of_pick }} - {{ historical_pick.pick_data.target_winner }}</p>
+            {%  if historical_pick.pick_data.pick_success %}
+                <p style="color: green"><strong>Bet Successful</strong></p>
+            {% else %}
+                <p style="color: red"><strong>Bet Failed</strong></p>
+            {% endif %}
+            <p>Pick Sold by: {{ historical_pick.seller.user.get_full_name }}</p>
         </div>
         {% endfor %}
     </div>
-</div>
-<div class="List of completed picks">
-    <ul>
-        {% for historical_pick in historical_picks %}
-            <li>
-                <div class="historical_pick_card">
-                    <div class="historical_pick_card_header">
-                        <h2>Pick Sold by: {{ historical_pick.seller.user.get_full_name }}</h2>
-                    </div>
-                    <div class="historical_pick_card_body">
-                        <p>Posted at: {{ historical_pick.posted_at }}</p>
-                        <p>Closed at: {{ historical_pick.event_time_done }} </p>
-                        <p>{{ historical_pick.game_event_result.team_1 }} : {{ historical_pick.game_event_result.team_1_points }}  VS {{ historical_pick.game_event_result.team_2 }} : {{ historical_pick.game_event_result.team_2_points }}</p>
-                        <p></p>
-                    </div>
-                    <div class="original_pick_info">
-                        <p>Original Pick: {{ historical_pick.type_of_pick }} - {{ historical_pick.pick_data.target_winner }}</p>
-                        <p>Pick was successful : {{ historical_pick.pick_data.pick_success }}</p>
-                    </div>
-                </div>
-            </li>
-        {% endfor %}
-    </ul>
-</div>
 
+    <div class="column">
+        <h2>Active Picks</h2>
+        {% for active_pick in active_picks %}
+            <div class="card">
+                <h3>{{ active_pick.game_data.team_1 }} vs. {{ active_pick.game_data.team_2 }}</h3>
+                <p>Event Start: {{ active_pick.event_start }}</p>
+                <p>Pick: {{ active_pick.type_of_pick }} - {{ active_pick.pick_data.target_winner }}</p>
+                <p>Pick Sold by: {{ active_pick.seller.user.get_full_name }}</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
 
 </body>
 </html>
