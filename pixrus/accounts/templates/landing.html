@@ -5,17 +5,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Google OAuth Example</title>
+    <title>pixRUs - Welcome</title>
     <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        /* General Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0d1117, #161b22);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Header Styling */
+        header {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(13, 17, 23, 0.9);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: #f0883e;
+        }
+
+        header nav a {
+            margin: 0 10px;
+            text-decoration: none;
+            font-size: 1rem;
+            color: #f0883e;
+            transition: color 0.3s ease;
+        }
+
+        header nav a:hover {
+            color: #ffbf80;
+        }
+
+        /* Main Container */
+        .container {
+            text-align: center;
+            padding: 50px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .container h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #f0883e, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .container p {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 15px auto;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(90deg, #f0883e, #ffd700);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-3px);
+            background: linear-gradient(90deg, #ff7e00, #ffe700);
+        }
+
+        /* Section Styling */
+        .sections {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 50px;
+        }
+
+        .section {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            width: 300px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .section h2 {
+            color: #f0883e;
+            margin-bottom: 15px;
+        }
+
+        .section p {
+            opacity: 0.8;
+        }
+
+        footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            background: rgba(13, 17, 23, 0.9);
+        }
+
+        footer p {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
+<header>
+    <h1>pixRUs</h1>
+    <nav>
+        <a href="#about">About Us</a>
+        <a href="#contact">Contact</a>
+    </nav>
+</header>
 <div class="container">
-    <h1>Welcome to Our Application</h1>
-    <p>Please log in to access the content.</p>
-    <br>
+    <h1>Welcome to pixRUs</h1>
+    <p>Your trusted marketplace for sports picks. Login to explore!</p>
     <a href="{% provider_login_url 'google' process='login' action='reauthenticate' %}" class="button">Login with Google</a>
-    <br>
     <a href="{% url 'account_logout' %}" class="button">Logout</a>
 </div>
+<div class="sections">
+    <div class="section" id="about">
+        <h2>About Us</h2>
+        <p>pixRUs is the platform for transparent and trustworthy sports picks. Connect, engage, and thrive with our dynamic community.</p>
+    </div>
+    <div class="section" id="contact">
+        <h2>Contact</h2>
+        <p>Need help? Reach us at <a href="mailto:support@pixrus.com" style="color: #ffd700; text-decoration: none;">support@pixrus.com</a>.</p>
+    </div>
+</div>
+<footer>
+    <p>&copy; 2024 pixRUs. All Rights Reserved.</p>
+</footer>
 </body>
 </html>
