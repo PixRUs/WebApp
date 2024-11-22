@@ -9,21 +9,22 @@ class ActivePick(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, related_name='active_pick_seller')
     posted_at = models.DateTimeField(auto_now_add=True)
-    event_start = models.DateTimeField(auto_now_add=True)
+    event_start = models.DateTimeField(null = True)
     pick_data = models.JSONField(null=True, blank=True)
-    type_of_pick = models.CharField(max_length=25, null=True, blank=True)
+    type_of_pick = models.CharField(max_length=50, null=True, blank=True)
     game_data = models.JSONField(null=True, blank=True)
     buyers_with_access = models.ManyToManyField(Buyer, related_name='active_picks_buyer_access', blank=True)
 
     def has_access(self, buyer):
         return self.buyers_with_access.filter(id=buyer.id).exists()
 
-    def make_historical(self, event_result):
+    def make_historical(self,pick_data,event_result):
         historical_pick = HistoricalPick.objects.create(
-            id=self.id,
             seller=self.seller,
             posted_at=self.posted_at,
-            event_result=event_result,
+            game_event_result=event_result,
+            type_of_pick=self.type_of_pick,
+            pick_data=pick_data,
         )
         historical_pick.buyers_with_access.set(self.buyers_with_access.all())
         self.delete()
@@ -50,13 +51,13 @@ class ActivePick(models.Model):
 
 
 class HistoricalPick(models.Model):
-    id = models.UUIDField(primary_key=True, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4,editable=False)
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, related_name='historical_pick_seller')
     posted_at = models.DateTimeField()
-    event_time_done = models.DateTimeField(auto_now_add=True)
-    game_event_result = models.JSONField(null=True)
-    pick_data = models.JSONField(null=True, blank=True)
-    type_of_pick = models.CharField(max_length=10, null=True, blank=True)
+    event_time_done = models.DateTimeField(null=True)
+    game_event_result = models.JSONField()
+    pick_data = models.JSONField()
+    type_of_pick = models.CharField(max_length=50, null=True, blank=True)
     buyers_with_access = models.ManyToManyField(Buyer, related_name='historical_pick_buyer', blank=True)
 
     def has_access(self, buyer):

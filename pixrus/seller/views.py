@@ -8,7 +8,7 @@ from django.http import HttpResponseForbidden
 @role_required(required_role='seller')
 def seller_landing(request):
     if not Seller.objects.filter(user=request.user).exists():
-        return HttpResponseForbidden("You do not have permission to access this page.")  # Raw 403 response
+        return HttpResponseForbidden("You do not have permission to access this page.")
     
     # Retrieve the seller object associated with the user
     seller = Seller.objects.get(user=request.user)
@@ -18,6 +18,14 @@ def seller_landing(request):
         'seller': seller,
         'active_picks': active_picks,
         'historical_picks': historical_picks,
+        'stats':seller.stats,
     }
     return render(request, 'seller_landing.html',context)
+@role_required(required_role='seller')
+def post_pick_view(request):
+    if not Seller.objects.filter(user=request.user).exists():
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    seller = Seller.objects.get(user=request.user)
+    #need to gather all the current pick info.
+
 

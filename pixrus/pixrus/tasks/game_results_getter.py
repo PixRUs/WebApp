@@ -7,14 +7,15 @@ from serpapi import GoogleSearch
 import os
 VENDOR_API_KEY = os.getenv('SERPAPI_ID')
 
-def has_game_happened(query_data):
+def has_game_happened_moneyline(query_data):
     is_final = True
     team_1 = query_data.get('team_1')
     team_2 = query_data.get('team_2')
     event_date_str = query_data.get('event_time')
     if not team_1 or not team_2 or not event_date_str:
         return False,{}
-    
+
+    event_date_str = str(event_date_str)
     event_date = datetime.fromisoformat(event_date_str)
     q = f"{team_1} vs {team_2} {event_date.strftime('%B %d')}"
     
@@ -51,12 +52,19 @@ def has_game_happened(query_data):
     return is_final, game_result_data
 
 
-def score_result(game_query_data,game_result_data = None):
-    if not game_result_data:
-        has_happened,game_result_data = has_game_happened(game_query_data)
-        if not has_happened or game_result_data is None:
-            return False,{}
-        
+def get_score_result(game_query_data,type_of_pick):
+    bet_type_functions = {
+        "moneyline": score_result_moneyline,
+    }
+    bet_type_function = bet_type_functions.get(type_of_pick)
+    if bet_type_function:
+        return bet_type_function(game_query_data)
+
+def score_result_moneyline(game_query_data):
+    has_happened,game_result_data = has_game_happened_moneyline(game_query_data)
+    if not has_happened or game_result_data is None:
+        return False,{}
+
     teams = game_result_data["game_spotlight"]["teams"] 
     team1_score = int(teams[0]["score"]["T"])
     team2_score = int(teams[1]["score"]["T"])
@@ -71,11 +79,13 @@ def score_result(game_query_data,game_result_data = None):
         team_winner = "Draw"
     
     return True,{
-        "team1_score": team1_score,
-        "team2_score": team2_score,
-        "differential_team1": differential_team1,
-        "differential_team2": differential_team2,
-        "winner":team_winner
+        "team_1": teams[0]['name'],
+        "team_2": teams[1]['name'],
+        "team_1_points": team1_score,
+        "team_2_points": team2_score,
+        "team_1_differential": differential_team1,
+        "team_2_differential": differential_team2,
+        "game_winner":team_winner,
     }
 
         
