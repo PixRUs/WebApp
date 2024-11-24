@@ -1,11 +1,13 @@
 from django.shortcuts import render
+from django.views.decorators.cache import never_cache
+
 from product.models import ActivePick,HistoricalPick
 from pixrus.utils.decorators import role_required
 from seller.models import Seller
-from django.http import HttpResponseForbidden,HttpResponse
+from django.http import HttpResponseForbidden,HttpResponse,JsonResponse
 from .utils.pick_data_getter import get_odds
 
-
+@never_cache
 @role_required(required_role='seller')
 def seller_landing(request):
     if not Seller.objects.filter(user=request.user).exists():
@@ -83,11 +85,23 @@ def post_pick_view(request):
 
     return render(request, "post_pick.html", context)
 
+
 @role_required(required_role='seller')
 def activate_pick(request,pick_id):
-    if not Seller.objects.filter(user=request.user).exists():
+    seller_query = Seller.objects.filter(user=request.user)
+    if not seller_query:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    return HttpResponse(f"{pick_id}")
+    picks = request.session['odds']
+    pick = next((pick for pick in picks if pick["id"] == pick_id), None)
+    seller = seller_query.first()
+    if request.method == "POST":
+        pick_data = {"target_winner": request.POST.get("outcome"), "odds": request.POST.get("multiplier"),
+                     "book_maker": request.POST.get("bookmaker")}
+        game_data = {"team_1": request.POST.get("team_1"), "team_2": request.POST.get("team_2")}
+        ActivePick.objects.create(seller=seller,event_start=request.POST.get("commence_time"),pick_data=pick_data,game_data=game_data,type_of_pick="h2h")
+        return JsonResponse({"success": True, "message": "Pick activated successfully!"})
+    else:
+        return render(request,"activate_pick.html",{"pick":pick})
 
     #need to gather all the current pick info.
 
