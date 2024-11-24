@@ -54,7 +54,7 @@ def has_game_happened_moneyline(query_data):
 
 def get_score_result(game_query_data,type_of_pick):
     bet_type_functions = {
-        "moneyline": score_result_moneyline,
+        "h2h": score_result_moneyline,
     }
     bet_type_function = bet_type_functions.get(type_of_pick)
     if bet_type_function:

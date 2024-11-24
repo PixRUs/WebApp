@@ -121,11 +121,12 @@
         <h2>Active Picks</h2>
         {% for active_pick in active_picks %}
             <div class="card">
-                <h3>{{ active_pick.game_data.team_1 }} vs. {{ active_pick.game_data.team_2 }}</h3>
+                <h3>{{ active_pick.game_data.away_team }} at {{ active_pick.game_data.home_team }}</h3>
                 <p>Event Start: {{ active_pick.event_start }}</p>
                 <p>Pick: {{ active_pick.type_of_pick }} - {{ active_pick.pick_data.target_winner }}</p>
                 <p>Pick Odds: {{ active_pick.pick_data.odds}}</p>
                 <p>Sportsbook: {{ active_pick.pick_data.book_maker }}</p>
+                <p>Bet Amount: {{ active_pick.pick_data.bet_amount }}</p>
             </div>
         {% endfor %}
     </div>

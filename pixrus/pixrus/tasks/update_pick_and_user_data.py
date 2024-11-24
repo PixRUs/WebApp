@@ -3,6 +3,7 @@ import sys
 import django
 from pathlib import Path
 
+
 # Get the root of the project dynamically
 project_root = Path(__file__).resolve().parent.parent.parent
 sys.path.append(str(project_root))
@@ -27,13 +28,13 @@ for active_pick in all_active_picks:
     if type_of_pick == "moneyline":
         if event_start is None or event_start.date() <= datetime.today().date():
             game_data =  active_pick.game_data
-            team_1 = game_data.get('team_1')
-            team_2 = game_data.get('team_2')
-            if not team_1 or not team_2 or not event_start:
+            home_team = game_data.get('home_team')
+            away_team = game_data.get('away_team')
+            if not home_team or not away_team or not event_start:
                 continue
             game_query_data = {
-                "team_1": team_1,
-                "team_2": team_2,
+                "team_1": home_team,
+                "team_2": away_team,
                 "event_time": event_start
             }
     has_happened,result = get_score_result(game_query_data, type_of_pick)

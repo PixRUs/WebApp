@@ -67,14 +67,14 @@
         }
     </style>
     <script>
-        function confirmActivation(commence_time,team_1,team_2,game, bookmaker, outcome, multiplier) {
+        function confirmActivation(commence_time,home_team,away_team,game, bookmaker, outcome, multiplier) {
             if (confirm(`Are you sure you want to activate the following?\n\nGame: ${game}\nBookmaker: ${bookmaker}\nOutcome: ${outcome}\nOdds: ${multiplier}`)) {
                 const formData = new FormData();
                 formData.append("bookmaker", bookmaker);
                 formData.append("outcome", outcome);
                 formData.append("multiplier", multiplier);
-                formData.append("team_1",team_1)
-                formData.append("team_2",team_2)
+                formData.append("home_team",home_team)
+                formData.append("away_team",away_team)
                 formData.append("commence_time",commence_time)
 
                 // Send POST request to the same URL

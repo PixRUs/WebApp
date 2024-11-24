@@ -97,7 +97,7 @@ def activate_pick(request,pick_id):
     if request.method == "POST":
         pick_data = {"target_winner": request.POST.get("outcome"), "odds": request.POST.get("multiplier"),
                      "book_maker": request.POST.get("bookmaker")}
-        game_data = {"team_1": request.POST.get("team_1"), "team_2": request.POST.get("team_2")}
+        game_data = {"home_team": request.POST.get("home_team"), "away_team": request.POST.get("away_team")}
         ActivePick.objects.create(seller=seller,event_start=request.POST.get("commence_time"),pick_data=pick_data,game_data=game_data,type_of_pick="h2h")
         return JsonResponse({"success": True, "message": "Pick activated successfully!"})
     else:
