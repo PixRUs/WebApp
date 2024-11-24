@@ -44,7 +44,7 @@ def profile_completion(request):
                 Seller.objects.get_or_create(user=request.user,
                 defaults={'user_name': user_name,
                 'meta_data': {},
-                'stats': {}}
+                'stats': {"num_of_success": 0, "num_of_failures": 0},}
                 )
                 return redirect('seller_dashboard')  # Redirect to seller dashboard
             elif role == 'buyer':

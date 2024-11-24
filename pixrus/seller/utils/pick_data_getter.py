@@ -1,17 +1,18 @@
 import datetime
 import requests
 from serpapi import GoogleSearch
-
+from product.models import ApiRequest
 import requests
+import os
 
 # api_key_SERP-API
 SERP_KEY = 'a024009b966e529676d4497b8bb73928ca784ba41e9f66e21adeb13f28f6c3a7'
 # api_key_ODDS-API
-API_KEY = '8f728c878478b83769b2172e2117df17'
+API_KEY = os.getenv('ODDS_ID')
 BASE_URL = 'https://api.the-odds-api.com/v4/sports'
 
 
-def get_upcoming_odds(sport='basketball_nba', regions='us', odds_format='decimal', markets='h2h', date_format='iso'):
+def get_upcoming_odds(sport,markets, regions='us', odds_format='american',date_format='iso'):
     url = f"{BASE_URL}/{sport}/odds"
     params = {
         'apiKey': API_KEY,
@@ -27,23 +28,74 @@ def get_upcoming_odds(sport='basketball_nba', regions='us', odds_format='decimal
         print(f"Error: {response.status_code} - {response.json()}")
         return None
 
+def get_odds(sport,league,type_of_pick):
+    data = {}
+    if sport == 'basketball':
+        if league == 'nba':
+            if type_of_pick == 'h2h':
+                request = ApiRequest.get_request_data(sport=sport,league=league, type_of_pick='h2h')
+                if request is None:
+                    data = get_nba_odd_data_h2h()
+                else:
+                    return request
+
+    ApiRequest.objects.get_or_create(
+        sport=sport,
+        league=league,
+        type_of_pick=type_of_pick,
+        defaults={
+            'endpoint': BASE_URL,
+            'sport': sport,
+            'league': league,
+            'type_of_pick': type_of_pick,
+            'response_data': data
+        }
+    )
+    return data
 
 # testing section
-if __name__ == "__main__":
-    odds_data = get_upcoming_odds()
+def get_nba_odd_data_h2h():
+    print("Making request..")
+    odds_data = get_upcoming_odds(sport='basketball_nba', markets='h2h')
+    odd_json = []
     if odds_data:
-        print("Upcoming Odds:\n")
-        for game in odds_data:
-            print(f"Game: {game['home_team']} vs {game['away_team']}")
-            print(f"Start Time: {game['commence_time']}")
+        for index, game in enumerate(odds_data):
+            # Generate a unique ID for each game
+            game_id = f"{game['home_team']}_vs_{game['away_team']}_{index}"
+
+            game_entry = {
+                "id": game_id,  # Add the unique ID
+                "home_team": game['home_team'],
+                "away_team": game['away_team'],
+                "commence_time": game['commence_time'],
+                "bookmakers": []
+            }
+
             for bookmaker in game['bookmakers']:
-                print(f"Bookmaker: {bookmaker['title']}")
+                bookmaker_entry = {
+                    "title": bookmaker['title'],
+                    "markets": []
+                }
+
                 for market in bookmaker['markets']:
+                    market_entry = {
+                        "outcomes": []
+                    }
+
                     for outcome in market['outcomes']:
-                        print(f" - {outcome['name']}: {outcome['price']}")
-            print("\n" + "-" * 20 + "\n")
-    else:
-        print("No data received.")
+                        outcome_entry = {
+                            "name": outcome['name'],
+                            "multiplier": outcome['price']
+                        }
+                        market_entry["outcomes"].append(outcome_entry)
+
+                    bookmaker_entry["markets"].append(market_entry)
+
+                game_entry["bookmakers"].append(bookmaker_entry)
+
+            odd_json.append(game_entry)
+    return odd_json
+
 
 
 def get_available_sports():

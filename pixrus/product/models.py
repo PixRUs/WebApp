@@ -78,18 +78,48 @@ class HistoricalPick(models.Model):
         return cls.objects.filter(seller=seller)
 
 
-class VendorApiRequest(models.Model):
-    vendor = models.CharField(max_length=255, unique=True)
-    endpoint = models.CharField(max_length=255)  # The API endpoint that was called
-    request_time = models.DateTimeField(auto_now_add=True)  # Time of the API request
-    response_status = models.IntegerField()  # HTTP status code of the API response
-    response_data = models.JSONField(null=True, blank=True)  # Store the API response, if needed
-    delta = models.IntegerField(default=30)  # or any default integer value
+class ApiRequest(models.Model):
+    endpoint = models.CharField(null=False,max_length=255)  # The API endpoint that was called
+    request_time = models.DateTimeField(null=False,auto_now_add=True)  # Time of the API request
+    response_data = models.JSONField(null=False, blank=True)  # Store the API response, if needed
+    sport = models.CharField(null=False,max_length=100)
+    league = models.CharField(max_length=100,blank=True,null=True)
+    type_of_pick = models.CharField(null=False,max_length=50, blank=True)
+    delta = models.IntegerField(null=False,default=30)  # or any default integer value
 
     class Meta:
         verbose_name = "Vendor API Request"
         verbose_name_plural = "Vendor API Requests"
         ordering = ['-request_time']
+
+    @classmethod
+    def is_within_delta(cls, api_request):
+        # Get the current time
+        current_time = timezone.now()
+
+        # Calculate the time difference
+        time_difference = current_time - api_request.request_time
+
+        # Compare the time difference in seconds with delta (converted to seconds)
+        delta_in_seconds = api_request.delta * 60  # Assuming delta is in minutes
+        return time_difference.total_seconds() < delta_in_seconds
+
+    @classmethod
+    def get_request_data(cls, sport, league, type_of_pick):
+        queryset = cls.objects.filter(sport=sport,league=league,type_of_pick=type_of_pick)
+        if not queryset.exists():  # Check if queryset is empty
+            return None
+
+        api_request = queryset.first()
+        # Check if response_data is None or empty or if it's within delta
+        if (
+            api_request.response_data is None or
+            api_request.response_data == {} or
+            cls.is_within_delta(api_request)  # Corrected call here
+        ):
+            return None
+
+        return api_request.response_data
 
 
 class Subscription(models.Model):

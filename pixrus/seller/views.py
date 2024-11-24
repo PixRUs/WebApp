@@ -2,7 +2,8 @@ from django.shortcuts import render
 from product.models import ActivePick,HistoricalPick
 from pixrus.utils.decorators import role_required
 from seller.models import Seller
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden,HttpResponse
+from .utils.pick_data_getter import get_odds
 
 
 @role_required(required_role='seller')
@@ -21,11 +22,73 @@ def seller_landing(request):
         'stats':seller.stats,
     }
     return render(request, 'seller_landing.html',context)
+
+
 @role_required(required_role='seller')
 def post_pick_view(request):
     if not Seller.objects.filter(user=request.user).exists():
         return HttpResponseForbidden("You do not have permission to access this page.")
-    seller = Seller.objects.get(user=request.user)
+
+
+    # Get current filter parameters or defaults
+    team_filter = request.GET.get("team", request.session.get("team_filter", "")).lower()
+    sportsbook_filter = request.GET.get("sportsbook", request.session.get("sportsbook_filter", "")).lower()
+    date_filter = request.GET.get("date", request.session.get("date_filter", "")).lower()
+
+    # Store filters in session for persistence
+    request.session["team_filter"] = team_filter
+    request.session["sportsbook_filter"] = sportsbook_filter
+    request.session["date_filter"] = date_filter
+
+
+    current_pick_data = get_odds(sport="basketball", league="nba",type_of_pick='h2h')
+    request.session["odds"] = current_pick_data
+
+    filtered_picks = []
+    unique_sportsbooks = set()
+
+    # Extract unique sportsbooks
+    for pick in current_pick_data:
+        for bookmaker in pick["bookmakers"]:
+            unique_sportsbooks.add(bookmaker["title"])
+
+    # Apply filters
+    for pick in current_pick_data:
+        # Check team filter
+        if team_filter and team_filter not in pick["home_team"].lower() and team_filter not in pick[
+            "away_team"].lower():
+            continue
+
+        # Check date filter
+        if date_filter and not pick["commence_time"].startswith(date_filter):
+            continue
+
+        # Check sportsbook filter
+        if sportsbook_filter:
+            matching_bookmakers = [
+                bookmaker for bookmaker in pick["bookmakers"]
+                if sportsbook_filter in bookmaker["title"].lower()
+            ]
+            if not matching_bookmakers:
+                continue
+            pick["bookmakers"] = matching_bookmakers
+
+        filtered_picks.append(pick)
+
+    context = {
+        "picks": filtered_picks,
+        "all_picks": current_pick_data,
+        "unique_sportsbooks": sorted(unique_sportsbooks),
+    }
+
+    return render(request, "post_pick.html", context)
+
+@role_required(required_role='seller')
+def activate_pick(request,pick_id):
+    if not Seller.objects.filter(user=request.user).exists():
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    return HttpResponse(f"{pick_id}")
+
     #need to gather all the current pick info.
 
 
