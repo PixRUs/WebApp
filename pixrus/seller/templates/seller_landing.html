@@ -107,9 +107,9 @@
         <div class="card">
             <h3>{{ historical_pick.game_event_result.team_1 }} : {{ historical_pick.game_event_result.team_1_points }} vs. {{ historical_pick.game_event_result.team_2 }} : {{ historical_pick.game_event_result.team_2_points }}</h3>
             <p>Original Pick: {{ historical_pick.type_of_pick }} - {{ historical_pick.pick_data.target_winner }}</p>
-            <p>Pick Odds: {{ active_pick.pick_data.odds}}</p>
-            <p>Sportsbook: {{ active_pick.pick_data.book_maker }}</p>
-            <p>Bet Amount: {{ active_pick.pick_data.bet_amount }}</p>
+            <p>Pick Odds: {{ historical_pick.pick_data.odds}}</p>
+            <p>Sportsbook: {{ historical_pick.pick_data.book_maker }}</p>
+            <p>Bet Amount: {{ historical_pick.pick_data.bet_amount }}</p>
             {%  if historical_pick.pick_data.pick_success %}
                 <p style="color: green"><strong>Bet Successful</strong></p>
             {% else %}
