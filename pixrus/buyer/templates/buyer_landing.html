@@ -71,7 +71,7 @@
         <h2>Historical Picks</h2>
         {% for historical_pick in historical_picks %}
         <div class="card">
-            <h3>{{ historical_pick.game_event_result.home_team }} : {{ historical_pick.game_event_result.home_team_points }} vs. {{ historical_pick.game_event_result.away_team }} : {{ historical_pick.game_event_result.away_team_points }}</h3>
+            <h3>{{ historical_pick.game_event_result.team_1 }} : {{ historical_pick.game_event_result.team_1_points }} vs. {{ historical_pick.game_event_result.team_2 }} : {{ historical_pick.game_event_result.team_2_points }}</h3>
             <p>Finished at: {{ historical_pick.event_time_done }}</p>
             <p>Original Pick: {{ historical_pick.type_of_pick }} - {{ historical_pick.pick_data.target_winner }}</p>
             <p>Pick Odds: {{ historical_pick.pick_data.odds }}</p>
