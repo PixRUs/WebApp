@@ -1,17 +1,18 @@
 import datetime
 import requests
 from serpapi import GoogleSearch
-
+from product.models import ApiRequest
 import requests
-#api_key_SERP-API
+import os
+
+# api_key_SERP-API
 SERP_KEY = 'a024009b966e529676d4497b8bb73928ca784ba41e9f66e21adeb13f28f6c3a7'
-#api_key_ODDS-API
-API_KEY = '8f728c878478b83769b2172e2117df17'
-BASE_URL = 'https://api.the-odds-api.com/v4/sports'    
-    
+# api_key_ODDS-API
+API_KEY = os.getenv('ODDS_ID')
+BASE_URL = 'https://api.the-odds-api.com/v4/sports'
 
 
-def get_upcoming_odds(sport='basketball_nba', regions='us', odds_format='decimal', markets='h2h', date_format='iso'):
+def get_upcoming_odds(sport,markets, regions='us', odds_format='american',date_format='iso'):
     url = f"{BASE_URL}/{sport}/odds"
     params = {
         'apiKey': API_KEY,
@@ -26,33 +27,87 @@ def get_upcoming_odds(sport='basketball_nba', regions='us', odds_format='decimal
     else:
         print(f"Error: {response.status_code} - {response.json()}")
         return None
+
+def get_odds(sport,league,type_of_pick):
+    data = {}
+    if sport == 'basketball':
+        if league == 'nba':
+            if type_of_pick == 'h2h':
+                request = ApiRequest.get_request_data(sport=sport,league=league, type_of_pick='h2h')
+                if request is None:
+                    data = get_nba_odd_data_h2h()
+                else:
+                    return request
+
+    ApiRequest.objects.get_or_create(
+        sport=sport,
+        league=league,
+        type_of_pick=type_of_pick,
+        defaults={
+            'endpoint': BASE_URL,
+            'sport': sport,
+            'league': league,
+            'type_of_pick': type_of_pick,
+            'response_data': data
+        }
+    )
+    return data
+
 # testing section
-if __name__ == "__main__":
-    odds_data = get_upcoming_odds()
+def get_nba_odd_data_h2h():
+    print("Making request..")
+    odds_data = get_upcoming_odds(sport='basketball_nba', markets='h2h')
+    odd_json = []
     if odds_data:
-        print("Upcoming Odds:\n")
-        for game in odds_data:
-            print(f"Game: {game['home_team']} vs {game['away_team']}")
-            print(f"Start Time: {game['commence_time']}")
+        for index, game in enumerate(odds_data):
+            # Generate a unique ID for each game
+            game_id = f"{game['home_team']}_vs_{game['away_team']}_{index}"
+
+            game_entry = {
+                "id": game_id,  # Add the unique ID
+                "home_team": game['home_team'],
+                "away_team": game['away_team'],
+                "commence_time": game['commence_time'],
+                "bookmakers": []
+            }
+
             for bookmaker in game['bookmakers']:
-                print(f"Bookmaker: {bookmaker['title']}")
+                bookmaker_entry = {
+                    "title": bookmaker['title'],
+                    "markets": []
+                }
+
                 for market in bookmaker['markets']:
+                    market_entry = {
+                        "outcomes": []
+                    }
+
                     for outcome in market['outcomes']:
-                        print(f" - {outcome['name']}: {outcome['price']}")
-            print("\n" + "-" * 20 + "\n")
-    else:
-        print("No data received.")
+                        outcome_entry = {
+                            "name": outcome['name'],
+                            "multiplier": outcome['price']
+                        }
+                        market_entry["outcomes"].append(outcome_entry)
+
+                    bookmaker_entry["markets"].append(market_entry)
+
+                game_entry["bookmakers"].append(bookmaker_entry)
+
+            odd_json.append(game_entry)
+    return odd_json
+
 
 
 def get_available_sports():
     url = f"{BASE_URL}/"
     params = {'apiKey': API_KEY}
-    response = requests.get(url, params=params) 
+    response = requests.get(url, params=params)
     if response.status_code == 200:
         return response.json()  # list of sports
     else:
         print(f"Error: {response.status_code} - {response.json()}")
         return None
+
 
 def get_in_play_odds(sport='basketball_nba', regions='us'):
     url = f"{BASE_URL}/{sport}/odds"
@@ -69,7 +124,6 @@ def get_in_play_odds(sport='basketball_nba', regions='us'):
     else:
         print(f"Error: {response.status_code} - {response.json()}")
         return None
-    
 
 
 def get_future_event_odds(sport='basketball_nba', regions='us', days_ahead=7):
@@ -90,7 +144,6 @@ def get_future_event_odds(sport='basketball_nba', regions='us', days_ahead=7):
         return None
 
 
-
 # def get_sportsOdds_data():
 #     url = "https://api.the-odds-api.com/v4/sports/?apiKey=YOUR_API_KEY"  # Replace with your API endpoint
 #     headers = {
@@ -101,16 +154,16 @@ def get_future_event_odds(sport='basketball_nba', regions='us', days_ahead=7):
 
 def get_sportsResults_data():
     params = {
-    "q": "Manchester United F.C.",
-    "location": "austin, texas, united states",
-    "api_key": SERP_KEY
+        "q": "Manchester United F.C.",
+        "location": "austin, texas, united states",
+        "api_key": SERP_KEY
     }
 
     search = GoogleSearch(params)
     results = search.get_dict()
     sports_results = results["sports_results"]
-    
-    
+
+
 def get_upcoming_nba_games():
     params = {
         "q": "NBA schedule",
@@ -144,10 +197,8 @@ def get_upcoming_nba_games():
         print("No sports results found.")
 
 
-#get_upcoming_nba_games()
+# get_upcoming_nba_games()
 
-    
-    
 
 def get_sport_schedule_UI():
     # List of supported sports and leagues for validation
@@ -155,7 +206,8 @@ def get_sport_schedule_UI():
     soccer_leagues = ["Premier League", "La Liga", "Serie A", "Bundesliga", "Ligue 1"]
 
     # Ask the user for the sport they are interested in
-    sport = input("Enter the sport you want to see the schedule for (e.g., NBA, Soccer, Tennis, Baseball): ").strip().lower()
+    sport = input(
+        "Enter the sport you want to see the schedule for (e.g., NBA, Soccer, Tennis, Baseball): ").strip().lower()
 
     # Check if the sport is supported
     if sport not in supported_sports:
@@ -184,7 +236,7 @@ def get_sport_schedule_UI():
         "location": "austin, texas, united states",
         "api_key": SERP_KEY
     }
-    
+
     # Perform the search
     search = GoogleSearch(params)
     results = search.get_dict()
@@ -192,7 +244,7 @@ def get_sport_schedule_UI():
     # Check if 'sports_results' is in the results
     if 'sports_results' in results and 'games' in results['sports_results']:
         games = results['sports_results']['games']
-        
+
         print(f"Total games found: {len(games)}")
 
         # Display the upcoming games
@@ -206,7 +258,5 @@ def get_sport_schedule_UI():
                 print(f"{team1} vs {team2} on {date}")
     else:
         print("No games found for the specified sport or league.")
-    
 
-
-#get_sport_schedule_UI()   
+# get_sport_schedule_UI()

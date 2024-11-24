@@ -3,7 +3,7 @@
 """
 
 
-def update_buyer_and_seller_stats(pick_data,result_data,seller,buyers):
+def update_buyer_and_seller_stats(pick_data,result_data,seller,buyers,type_of_pick):
     """_summary_
 
     Args:
@@ -12,30 +12,31 @@ def update_buyer_and_seller_stats(pick_data,result_data,seller,buyers):
         seller (_type_): seller associated with the pick. 
         buyers (_type_): buyers who have purchase the pick. 
     """
-    type_of_bet = pick_data['type']
     bet_type_functions = {
         "moneyline": update_seller_stats_moneyline,
         "pointspread": update_seller_stats_pointspread,
     }
-    bet_type_function = bet_type_functions.get(type_of_bet)
+    bet_type_function = bet_type_functions.get(type_of_pick)
     if bet_type_function:
-        bet_type_function(seller, pick_data=pick_data, result_data=result_data)
+        return bet_type_function(seller, pick_data=pick_data, result_data=result_data)
     
 
 
 def update_seller_stats_moneyline(seller,pick_data,result_data):
     #Moneyline: Betting on the team or player to win the game outright, regardless of the score.
     seller_stats = seller.stats
-    if(result_based_of_game_win(pick_data=pick_data,result_data=result_data)):
+    if result_based_of_game_win(pick_data=pick_data, event_result=result_data):
         seller_stats['num_of_success'] += 1
+        return True
     else:
         seller_stats['num_of_failures'] += 1
+        return False
 
             
 
-def result_based_of_game_win(pick_data,result_data):
-    seller_selected_outcome = pick_data['seller_pick']['target']
-    actual_outcome = result_data['winner']
+def result_based_of_game_win(pick_data,event_result):
+    seller_selected_outcome = pick_data['target_winner']
+    actual_outcome = event_result['game_winner']
     return seller_selected_outcome == actual_outcome
     
     
