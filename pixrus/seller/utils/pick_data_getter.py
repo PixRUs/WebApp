@@ -1,4 +1,5 @@
-import datetime
+from datetime import datetime
+import pytz
 import requests
 from serpapi import GoogleSearch
 from product.models import ApiRequest
@@ -12,7 +13,7 @@ API_KEY = os.getenv('ODDS_ID')
 BASE_URL = 'https://api.the-odds-api.com/v4/sports'
 
 
-def get_upcoming_odds(sport,markets, regions='us', odds_format='american',date_format='iso'):
+def get_upcoming_odds(sport,markets, regions='us', odds_format='american',date_format=''):
     url = f"{BASE_URL}/{sport}/odds"
     params = {
         'apiKey': API_KEY,
@@ -67,7 +68,7 @@ def get_nba_odd_data_h2h():
                 "id": game_id,  # Add the unique ID
                 "home_team": game['home_team'],
                 "away_team": game['away_team'],
-                "commence_time": game['commence_time'],
+                "commence_time": format_time(game['commence_time']),
                 "bookmakers": []
             }
 
@@ -96,7 +97,15 @@ def get_nba_odd_data_h2h():
             odd_json.append(game_entry)
     return odd_json
 
+def format_time(time):
+    print(time)
+    utc_time = datetime.strptime(time, "%Y-%m-%dT%H:%M:%SZ")
+    utc_time = utc_time.replace(tzinfo=pytz.utc)
 
+    # Convert to Eastern Time (ET)
+    eastern = pytz.timezone("US/Eastern")
+    et_time = utc_time.astimezone(eastern)
+    return et_time.strftime("%Y-%m-%d %H:%M:%S %Z")
 
 def get_available_sports():
     url = f"{BASE_URL}/"
