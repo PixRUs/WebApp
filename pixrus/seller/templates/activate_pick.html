@@ -68,7 +68,12 @@
     </style>
     <script>
         function confirmActivation(commence_time,home_team,away_team,game, bookmaker, outcome, multiplier) {
-            if (confirm(`Are you sure you want to activate the following?\n\nGame: ${game}\nBookmaker: ${bookmaker}\nOutcome: ${outcome}\nOdds: ${multiplier}`)) {
+            const unit_amount = prompt(`Please enter a unit size for the following game activation:\n\nGame: ${game}\nBookmaker: ${bookmaker}\nOutcome: ${outcome}\nOdds: ${multiplier}\nUnit amount: `);
+            if (!unit_amount || isNaN(unit_amount) || !Number.isInteger(Number(unit_amount)) || Number(unit_amount) <= 0) {
+                alert("Invalid unit size. Please enter a positive integer.");
+                return;
+            }
+            if (confirm(`Are you sure you want to activate the following?\n\nGame: ${game}\nBookmaker: ${bookmaker}\nOutcome: ${outcome}\nOdds: ${multiplier}\nUnit Amount: ${unit_amount}`)) {
                 const formData = new FormData();
                 formData.append("bookmaker", bookmaker);
                 formData.append("outcome", outcome);
@@ -76,6 +81,7 @@
                 formData.append("home_team",home_team)
                 formData.append("away_team",away_team)
                 formData.append("commence_time",commence_time)
+                formData.append("unit_size",unit_amount)
 
                 // Send POST request to the same URL
                 fetch(window.location.href, {
