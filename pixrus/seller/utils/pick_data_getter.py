@@ -35,12 +35,12 @@ def get_odds(sport,league,type_of_pick):
         if league == 'nba':
             if type_of_pick == 'h2h':
                 request = ApiRequest.get_request_data(sport=sport,league=league, type_of_pick='h2h')
-                if request is None:
+                if request is None or request == {}:
                     data = get_nba_odd_data_h2h()
                 else:
                     return request
 
-    ApiRequest.objects.get_or_create(
+    obj,created = ApiRequest.objects.get_or_create(
         sport=sport,
         league=league,
         type_of_pick=type_of_pick,
@@ -52,6 +52,11 @@ def get_odds(sport,league,type_of_pick):
             'response_data': data
         }
     )
+    if not created:
+        obj.response_data = data
+        obj.save()
+
+
     return data
 
 # testing section
