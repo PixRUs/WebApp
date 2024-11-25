@@ -13,23 +13,25 @@ def update_buyer_and_seller_stats(pick_data,result_data,seller,buyers,type_of_pi
         buyers (_type_): buyers who have purchase the pick. 
     """
     bet_type_functions = {
-        "moneyline": update_seller_stats_moneyline,
+        "h2h": update_seller_stats_h2h,
         "pointspread": update_seller_stats_pointspread,
     }
     bet_type_function = bet_type_functions.get(type_of_pick)
     if bet_type_function:
         return bet_type_function(seller, pick_data=pick_data, result_data=result_data)
-    
+    return False
 
 
-def update_seller_stats_moneyline(seller,pick_data,result_data):
+def update_seller_stats_h2h(seller,pick_data,result_data):
     #Moneyline: Betting on the team or player to win the game outright, regardless of the score.
     seller_stats = seller.stats
     if result_based_of_game_win(pick_data=pick_data, event_result=result_data):
         seller_stats['num_of_success'] += 1
+        seller_stats['units_won'] += pick_data['bet_amount']
         return True
     else:
         seller_stats['num_of_failures'] += 1
+        seller_stats['units_lost'] -= pick_data['bet_amount']
         return False
 
             

@@ -4,6 +4,8 @@ from django.db import models
 from django.utils import timezone
 from buyer.models import Buyer
 from seller.models import Seller
+from django.utils import timezone
+from zoneinfo import ZoneInfo  # Use pytz if your Python version is < 3.9
 
 class ActivePick(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -92,13 +94,19 @@ class ApiRequest(models.Model):
         verbose_name_plural = "Vendor API Requests"
         ordering = ['-request_time']
 
+    from django.utils import timezone
+    from zoneinfo import ZoneInfo  # Use pytz if your Python version is < 3.9
+
     @classmethod
     def is_within_delta(cls, api_request):
-        # Get the current time
-        current_time = timezone.now()
+        # Get the current time in ET
+        current_time = timezone.now().astimezone(ZoneInfo("US/Eastern"))
+
+        # Convert api_request.request_time to ET if it's not already in ET
+        request_time_et = api_request.request_time.astimezone(ZoneInfo("US/Eastern"))
 
         # Calculate the time difference
-        time_difference = current_time - api_request.request_time
+        time_difference = current_time - request_time_et
 
         # Compare the time difference in seconds with delta (converted to seconds)
         delta_in_seconds = api_request.delta * 60  # Assuming delta is in minutes
@@ -107,7 +115,7 @@ class ApiRequest(models.Model):
     @classmethod
     def get_request_data(cls, sport, league, type_of_pick):
         queryset = cls.objects.filter(sport=sport,league=league,type_of_pick=type_of_pick)
-        if not queryset.exists():  # Check if queryset is empty
+        if not queryset.exists(): # Check if queryset is empty
             return None
 
         api_request = queryset.first()
