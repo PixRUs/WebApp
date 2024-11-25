@@ -1,14 +1,115 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Profile Completion</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pixRUs - Complete Profile</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        /* General Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0d1117, #161b22);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        /* Container Styling */
+        .container {
+            text-align: center;
+            padding: 50px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .container h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #f0883e, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1rem;
+            color: #ffd700;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            outline: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: #a0a0a0;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border: 1px solid #ffd700;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(90deg, #f0883e, #ffd700);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            background: linear-gradient(90deg, #ff7e00, #ffe700);
+        }
+
+        .note {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
+<div class="container">
     <h1>Complete Your Profile</h1>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        <div class="form-group">
+            {{ form.as_p }}
+        </div>
         <button type="submit">Submit</button>
     </form>
+    <p class="note">Fields marked with * are required. Please provide accurate information.</p>
+</div>
 </body>
 </html>
