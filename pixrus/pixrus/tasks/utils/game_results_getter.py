@@ -7,7 +7,7 @@ from serpapi import GoogleSearch
 import os
 VENDOR_API_KEY = os.getenv('SERPAPI_ID')
 
-def has_game_happened_moneyline(query_data):
+def has_game_happened_h2h(query_data):
     is_final = True
     team_1 = query_data.get('team_1')
     team_2 = query_data.get('team_2')
@@ -54,14 +54,14 @@ def has_game_happened_moneyline(query_data):
 
 def get_score_result(game_query_data,type_of_pick):
     bet_type_functions = {
-        "h2h": score_result_moneyline,
+        "h2h": score_result_h2h,
     }
     bet_type_function = bet_type_functions.get(type_of_pick)
     if bet_type_function:
         return bet_type_function(game_query_data)
 
-def score_result_moneyline(game_query_data):
-    has_happened,game_result_data = has_game_happened_moneyline(game_query_data)
+def score_result_h2h(game_query_data):
+    has_happened,game_result_data = has_game_happened_h2h(game_query_data)
     if not has_happened or game_result_data is None:
         return False,{}
 

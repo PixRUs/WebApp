@@ -3,19 +3,20 @@ import sys
 import django
 from pathlib import Path
 
-
 # Get the root of the project dynamically
 project_root = Path(__file__).resolve().parent.parent.parent
 sys.path.append(str(project_root))
 
 # Set the Django settings module
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pixrus.settings')
+
+# Initialize Django
 django.setup()
 
 from datetime import datetime
 from product.models import ActivePick
-from util import update_buyer_and_seller_stats
-from game_results_getter import get_score_result
+from pixrus.tasks.utils.update import update_buyer_and_seller_stats
+from pixrus.tasks.utils.game_results_getter import get_score_result
 
 
 all_active_picks = ActivePick.objects.all()
@@ -25,7 +26,7 @@ for active_pick in all_active_picks:
     event_start = active_pick.event_start
     type_of_pick = active_pick.type_of_pick
     game_query_data = {}
-    if type_of_pick == "moneyline":
+    if type_of_pick == "h2h":
         if event_start is None or event_start.date() <= datetime.today().date():
             game_data =  active_pick.game_data
             home_team = game_data.get('home_team')
