@@ -103,13 +103,12 @@ class ApiRequest(models.Model):
         current_time = timezone.now().astimezone(ZoneInfo("US/Eastern"))
 
         # Convert api_request.request_time to ET if it's not already in ET
-        request_time_et = api_request.request_time.astimezone(ZoneInfo("US/Eastern"))
-
+        print("current_time", current_time)
+        print("api_request", api_request.request_time.astimezone(ZoneInfo("US/Eastern")))
         # Calculate the time difference
-        time_difference = current_time - request_time_et
+        time_difference = current_time - api_request.request_time.astimezone(ZoneInfo("US/Eastern"))
+        delta_in_seconds = api_request.delta * 60
 
-        # Compare the time difference in seconds with delta (converted to seconds)
-        delta_in_seconds = api_request.delta * 60  # Assuming delta is in minutes
         return time_difference.total_seconds() < delta_in_seconds
 
     @classmethod
@@ -122,9 +121,10 @@ class ApiRequest(models.Model):
         # Check if response_data is None or empty or if it's within delta
         if (
             api_request.response_data is None or
-            api_request.response_data == {} or
+            api_request.response_data == {} or not
             cls.is_within_delta(api_request)  # Corrected call here
         ):
+
             return None
 
         return api_request.response_data
