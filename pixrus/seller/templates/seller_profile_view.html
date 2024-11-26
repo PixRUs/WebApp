@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace Seller</title>
+    <style>
+        /* Basic styling for the cards */
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card h3 {
+            margin: 0 0 8px;
+        }
+        .card p {
+            margin: 4px 0;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .failure {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ seller.user_name }}</h1>
+    <p>Units won: {{ seller.stats.units_won }}</p>
+    <p>Number of bets won: {{ seller.stats.num_of_success }}</p>
+    <p>Number of bets lost: {{ seller.stats.num_of_failures }}</p>
+
+    <h2>Previous Picks:</h2>
+    {% if historical_picks %}
+        {% for pick in historical_picks|slice:":10" %}
+            <div class="card">
+                <h3>{{ pick.game_event_result.team_1 }} ({{ pick.game_event_result.team_1_points }}) vs. {{ pick.game_event_result.team_2 }} ({{ pick.game_event_result.team_2_points }})</h3>
+                <p><strong>Original Pick:</strong> {{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</p>
+                <p><strong>Pick Odds:</strong> {{ pick.pick_data.odds }}</p>
+                <p><strong>Sportsbook:</strong> {{ pick.pick_data.book_maker }}</p>
+                <p><strong>Unit Amount:</strong> {{ pick.pick_data.bet_amount }}</p>
+                {% if pick.pick_data.pick_success %}
+                    <p class="success">Bet Successful</p>
+                {% else %}
+                    <p class="failure">Bet Failed</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No historical picks available.</p>
+    {% endif %}
+</body>
+</html>

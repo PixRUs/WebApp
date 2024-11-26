@@ -4,7 +4,7 @@ from django.views.decorators.cache import never_cache
 from product.models import ActivePick,HistoricalPick
 from pixrus.utils.decorators import role_required
 from seller.models import Seller
-from django.http import HttpResponseForbidden,HttpResponse,JsonResponse
+from django.http import HttpResponseForbidden,HttpResponse,JsonResponse,HttpResponseNotFound
 from .utils.pick_data_getter import get_odds
 
 @never_cache
@@ -102,6 +102,19 @@ def activate_pick(request,pick_id):
         return JsonResponse({"success": True, "message": "Pick activated successfully!"})
     else:
         return render(request,"activate_pick.html",{"pick":pick})
+def profile(request,seller_id):
+    try:
+        seller = Seller.objects.get(id=seller_id)
+    except Seller.DoesNotExist:
+        return HttpResponseNotFound("Seller not found")
+    historical_picks = HistoricalPick.objects.filter(seller=seller)
+    context = {
+        'seller': seller,
+        'historical_picks': historical_picks,
+    }
+    return render(request, 'seller_profile_view.html', context)
+
+
 
     #need to gather all the current pick info.
 

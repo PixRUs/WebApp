@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace Landing</title>
+</head>
+<body>
+    <h1>Marketplace Sellers</h1>
+    <ul>
+        {% for seller in sellers %}
+            <li>
+                <h2>{{ seller.user_name }}</h2>
+                <p>Units won: {{ seller.stats.units_won }}</p>
+                <p>Number of bets won: {{ seller.stats.num_of_success }}</p>
+                <p>Number of bets lost: {{ seller.stats.num_of_failures }}</p>
+                <a href="{% url 'profile' seller.id %}" class="button">View Details</a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

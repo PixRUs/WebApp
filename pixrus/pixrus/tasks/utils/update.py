@@ -27,11 +27,11 @@ def update_seller_stats_h2h(seller,pick_data,result_data):
     seller_stats = seller.stats
     if result_based_of_game_win(pick_data=pick_data, event_result=result_data):
         seller_stats['num_of_success'] += 1
-        seller_stats['units_won'] += pick_data['bet_amount']
+        seller_stats['units_won'] += int(pick_data['bet_amount'])
         return True
     else:
         seller_stats['num_of_failures'] += 1
-        seller_stats['units_lost'] -= pick_data['bet_amount']
+        seller_stats['units_won'] -= int(pick_data['bet_amount'])
         return False
 
             
