@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace Seller</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1f1f1f, #333333);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: #f0883e;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin: 8px 0;
+        }
+
+        h2 {
+            color: #ffcc00;
+            font-size: 1.8rem;
+            margin: 40px 0 20px;
+            border-bottom: 2px solid #444;
+            padding-bottom: 5px;
+        }
+
+        /* Card Styling */
+        .card {
+            border: 1px solid #444;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .card h3 {
+            margin: 0 0 12px;
+            font-size: 1.5rem;
+            color: #ffcc00;
+        }
+
+        .card p {
+            margin: 6px 0;
+            font-size: 1rem;
+            color: #d6d6d6;
+        }
+
+        .success {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .failure {
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        /* Button Styling */
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .button-container a {
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .redirect-button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(90deg, #f0883e, #ffcc00);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .redirect-button:hover {
+            transform: translateY(-5px);
+            background: linear-gradient(90deg, #ff7e00, #ffe700);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        /* No Picks Styling */
+        .no-picks {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #ccc;
+            margin-top: 20px;
+        }
+
+        /* Header Info Styling */
+        .header-info {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ seller.user_name }}</h1>
+    <div class="header-info">
+        <p><strong>Total Picks Placed:</strong> {{ seller.stats.total_picks_placed }}</p>
+        <p><strong>Units Won:</strong> {{ seller.stats.units_won }}</p>
+        <p><strong>Number of Bets Won:</strong> {{ seller.stats.num_of_success }}</p>
+        <p><strong>Number of Bets Lost:</strong> {{ seller.stats.num_of_failures }}</p>
+    </div>
+
+    <div class="button-container">
+        <a href="{% url 'post_pick' %}">
+            <button class="redirect-button">Post Picks</button>
+        </a>
+        <a href="{% url 'seller_dashboard'  %}">
+            <button class="redirect-button">Manage Profile</button>
+        </a>
+        <a href="{% url 'manage_buyers'  %}">
+            <button class="redirect-button">Manage Buyers</button>
+        </a>
+    </div>
+
+<a href="{% url 'active_picks' seller.id %}" class="redirect-button" style="font-size: 1.5rem; padding: 12px 20px; text-decoration: none;">Current Picks</a>
+
+
+    {% if active_picks %}
+        {% for pick in active_picks|slice:":10" %}
+            <div class="card">
+                <h3>{{ pick.game_data.away_team }} at {{ pick.game_data.home_team }}</h3>
+                <p><strong>Event Start:</strong> {{ pick.event_start }}</p>
+                <p><strong>Pick:</strong> {{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</p>
+                <p><strong>Pick Odds:</strong> {{ pick.pick_data.odds }}</p>
+                <p><strong>Sportsbook:</strong> {{ pick.pick_data.book_maker }}</p>
+                <p><strong>Unit Amount:</strong> {{ pick.pick_data.bet_amount }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="no-picks">No active picks available.</p>
+    {% endif %}
+
+<a href="{% url 'historical_picks' seller.id%}" class="redirect-button" style="font-size: 1.5rem; padding: 12px 20px; text-decoration: none;">Previous Picks</a>
+
+
+    {% if historical_picks %}
+        {% for pick in historical_picks|slice:":10" %}
+            <div class="card">
+                <h3>{{ pick.game_event_result.team_1 }} ({{ pick.game_event_result.team_1_points }}) vs. {{ pick.game_event_result.team_2 }} ({{ pick.game_event_result.team_2_points }})</h3>
+                <p><strong>Original Pick:</strong> {{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</p>
+                <p><strong>Pick Odds:</strong> {{ pick.pick_data.odds }}</p>
+                <p><strong>Sportsbook:</strong> {{ pick.pick_data.book_maker }}</p>
+                <p><strong>Unit Amount:</strong> {{ pick.pick_data.bet_amount }}</p>
+                {% if pick.pick_data.pick_success %}
+                    <p class="success">Bet Successful</p>
+                {% else %}
+                    <p class="failure">Bet Failed</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="no-picks">No historical picks available.</p>
+    {% endif %}
+</body>
+</html>

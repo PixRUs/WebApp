@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historical Picks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1f1f1f, #333333);
+            color: #fff;
+        }
+
+        h1 {
+            text-align: center;
+            color: #f0883e;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            border: 1px solid #444;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            color: #ffcc00;
+            margin-bottom: 10px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination a, .pagination span {
+            color: #fff;
+            margin: 0 5px;
+            padding: 8px 15px;
+            text-decoration: none;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .pagination a:hover {
+            background: linear-gradient(90deg, #f0883e, #ffcc00);
+        }
+
+        .pagination .current-page {
+            background: linear-gradient(90deg, #f0883e, #ffcc00);
+            font-weight: bold;
+        }
+
+        .back-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            color: #fff;
+            background: linear-gradient(90deg, #f0883e, #ffcc00);
+            border: none;
+            border-radius: 50px;
+            text-align: center;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-button:hover {
+            transform: translateY(-5px);
+            background: linear-gradient(90deg, #ff7e00, #ffe700);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <h1>Historical Picks</h1>
+
+    {% if picks_page %}
+        {% for pick in picks_page %}
+            <div class="card">
+                <h3>{{ pick.game_event_result.team_1 }} ({{ pick.game_event_result.team_1_points }}) vs {{ pick.game_event_result.team_2 }} ({{ pick.game_event_result.team_2_points }})</h3>
+                <p><strong>Pick:</strong> {{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</p>
+                <p><strong>Odds:</strong> {{ pick.pick_data.odds }}</p>
+                <p><strong>Sportsbook:</strong> {{ pick.pick_data.book_maker }}</p>
+                <p><strong>Unit Amount:</strong> {{ pick.pick_data.bet_amount }}</p>
+                <p><strong>Posted At:</strong> {{ pick.posted_at }}</p>
+                {% if pick.pick_data.pick_success %}
+                    <p style="color: #4caf50;"><strong>Bet Successful</strong></p>
+                {% else %}
+                    <p style="color: #f44336;"><strong>Bet Failed</strong></p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No historical picks available.</p>
+    {% endif %}
+
+    <div class="pagination">
+        {% if picks_page.has_previous %}
+            <a href="?page=1">First</a>
+            <a href="?page={{ picks_page.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span class="current-page">Page {{ picks_page.number }} of {{ picks_page.paginator.num_pages }}</span>
+        {% if picks_page.has_next %}
+            <a href="?page={{ picks_page.next_page_number }}">Next</a>
+            <a href="?page={{ picks_page.paginator.num_pages }}">Last</a>
+        {% endif %}
+    </div>
+
+    <a href="{% url 'seller_dashboard' %}" class="back-button">Back to Dashboard</a>
+</body>
+</html>

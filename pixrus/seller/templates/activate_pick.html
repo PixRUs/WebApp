@@ -7,31 +7,32 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
+            background: linear-gradient(135deg, #1f1f1f, #333333);
+            color: #fff;
             margin: 20px;
         }
         .container {
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
             padding: 20px;
         }
-        h1, h2 {
+        h1, h2, h3, h4 {
             text-align: center;
-            color: #333;
+            color: #f0883e;
         }
         .game-details, .bookmakers {
             margin-top: 20px;
         }
         .bookmaker {
             margin-top: 10px;
-            padding: 10px;
-            background: #f4f4f4;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            padding: 15px;
+            background: #1f1f1f;
+            border: 1px solid #555;
+            border-radius: 12px;
         }
         .market {
             margin-left: 10px;
@@ -40,35 +41,41 @@
         .outcome {
             margin-left: 20px;
         }
-        .activate-button {
+        .activate-button, .back-button {
             display: inline-block;
             margin-top: 10px;
-            padding: 10px 15px;
-            background-color: #007BFF;
+            padding: 12px 20px;
+            background: linear-gradient(90deg, #f0883e, #ffcc00);
             color: #fff;
             text-decoration: none;
             border: none;
-            border-radius: 5px;
+            border-radius: 50px;
             font-size: 14px;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .activate-button:hover {
-            background-color: #0056b3;
+        .activate-button:hover, .back-button:hover {
+            background: linear-gradient(90deg, #ff7e00, #ffe700);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
         }
-        .success-message {
+        .button-container {
+            text-align: center;
             margin-top: 20px;
-            padding: 10px;
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-            border-radius: 8px;
+        }
+        p {
+            margin: 5px 0;
+            color: #ddd;
+        }
+        strong {
+            color: #ffcc00;
         }
     </style>
     <script>
-        function confirmActivation(commence_time,home_team,away_team,game, bookmaker, outcome, multiplier) {
-            const unit_amount = prompt(`Please enter a unit size for the following game activation:\n\nGame: ${game}\nBookmaker: ${bookmaker}\nOutcome: ${outcome}\nOdds: ${multiplier}\nUnit amount: `);
+        function confirmActivation(commence_time, home_team, away_team, game, bookmaker, outcome, multiplier) {
+            const unit_amount = prompt(`Please enter a unit size for the following game activation:\n\nGame: ${game}\nBookmaker: ${bookmaker}\nOutcome: ${outcome}\nOdds: ${multiplier}`);
             if (!unit_amount || isNaN(unit_amount) || !Number.isInteger(Number(unit_amount)) || Number(unit_amount) <= 0) {
                 alert("Invalid unit size. Please enter a positive integer.");
                 return;
@@ -78,11 +85,11 @@
                 formData.append("bookmaker", bookmaker);
                 formData.append("outcome", outcome);
                 formData.append("multiplier", multiplier);
-                formData.append("home_team",home_team)
-                formData.append("away_team",away_team)
+                formData.append("home_team", home_team);
+                formData.append("away_team", away_team);
                 commence_time = new Date(commence_time).toISOString();
-                formData.append("commence_time",commence_time)
-                formData.append("unit_size",unit_amount)
+                formData.append("commence_time", commence_time);
+                formData.append("unit_size", unit_amount);
 
                 // Send POST request to the same URL
                 fetch(window.location.href, {
@@ -119,6 +126,11 @@
             }
             return "";
         }
+
+        // Navigate back to the previous page
+        function goBack() {
+            window.history.back();
+        }
     </script>
 </head>
 <body>
@@ -153,6 +165,11 @@
                     </div>
                 </div>
             {% endfor %}
+        </div>
+
+        <!-- Back to Post Picks Button -->
+        <div class="button-container">
+            <button class="back-button" onclick="goBack()">Back to Post Picks</button>
         </div>
     </div>
 </body>

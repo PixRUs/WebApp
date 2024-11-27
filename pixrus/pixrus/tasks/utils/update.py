@@ -25,6 +25,7 @@ def update_buyer_and_seller_stats(pick_data,result_data,seller,buyers,type_of_pi
 def update_seller_stats_h2h(seller,pick_data,result_data):
     #Moneyline: Betting on the team or player to win the game outright, regardless of the score.
     seller_stats = seller.stats
+    seller_stats['total_picks_placed'] += 1
     if result_based_of_game_win(pick_data=pick_data, event_result=result_data):
         seller_stats['num_of_success'] += 1
         seller_stats['units_won'] += int(pick_data['bet_amount'])

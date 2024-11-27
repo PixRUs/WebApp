@@ -7,41 +7,139 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
-            color: #333;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1f1f1f, #333333);
+            color: #fff;
+            min-height: 100vh;
         }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #f0883e;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
         .filters {
             margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
         }
+
         .filters form {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
+
         .filters select, .filters input, .filters button {
-            padding: 5px;
+            padding: 10px;
             font-size: 16px;
+            border: 1px solid #f0883e;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff; /* Ensures text is visible */
+            outline: none;
+            -webkit-appearance: none; /* For better styling in dropdowns */
         }
+
+        .filters select option, .filters input::placeholder {
+            color: #aaa; /* Light gray for placeholder and dropdown options */
+        }
+
+        .filters button {
+            cursor: pointer;
+            background: linear-gradient(90deg, #f0883e, #ffcc00);
+            border: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .filters button:hover {
+            background: linear-gradient(90deg, #ff7e00, #ffe700);
+            transform: scale(1.05);
+        }
+
         .game {
             margin-bottom: 20px;
             padding: 20px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
+
+        .game:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
+        }
+
         .game h2 {
             margin: 0 0 10px;
+            color: #ffcc00;
+            font-size: 1.5rem;
         }
+
+        .game p {
+            margin: 4px 0;
+            color: #ddd;
+        }
+
         .bookmaker {
             margin-top: 10px;
         }
-        .outcome {
+
+        .outcome p {
             margin-left: 20px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .details-button, .dashboard-button {
+            text-decoration: none;
+            color: #fff;
+            background: linear-gradient(90deg, #f0883e, #ffcc00);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .details-button:hover, .dashboard-button:hover {
+            background: linear-gradient(90deg, #ff7e00, #ffe700);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .dashboard-container {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        p.no-games {
+            text-align: center;
+            color: #ddd;
+            font-size: 1.2rem;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
+    <div class="dashboard-container">
+        <a href="{% url 'seller_dashboard' %}" class="dashboard-button">
+            Back to Dashboard
+        </a>
+    </div>
+
     <h1>NBA Game Odds</h1>
 
     <!-- Filters -->
@@ -57,16 +155,15 @@
             </select>
 
             <!-- Sportsbook Filter -->
-        <select name="sportsbook">
-            <option value="">Filter by Sportsbook</option>
-            {% for sportsbook in unique_sportsbooks %}
-                <option value="{{ sportsbook }}">{{ sportsbook }}</option>
-            {% endfor %}
-        </select>
-
+            <select name="sportsbook">
+                <option value="">Filter by Sportsbook</option>
+                {% for sportsbook in unique_sportsbooks %}
+                    <option value="{{ sportsbook }}">{{ sportsbook }}</option>
+                {% endfor %}
+            </select>
 
             <!-- Date Filter -->
-            <input type="date" name="date">
+            <input type="date" name="date" placeholder="Select Date">
 
             <!-- Submit Button -->
             <button type="submit">Filter</button>
@@ -74,44 +171,43 @@
     </div>
 
     <!-- Display Picks -->
-{% for pick in picks %}
-    {% if pick.bookmakers %}
-        <div class="game" style="display: flex; justify-content: space-between; align-items: center; border: 1px solid #ddd; padding: 10px; margin-bottom: 15px; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
-            <!-- Game Details -->
-            <div>
-                <h2>{{ pick.home_team }} vs {{ pick.away_team }}</h2>
-                <p><strong>Start Time:</strong> {{ pick.commence_time }}</p>
+    {% for pick in picks %}
+        {% if pick.bookmakers %}
+            <div class="game">
+                <!-- Game Details -->
+                <div>
+                    <h2>{{ pick.away_team }} at {{ pick.home_team }}</h2>
+                    <p><strong>Start Time:</strong> {{ pick.commence_time }}</p>
 
-                {% for bookmaker in pick.bookmakers %}
-                    <div class="bookmaker">
-                        <p><strong>Bookmaker:</strong> {{ bookmaker.title }}</p>
+                    {% for bookmaker in pick.bookmakers %}
+                        <div class="bookmaker">
+                            <p><strong>Bookmaker:</strong> {{ bookmaker.title }}</p>
 
-                        {% for market in bookmaker.markets %}
-                            <div class="market">
-                                {% for outcome in market.outcomes %}
-                                    <div class="outcome">
-                                        <p><strong>Outcome:</strong> {{ outcome.name }} - <strong>Odds:</strong> {{ outcome.multiplier }}</p>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endfor %}
+                            {% for market in bookmaker.markets %}
+                                <div class="market">
+                                    {% for outcome in market.outcomes %}
+                                        <div class="outcome">
+                                            <p><strong>Outcome:</strong> {{ outcome.name }} - <strong>Odds:</strong> {{ outcome.multiplier }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Button to Redirect -->
+                <div>
+                    <a href="{% url 'activate_pick' pick.id %}" class="details-button">
+                        Post Pick
+                    </a>
+                </div>
             </div>
-
-            <!-- Button to Redirect -->
-            <div>
-                <a href="{% url 'activate_pick' pick.id %}" class="details-button" style="text-decoration: none; color: #fff; background-color: #007BFF; padding: 10px 15px; border-radius: 5px; font-size: 14px; font-weight: bold; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);">
-                    Post Pick
-                </a>
-            </div>
-        </div>
-    {% endif %}
-{% endfor %}
-
+        {% endif %}
+    {% endfor %}
 
     {% if not picks %}
-        <p>No games match your filter criteria.</p>
+        <p class="no-games">No games match your filter criteria.</p>
     {% endif %}
 </body>
 </html>

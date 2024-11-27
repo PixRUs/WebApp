@@ -1,7 +1,11 @@
-from django.shortcuts import render
-from django.views.decorators.cache import never_cache
+import time
 
-from product.models import ActivePick,HistoricalPick
+from django.shortcuts import render
+from django.utils import timezone
+from django.views.decorators.cache import never_cache
+from django.core.paginator import Paginator
+
+from product.models import ActivePick,HistoricalPick,Subscription
 from pixrus.utils.decorators import role_required
 from seller.models import Seller
 from django.http import HttpResponseForbidden,HttpResponse,JsonResponse,HttpResponseNotFound
@@ -23,7 +27,7 @@ def seller_landing(request):
         'historical_picks': historical_picks,
         'stats':seller.stats,
     }
-    return render(request, 'seller_landing.html',context)
+    return render(request, 'seller_dashboard.html', context)
 
 
 @role_required(required_role='seller')
@@ -102,19 +106,75 @@ def activate_pick(request,pick_id):
         return JsonResponse({"success": True, "message": "Pick activated successfully!"})
     else:
         return render(request,"activate_pick.html",{"pick":pick})
-def profile(request,seller_id):
+
+
+@role_required(required_role='seller')
+def active_picks(request,seller_id):
     try:
         seller = Seller.objects.get(id=seller_id)
     except Seller.DoesNotExist:
         return HttpResponseNotFound("Seller not found")
+
+    active_picks = ActivePick.objects.filter(seller=seller)  # Query for active picks
+    paginator = Paginator(active_picks, 10)  # Show 10 picks per page
+
+    # Get the current page number from the request
+    page_number = request.GET.get('page', 1)
+    picks_page = paginator.get_page(page_number)
+
+    return render(request, 'seller_current_picks.html', {
+        'picks_page': picks_page
+    })
+
+@role_required(required_role='seller')
+def historical_picks(request, seller_id):
+    try:
+        seller = Seller.objects.get(id=seller_id)
+    except Seller.DoesNotExist:
+        return HttpResponseNotFound("Seller not found")
+
+    historical_picks = HistoricalPick.objects.filter(seller=seller)  # Query for active picks
+    paginator = Paginator(historical_picks, 10)  # Show 10 picks per page
+
+    # Get the current page number from the request
+    page_number = request.GET.get('page', 1)
+    picks_page = paginator.get_page(page_number)
+
+    return render(request, 'seller_prev_picks.html', {
+        'picks_page': picks_page
+    })
+
+@role_required(required_role='seller')
+def manage_buyers(request):
+    if not Seller.objects.filter(user=request.user).exists():
+        return HttpResponseForbidden("You do not have permission to access this page.")
+
+    # Retrieve the seller object associated with the user
+    seller = Seller.objects.get(user=request.user)
+    subscriber_queries = Subscription.objects.filter(seller=seller)
+    terminated_subscriptions = []
+    active_subscriptions = []
+    for sub in subscriber_queries:
+        if sub.subscribed_until < timezone.now():
+            terminated_subscriptions.append(sub)
+        else:
+            active_subscriptions.append(sub)
+
+    single_pick_buyers = []
+    active_picks = ActivePick.objects.filter(seller=seller)
+    for pick in active_picks:
+        buyers = pick.buyers_with_access.all()  # Fetch all buyers for this pick
+        single_pick_buyers.append((buyers, pick))  # Append as a tuple (pick, buyers)
+
     historical_picks = HistoricalPick.objects.filter(seller=seller)
-    context = {
-        'seller': seller,
-        'historical_picks': historical_picks,
-    }
-    return render(request, 'seller_profile_view.html', context)
+    for pick in historical_picks:
+        buyers = pick.buyers_with_access.all()  # Fetch all buyers for this pick
+        single_pick_buyers.append((buyers, pick))  # Append as a tuple (pick, buyers)
 
+    # Result: List of tuples [(pick1, buyers_for_pick1), (pick2, buyers_for_pick2), ...]
 
+    context = {"terminated_subscriptions": terminated_subscriptions, "active_subscriptions": active_subscriptions, "buyers": single_pick_buyers}
+    return render(request, 'manage_buyers.html', context)
 
     #need to gather all the current pick info.
 

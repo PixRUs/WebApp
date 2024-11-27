@@ -11,10 +11,11 @@
         {% for seller in sellers %}
             <li>
                 <h2>{{ seller.user_name }}</h2>
+                <p>Total Picks Placed : {{ seller.stats.total_picks_placed }}</p>
                 <p>Units won: {{ seller.stats.units_won }}</p>
                 <p>Number of bets won: {{ seller.stats.num_of_success }}</p>
                 <p>Number of bets lost: {{ seller.stats.num_of_failures }}</p>
-                <a href="{% url 'profile' seller.id %}" class="button">View Details</a>
+                <a href="{% url 'profile' seller.id %}" class="button">View Profile</a>
             </li>
         {% endfor %}
     </ul>
