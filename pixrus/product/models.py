@@ -15,6 +15,7 @@ class ActivePick(models.Model):
     pick_data = models.JSONField(null=True, blank=True)
     type_of_pick = models.CharField(max_length=50, null=True, blank=True)
     game_data = models.JSONField(null=True, blank=True)
+    is_free = models.BooleanField(default=True)
     buyers_with_access = models.ManyToManyField(Buyer, related_name='active_picks_buyer_access', blank=True)
 
     def has_access(self, buyer):

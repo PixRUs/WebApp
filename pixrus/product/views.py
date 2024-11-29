@@ -4,6 +4,6 @@ from seller.models import Seller
 def marketplace_landing(request):
     sellers = Seller.objects.all()
     context = {
-        'sellers': sellers,
+        'sellers': sellers
     }
     return render(request=request,context=context,template_name='marketplace_landing.html')
