@@ -66,6 +66,7 @@
 </head>
 <body>
 <h1>Hello {{ buyer.user.get_full_name }}, this is the buyer page!</h1>
+<button onclick="window.location.href='{% url 'buyer_recommended' %}'">Recommended Picks </button>
 <div class="container">
     <div class="column">
         <h2>Historical Picks</h2>
