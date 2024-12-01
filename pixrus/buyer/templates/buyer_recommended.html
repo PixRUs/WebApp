@@ -111,6 +111,12 @@
                 <p><strong>Posted At:</strong> {{ recommended_pick.posted_at }}</p>
             </div>
         {% endfor %}
+    <h1>Recommended Sellers</h1>
+        {% for seller in sellers %}
+            <div class="card">
+                <h4>Seller: {{ seller.user_name }}</h4>
+            </div>
+        {% endfor %}
     <a href="{% url 'buyer_dashboard' %}" class="back-button">Back to Dashboard</a>
 </body>
 </html>
