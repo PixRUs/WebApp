@@ -28,6 +28,7 @@ def get_upcoming_odds(sport,markets, regions='us', odds_format='american',date_f
     else:
         print(f"Error: {response.status_code} - {response.json()}")
         return None
+from zoneinfo import ZoneInfo
 
 def get_odds(sport,league,type_of_pick):
     data = {}
@@ -54,6 +55,7 @@ def get_odds(sport,league,type_of_pick):
     )
     if not created:
         obj.response_data = data
+        obj.request_time = datetime.now(ZoneInfo("US/Eastern"))
         obj.save()
 
 
