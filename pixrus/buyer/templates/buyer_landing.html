@@ -3,104 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buyer Dashboard</title>
+    <title>Seller Dashboard</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
-            padding: 1%;
+            padding: 20px;
+            background: linear-gradient(135deg, #1f1f1f, #333333);
+            color: #fff;
+            min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-            background-color: #f4f4f4;
+            justify-content: center;  /* Centers the content horizontally */
+            align-items: center;      /* Centers the content vertically */
+            flex-direction: column;   /* Aligns items in a column */
+        }
+
+        h1 {
+            color: #f0883e;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 20px;
         }
 
         .container {
             display: flex;
-            gap: 20px;
-            padding: 20px;
-            width: 80%;
-            max-width: 1200px;
-        }
-
-        .column {
-            flex: 1;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-        }
-
-        .column h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #333;
+            flex-direction: column;
+            align-items: center; /* Centers the content horizontally */
+            width: 100%;
+            max-width: 1000px; /* Limits the maximum width of the container */
         }
 
         .card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            background-color: #f9f9f9;
-            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #444;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            max-width: 600px; /* Limits the maximum width of each card */
+            width: 90%; /* Ensures responsiveness */
         }
 
         .card:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
         }
 
         .card h3 {
-            margin: 0 0 10px;
-            font-size: 18px;
-            color: #444;
+            margin: 0 0 12px;
+            font-size: 1.5rem;
+            color: #ffcc00;
         }
 
         .card p {
-            margin: 5px 0;
-            color: #666;
+            margin: 6px 0;
+            font-size: 1rem;
+            color: #d6d6d6;
         }
+
+        .card .actions {
+            margin-top: 20px;
+        }
+
+        .card .actions button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(90deg, #f0883e, #ffcc00);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card .actions button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .pagination a, .pagination span {
+            color: #fff;
+            margin: 0 5px;
+            padding: 8px 15px;
+            text-decoration: none;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .pagination a:hover {
+            background: linear-gradient(90deg, #f0883e, #ffcc00);
+        }
+
+        .pagination .current-page {
+            background: linear-gradient(90deg, #f0883e, #ffcc00);
+            font-weight: bold;
+        }
+
+        .back-button {
+            display: block;
+            margin: 20px auto 0;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(90deg, #f0883e, #ffcc00);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-button:hover {
+            transform: translateY(-5px);
+            background: linear-gradient(90deg, #ff7e00, #ffe700);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .redirect-button {
+            display: inline-block;
+            margin: 20px auto;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(90deg, #f0883e, #ffcc00);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .redirect-button:hover {
+            background-color: #ffcc00;
+            transform: translateY(-2px);
+        }
+
     </style>
 </head>
 <body>
-<h1>Hello {{ buyer.user.get_full_name }}, this is the buyer page!</h1>
-<button onclick="window.location.href='{% url 'buyer_recommended' %}'">Recommended Picks </button>
-<div class="container">
-    <div class="column">
-        <h2>Historical Picks</h2>
-        {% for historical_pick in historical_picks %}
-        <div class="card">
-            <h3>{{ historical_pick.game_event_result.team_1 }} : {{ historical_pick.game_event_result.team_1_points }} vs. {{ historical_pick.game_event_result.team_2 }} : {{ historical_pick.game_event_result.team_2_points }}</h3>
-            <p>Finished at: {{ historical_pick.event_time_done }}</p>
-            <p>Original Pick: {{ historical_pick.type_of_pick }} - {{ historical_pick.pick_data.target_winner }}</p>
-            <p>Pick Odds: {{ historical_pick.pick_data.odds }}</p>
-            <p>Sportsbook: {{ historical_pick.pick_data.book_maker }}</p>
-            {%  if historical_pick.pick_data.pick_success %}
-                <p style="color: green"><strong>Bet Successful</strong></p>
-            {% else %}
-                <p style="color: red"><strong>Bet Failed</strong></p>
-            {% endif %}
-            <p>Pick Sold by: {{ historical_pick.seller.user.get_full_name }}</p>
-        </div>
-        {% endfor %}
+    <div class="container">
+        <h1>{{buyer.user_name}}</h1>
     </div>
+    {% for pick,seller in seller_picks %}
+        <div class="card">
+            <h3>{{ pick.game_data.away_team }} at {{ pick.game_data.home_team }}</h3>
+            <p><strong>Event Start:</strong> {{ pick.event_start }}</p>
+            <p><strong>Pick:</strong> {{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</p>
+            <p><strong>Pick Odds:</strong> {{ pick.pick_data.odds }}</p>
+            <p><strong>Sportsbook:</strong> {{ pick.pick_data.book_maker }}</p>
+            <p><strong>Unit Amount:</strong> {{ pick.pick_data.bet_amount }}</p>
+            <p>Pick Sold by:<a href="{% url 'profile_view' seller.id %}">{{ seller.user_name }}</a></p>
+        </div>
+    {% endfor %}
+         <h1>Free Active Picks</h1>
+            {% if free_active_picks %}
+            {% for pick in free_active_picks|slice:":10" %}
+                <div class="card">
+                    <h3>{{ pick.game_data.away_team }} at {{ pick.game_data.home_team }}</h3>
+                    <p><strong>Event Start:</strong> {{ pick.event_start }}</p>
+                    <p><strong>Pick:</strong> {{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</p>
+                    <p><strong>Pick Odds:</strong> {{ pick.pick_data.odds }}</p>
+                    <p><strong>Sportsbook:</strong> {{ pick.pick_data.book_maker }}</p>
+                    <p><strong>Unit Amount:</strong> {{ pick.pick_data.bet_amount }}</p>
+                    <p>Pick Sold by:<a href="{% url 'profile_view' seller.id %}">{{ seller.user_name }}</a></p>
+                </div>
+        {% endfor %}
+    {% else %}
+        <p class="no-picks">No free picks available at this time</p>
+    {% endif %}
 
-    <div class="column">
-        <h2>Active Picks</h2>
-        {% for active_pick in active_picks %}
+        {% for pick in historical_picks|slice:":10" %}
             <div class="card">
-                <h3>{{ active_pick.game_data.home_team }} vs. {{ active_pick.game_data.away_team }}</h3>
-                <p>Event Start: {{ active_pick.event_start }}</p>
-                <p>Pick: {{ active_pick.type_of_pick }} - {{ active_pick.pick_data.target_winner }}</p>
-                <p>Pick Odds: {{ active_pick.pick_data.odds }}</p>
-                <p>Sportsbook: {{ active_pick.pick_data.book_maker }}</p>
-                <p>Pick Sold by: {{ active_pick.seller.user.get_full_name }}</p>
+                <h3>{{ pick.game_event_result.team_1 }} ({{ pick.game_event_result.team_1_points }}) vs {{ pick.game_event_result.team_2 }} ({{ pick.game_event_result.team_2_points }})</h3>
+                <p><strong>Pick:</strong> {{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</p>
+                <p><strong>Odds:</strong> {{ pick.pick_data.odds }}</p>
+                <p><strong>Sportsbook:</strong> {{ pick.pick_data.book_maker }}</p>
+                <p><strong>Unit Amount:</strong> {{ pick.pick_data.bet_amount }}</p>
+                <p><strong>Posted At:</strong> {{ pick.posted_at }}</p>
+                {% if pick.pick_data.pick_success %}
+                    <p style="color: #4caf50;"><strong>Bet Successful</strong></p>
+                {% else %}
+                    <p style="color: #f44336;"><strong>Bet Failed</strong></p>
+                {% endif %}
             </div>
         {% endfor %}
     </div>
-</div>
-
 </body>
 </html>

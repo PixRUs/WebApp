@@ -145,6 +145,21 @@
     <!-- Filters -->
     <div class="filters">
         <form method="GET">
+            <select name="sport">
+                <option value="">Filter by sport</option>
+                {% for pick in all_picks %}
+                    <option value="{{ pick.home_team }}">{{ pick.home_team }}</option>
+                    <option value="{{ pick.away_team }}">{{ pick.away_team }}</option>
+                {% endfor %}
+            </select>
+
+            <select name="team">
+                <option value="">Filter by Team</option>
+                {% for pick in all_picks %}
+                    <option value="{{ pick.home_team }}">{{ pick.home_team }}</option>
+                    <option value="{{ pick.away_team }}">{{ pick.away_team }}</option>
+                {% endfor %}
+            </select>
             <!-- Team Filter -->
             <select name="team">
                 <option value="">Filter by Team</option>

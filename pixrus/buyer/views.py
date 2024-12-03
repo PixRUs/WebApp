@@ -1,18 +1,35 @@
 from django.shortcuts import render
 from pixrus.utils.decorators import role_required
-from product.models import ActivePick, HistoricalPick
+from product.models import ActivePick, HistoricalPick,Subscription
 from buyer.models import Buyer
+from seller.views import active_picks
 from .recomendation.util import get_recommended_picks,get_recommended_sellers
+from django.utils import timezone
+
 @role_required(required_role='buyer')
 def buyer_landing(request):
     buyer = Buyer.objects.get(user=request.user)
-    active_picks = ActivePick.get_active_picks_for_buyer(buyer)
-    historical_picks = HistoricalPick.get_historical_picks_for_buyer(buyer)
+    subscriptions = Subscription.objects.filter(buyer=buyer)
+    sellers = []
+    for subscription in subscriptions:
+        if subscription.subscribed_until > timezone.now():
+            sellers.append(subscription.seller)
+    all_active = []
+    for seller in sellers:
+        curr_active = ActivePick.objects.filter(seller=seller)
+        for pick in curr_active:
+            all_active.append((pick,seller))
+
+    ##top_5_active_picks = get_recommended_picks(buyer,5)
+
+
     context = {
         'buyer': buyer,
-        'active_picks': active_picks,
-        'historical_picks': historical_picks,
+        'seller_picks': all_active,
+        'sellers': sellers,
+
     }
+
     return render(request, 'buyer_landing.html',context)
 @role_required(required_role='buyer')
 def buyer_recommended(request):

@@ -31,15 +31,15 @@ def get_upcoming_odds(sport,markets, regions='us', odds_format='american',date_f
 from zoneinfo import ZoneInfo
 
 def get_odds(sport,league,type_of_pick):
-    data = {}
+    response_data = {}
     if sport == 'basketball':
         if league == 'nba':
             if type_of_pick == 'h2h':
-                request = ApiRequest.get_request_data(sport=sport,league=league, type_of_pick='h2h')
-                if request is None or request == {}:
-                    data = get_nba_odd_data_h2h()
+                request_object = ApiRequest.get_request_data(sport=sport,league=league, type_of_pick='h2h')
+                if request_object is None or request_object.response_data == {}:
+                    response_data = get_nba_odd_data_h2h()
                 else:
-                    return request
+                    return request_object
 
     obj,created = ApiRequest.objects.get_or_create(
         sport=sport,
@@ -50,16 +50,16 @@ def get_odds(sport,league,type_of_pick):
             'sport': sport,
             'league': league,
             'type_of_pick': type_of_pick,
-            'response_data': data
+            'response_data': response_data
         }
     )
     if not created:
-        obj.response_data = data
+        obj.response_data = response_data
         obj.request_time = datetime.now(ZoneInfo("US/Eastern"))
         obj.save()
 
 
-    return data
+    return obj
 
 # testing section
 def get_nba_odd_data_h2h():

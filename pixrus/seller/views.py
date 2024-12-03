@@ -1,5 +1,6 @@
 import time
 
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
@@ -9,12 +10,12 @@ from django.contrib import messages
 from django.shortcuts import redirect
 
 from buyer.models import Buyer
-from product.models import ActivePick,HistoricalPick,Subscription
-from pixrus.utils.decorators import role_required
+from product.models import ActivePick,HistoricalPick,ApiRequest
+from pixrus.utils.decorators import role_required,access_required
 from seller.models import Seller
-from django.http import HttpResponseForbidden,HttpResponse,JsonResponse,HttpResponseNotFound
+from django.http import HttpResponseForbidden,JsonResponse,HttpResponseNotFound
 from .utils.pick_data_getter import get_odds
-from .forms import Subscription as SubscriptionForm
+from .forms import Subscription as SubscriptionForm,LookUp
 from product.models import Subscription as Subscription
 @never_cache
 @role_required(required_role='seller')
@@ -36,7 +37,7 @@ def seller_landing(request):
 
 
 @role_required(required_role='seller')
-def post_pick_view(request):
+def post_pick_view(request,data_id):
     if not Seller.objects.filter(user=request.user).exists():
         return HttpResponseForbidden("You do not have permission to access this page.")
 
@@ -46,13 +47,14 @@ def post_pick_view(request):
     sportsbook_filter = request.GET.get("sportsbook", request.session.get("sportsbook_filter", "")).lower()
     date_filter = request.GET.get("date", request.session.get("date_filter", "")).lower()
 
+
     # Store filters in session for persistence
     request.session["team_filter"] = team_filter
     request.session["sportsbook_filter"] = sportsbook_filter
     request.session["date_filter"] = date_filter
 
 
-    current_pick_data = get_odds(sport="basketball", league="nba",type_of_pick='h2h')
+    current_pick_data = ApiRequest.objects.get(id=data_id).response_data
     request.session["odds"] = current_pick_data
 
     filtered_picks = []
@@ -105,23 +107,25 @@ def activate_pick(request,pick_id):
     seller = seller_query.first()
     if request.method == "POST":
         pick_data = {"target_winner": request.POST.get("outcome"), "odds": request.POST.get("multiplier"),
-                     "book_maker": request.POST.get("bookmaker"),"bet_amount": request.POST.get("unit_size")}
-        game_data = {"home_team": request.POST.get("home_team"), "away_team": request.POST.get("away_team")}
+                     "book_maker": request.POST.get("bookmaker"),"bet_amount": request.POST.get("unit_size"),"type":request.POST.get("type"),}
+        game_data = {"home_team": request.POST.get("home_team"), "away_team": request.POST.get("away_team"),"sport": request.POST.get("sport"),"league": request.POST.get("league"),}
         ActivePick.objects.create(seller=seller,event_start=request.POST.get("commence_time"),pick_data=pick_data,game_data=game_data,type_of_pick="h2h")
         return JsonResponse({"success": True, "message": "Pick activated successfully!"})
     else:
         return render(request,"activate_pick.html",{"pick":pick})
 
 
-@role_required(required_role='seller')
+@login_required
+@access_required()
 def active_picks(request,seller_id):
     try:
         seller = Seller.objects.get(id=seller_id)
     except Seller.DoesNotExist:
         return HttpResponseNotFound("Seller not found")
 
-    active_picks = ActivePick.objects.filter(seller=seller)  # Query for active picks
-    paginator = Paginator(active_picks, 10)  # Show 10 picks per page
+
+    active_picks = ActivePick.objects.filter(seller=seller)
+    paginator = Paginator(active_picks, 10)
 
     # Get the current page number from the request
     page_number = request.GET.get('page', 1)
@@ -131,7 +135,8 @@ def active_picks(request,seller_id):
         'picks_page': picks_page
     })
 
-@role_required(required_role='seller')
+@login_required
+@access_required()
 def historical_picks(request, seller_id):
     try:
         seller = Seller.objects.get(id=seller_id)
@@ -211,7 +216,7 @@ def profile_view(request,seller_id):
         "free_active_picks" : free_active_picks,
     }
     return render(request, 'profile_view.html', context)
-
+@role_required(required_role="buyer")
 def subscribe(request, seller_id):
     try:
         seller = Seller.objects.get(id=seller_id)
@@ -236,6 +241,22 @@ def subscribe(request, seller_id):
             return redirect('profile_view', seller_id=seller_id)
 
     return render(request, 'initialize_subscription.html', {'seller': seller,'form': Subscription})
+
+@role_required(required_role="seller")
+def look_up(request):
+    if request.method == 'POST':
+        form = LookUp(request.POST)
+        if form.is_valid():
+            sports_league_choice = form.cleaned_data['sports_league_choice']
+            form_type_of_bet = form.cleaned_data['type_of_bets']
+            if sports_league_choice =="basketball_nba":
+                if form_type_of_bet == "money_line":
+                    api_obj = get_odds(sport="basketball", league="nba",type_of_pick='h2h')
+                    return redirect('post_pick', api_obj.id)
+
+
+    return render(request, 'look_up.html',{'form':LookUp})
+
 
 
 

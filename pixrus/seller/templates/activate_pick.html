@@ -74,7 +74,7 @@
         }
     </style>
     <script>
-        function confirmActivation(commence_time, home_team, away_team, game, bookmaker, outcome, multiplier) {
+        function confirmActivation(commence_time, home_team, away_team, game, bookmaker, outcome, multiplier,sport,league,type) {
             const unit_amount = prompt(`Please enter a unit size for the following game activation:\n\nGame: ${game}\nBookmaker: ${bookmaker}\nOutcome: ${outcome}\nOdds: ${multiplier}`);
             if (!unit_amount || isNaN(unit_amount) || !Number.isInteger(Number(unit_amount)) || Number(unit_amount) <= 0) {
                 alert("Invalid unit size. Please enter a positive integer.");
@@ -90,7 +90,9 @@
                 commence_time = new Date(commence_time).toISOString();
                 formData.append("commence_time", commence_time);
                 formData.append("unit_size", unit_amount);
-
+                formData.append("sport", sport);
+                formData.append("league", league);
+                formData.append("type", type);
                 // Send POST request to the same URL
                 fetch(window.location.href, {
                     method: "POST",
@@ -155,7 +157,7 @@
                                         <p><strong>Outcome:</strong> {{ outcome.name }}</p>
                                         <p><strong>Multiplier:</strong> {{ outcome.multiplier }}</p>
                                         <!-- Activate Button -->
-                                        <button class="activate-button" onclick="confirmActivation('{{ pick.commence_time }}','{{ pick.home_team }}', '{{ pick.away_team }}', '{{ pick.home_team }} vs {{ pick.away_team }}', '{{ bookmaker.title }}', '{{ outcome.name }}', '{{ outcome.multiplier }}')">
+                                        <button class="activate-button" onclick="confirmActivation('{{ pick.commence_time }}','{{ pick.home_team }}', '{{ pick.away_team }}', '{{ pick.home_team }} vs {{ pick.away_team }}', '{{ bookmaker.title }}', '{{ outcome.name }}', '{{ outcome.multiplier }}','{{ pick.sport }}','{{ pick.league }}','{{ pick.type }}')">
                                             Activate
                                         </button>
                                     </div>
