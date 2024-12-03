@@ -165,15 +165,20 @@
             <p><strong>Number of Bets Won:</strong> {{ seller.stats.num_of_success }}</p>
             <p><strong>Number of Bets Lost:</strong> {{ seller.stats.num_of_failures }}</p>
         </div>
-        {% if subscription %}
-            <h3>Subscribed until{{subscription.subscribed_until}}</h3>
-        {% endif %}
+{% if subscription %}
+    <h3>Subscribed until {{ subscription.subscribed_until }}</h3>
+    <h1>
+        <a href="{% url 'active_picks' seller_id=seller.id %}" style="color: #f0883e; font-weight: bold;">
+            Active Picks
+        </a>
+    </h1>
 
-        {% if active_picks %}
-            <a href="{% url 'active_picks' seller_id=seller.id %}" class="redirect-button" style="font-size: 1.5rem; padding: 12px 20px; text-decoration: none;">Current Picks</a>
-        {% else %}
-    <h3>To view {{ seller.user_name }}'s current premium active picks, <a href="{% url 'subscribe_view' seller_id=seller.id %}" style="color: #f0883e; font-weight: bold;">please Subscribe</a></h3>
-        {% endif %}
+    {% if not active_picks %}
+        <h2 style="color: #ffcc00; font-size: 1.5rem;">No Active Picks to Display</h2>
+    {% endif %}
+{% else %}
+    <h2 style="color: #ffcc00; font-size: 1.5rem;">You are not subscribed yet. Please subscribe to view active picks.</h2>
+{% endif %}
         {% for pick in active_picks|slice:":10" %}
             <div class="card">
                 <h3>{{ pick.game_data.away_team }} at {{ pick.game_data.home_team }}</h3>
