@@ -138,6 +138,9 @@
         <a href="{% url 'manage_buyers'  %}">
             <button class="redirect-button">Manage Buyers</button>
         </a>
+        <a href="{% url 'profile_view' seller.id %}">
+            <button class="redirect-button">Public View</button>
+        </a>
     </div>
 
 <a href="{% url 'active_picks' seller.id %}" class="redirect-button" style="font-size: 1.5rem; padding: 12px 20px; text-decoration: none;">Current Picks</a>

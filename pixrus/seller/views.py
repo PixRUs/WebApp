@@ -4,13 +4,18 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
 from django.core.paginator import Paginator
+from dateutil.relativedelta import relativedelta
+from django.contrib import messages
+from django.shortcuts import redirect
 
+from buyer.models import Buyer
 from product.models import ActivePick,HistoricalPick,Subscription
 from pixrus.utils.decorators import role_required
 from seller.models import Seller
 from django.http import HttpResponseForbidden,HttpResponse,JsonResponse,HttpResponseNotFound
 from .utils.pick_data_getter import get_odds
-
+from .forms import Subscription as SubscriptionForm
+from product.models import Subscription as Subscription
 @never_cache
 @role_required(required_role='seller')
 def seller_landing(request):
@@ -177,5 +182,61 @@ def manage_buyers(request):
     return render(request, 'manage_buyers.html', context)
 
     #need to gather all the current pick info.
+
+
+def profile_view(request,seller_id):
+    try:
+        seller = Seller.objects.get(id=seller_id)
+    except Seller.DoesNotExist:
+        return HttpResponseNotFound("Seller not found")
+    try:
+        buyer = Buyer.objects.get(user=request.user)
+    except Buyer.DoesNotExist:
+        buyer = None
+    subscription = None
+    curr_picks = None
+
+    if buyer:
+        subscription = Subscription.objects.get(seller=seller,buyer=buyer)
+        if subscription and subscription.subscribed_until < timezone.now():
+            curr_picks = ActivePick.objects.filter(seller=seller)
+
+    view_historical_picks = HistoricalPick.objects.filter(seller=seller).order_by('-posted_at')[:5]
+    free_active_picks = ActivePick.objects.filter(seller=seller,is_free=True).order_by('-posted_at')
+    context = {
+        "seller": seller,
+        "subscription": subscription,
+        "active_picks" : curr_picks,
+        "historical_picks" : view_historical_picks,
+        "free_active_picks" : free_active_picks,
+    }
+    return render(request, 'profile_view.html', context)
+
+def subscribe(request, seller_id):
+    try:
+        seller = Seller.objects.get(id=seller_id)
+    except Seller.DoesNotExist:
+        return HttpResponseNotFound("Seller not found")
+    buyer = Buyer.objects.get(user=request.user)
+    if request.method == 'POST':
+        form = SubscriptionForm(request.POST)
+        if form.is_valid():
+            selected_plan = form.cleaned_data['plan']
+            if selected_plan =="yearly":
+                subscribed_until = timezone.now() + relativedelta(years=1)
+            elif selected_plan =="monthly":
+                subscribed_until = timezone.now() + relativedelta(months=1)
+            elif selected_plan =="weekly":
+                subscribed_until = timezone.now() + relativedelta(weeks=1)
+            elif selected_plan =="daily":
+                subscribed_until = timezone.now() + relativedelta(days=1)
+
+            Subscription.objects.get_or_create(buyer=buyer,seller=seller,defaults={'subscribed_until':subscribed_until})
+            messages.success(request, f"Subscription Successful! You selected the {selected_plan} plan. You will now be redirected to the seller page")
+            return redirect('profile_view', seller_id=seller_id)
+
+    return render(request, 'initialize_subscription.html', {'seller': seller,'form': Subscription})
+
+
 
 
