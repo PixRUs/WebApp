@@ -65,7 +65,8 @@ def get_odds(sport,league,type_of_pick):
 def get_nba_odd_data_h2h():
     print("Making request..")
     odds_data = get_upcoming_odds(sport='basketball_nba', markets='h2h')
-    odd_json = []
+    odd_json = {"sport": "basketball", "league": "nba", "type": "h2h"}
+    game_data = []
     if odds_data:
         for index, game in enumerate(odds_data):
             # Generate a unique ID for each game
@@ -101,7 +102,8 @@ def get_nba_odd_data_h2h():
 
                 game_entry["bookmakers"].append(bookmaker_entry)
 
-            odd_json.append(game_entry)
+            game_data.append(game_entry)
+    odd_json['games'] = game_data
     return odd_json
 
 def format_time(time):

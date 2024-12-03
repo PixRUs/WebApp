@@ -53,9 +53,10 @@ def post_pick_view(request,data_id):
     request.session["sportsbook_filter"] = sportsbook_filter
     request.session["date_filter"] = date_filter
 
+    api_req = ApiRequest.objects.get(id=data_id)
+    current_pick_data = api_req.response_data["games"]
 
-    current_pick_data = ApiRequest.objects.get(id=data_id).response_data
-    request.session["odds"] = current_pick_data
+    request.session["odds"] = api_req.response_data
 
     filtered_picks = []
     unique_sportsbooks = set()
@@ -102,14 +103,19 @@ def activate_pick(request,pick_id):
     seller_query = Seller.objects.filter(user=request.user)
     if not seller_query:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    picks = request.session['odds']
+    picks = request.session['odds']['games']
+    sport = request.session['odds']['sport']
+    type_of_pick = request.session['odds']['type']
+    league = request.session['odds']['league']
+
+
     pick = next((pick for pick in picks if pick["id"] == pick_id), None)
     seller = seller_query.first()
     if request.method == "POST":
         pick_data = {"target_winner": request.POST.get("outcome"), "odds": request.POST.get("multiplier"),
                      "book_maker": request.POST.get("bookmaker"),"bet_amount": request.POST.get("unit_size"),"type":request.POST.get("type"),}
-        game_data = {"home_team": request.POST.get("home_team"), "away_team": request.POST.get("away_team"),"sport": request.POST.get("sport"),"league": request.POST.get("league"),}
-        ActivePick.objects.create(seller=seller,event_start=request.POST.get("commence_time"),pick_data=pick_data,game_data=game_data,type_of_pick="h2h")
+        game_data = {"home_team": request.POST.get("home_team"), "away_team": request.POST.get("away_team"),"sport": sport,"league":league,}
+        ActivePick.objects.create(seller=seller,event_start=request.POST.get("commence_time"),pick_data=pick_data,game_data=game_data,type_of_pick=type_of_pick)
         return JsonResponse({"success": True, "message": "Pick activated successfully!"})
     else:
         return render(request,"activate_pick.html",{"pick":pick})
