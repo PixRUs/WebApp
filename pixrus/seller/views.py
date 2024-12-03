@@ -198,7 +198,7 @@ def profile_view(request,seller_id):
 
     if buyer:
         subscription = Subscription.objects.get(seller=seller,buyer=buyer)
-        if subscription and subscription.subscribed_until < timezone.now():
+        if subscription and subscription.subscribed_until > timezone.now():
             curr_picks = ActivePick.objects.filter(seller=seller)
 
     view_historical_picks = HistoricalPick.objects.filter(seller=seller).order_by('-posted_at')[:5]

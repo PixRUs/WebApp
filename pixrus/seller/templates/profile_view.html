@@ -184,21 +184,24 @@
                 <p><strong>Unit Amount:</strong> {{ pick.pick_data.bet_amount }}</p>
             </div>
         {% endfor %}
-    <h1>Free Active Picks</h1>
-    {% if free_active_picks %}
-        {% for pick in free_active_picks|slice:":10" %}
-            <div class="card">
-                <h3>{{ pick.game_data.away_team }} at {{ pick.game_data.home_team }}</h3>
-                <p><strong>Event Start:</strong> {{ pick.event_start }}</p>
-                <p><strong>Pick:</strong> {{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</p>
-                <p><strong>Pick Odds:</strong> {{ pick.pick_data.odds }}</p>
-                <p><strong>Sportsbook:</strong> {{ pick.pick_data.book_maker }}</p>
-                <p><strong>Unit Amount:</strong> {{ pick.pick_data.bet_amount }}</p>
-            </div>
+    {% if not subscription %}
+         <h1>Free Active Picks</h1>
+            {% if free_active_picks %}
+                {% for pick in free_active_picks|slice:":10" %}
+                    <div class="card">
+                        <h3>{{ pick.game_data.away_team }} at {{ pick.game_data.home_team }}</h3>
+                        <p><strong>Event Start:</strong> {{ pick.event_start }}</p>
+                        <p><strong>Pick:</strong> {{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</p>
+                        <p><strong>Pick Odds:</strong> {{ pick.pick_data.odds }}</p>
+                        <p><strong>Sportsbook:</strong> {{ pick.pick_data.book_maker }}</p>
+                        <p><strong>Unit Amount:</strong> {{ pick.pick_data.bet_amount }}</p>
+                    </div>
         {% endfor %}
     {% else %}
         <p class="no-picks">No active picks available.</p>
     {% endif %}
+        {% endif %}
+
     <h1><a href="{% url 'historical_picks' seller_id=seller.id %}" style="color: #f0883e; font-weight: bold;">Historical Picks</a></h1>
         {% for pick in historical_picks|slice:":10" %}
             <div class="card">
