@@ -152,7 +152,71 @@
             background-color: #ffcc00;
             transform: translateY(-2px);
         }
-            .orange-link {
+        .container {
+    padding: 20px;
+}
+
+.stats-container {
+    display: flex;          /* This enables Flexbox */
+    flex-wrap: wrap;        /* Allows wrapping of cards if there isn't enough space */
+    gap: 20px;              /* Adds space between the cards */
+}
+.stats-container {
+    display: flex;          /* Enable flexbox */
+    flex-wrap: wrap;        /* Allow the cards to wrap onto new rows */
+    gap: 20px;              /* Adds space between cards */
+}
+
+.card {
+    flex: 1;                /* Each card takes equal space */
+    min-width: 250px;       /* Prevent cards from getting too small */
+    max-width: 300px;       /* Limit the maximum size of each card */
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1); /* Same background as active_card */
+    border-radius: 12px;    /* Same border-radius as active_card */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Same shadow as active_card */
+    transition: transform 0.3s, box-shadow 0.3s; /* Smooth transition */
+    margin: 16px 0;
+}
+
+.card:hover {
+    transform: translateY(-5px);  /* Lift the card on hover */
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4); /* Increase shadow on hover */
+}
+
+.card h3 {
+    margin: 0 0 12px;
+    font-size: 1.5rem;
+    color: #ffcc00;  /* Same color for headings */
+}
+
+.card p {
+    margin: 6px 0;
+    font-size: 1rem;
+    color: #d6d6d6;  /* Same color for text */
+}
+
+.card .actions {
+    margin-top: 20px;
+}
+
+.card .actions button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    background: linear-gradient(90deg, #f0883e, #ffcc00);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card .actions button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+.orange-link {
     color: orange;
     text-decoration: none; /* Optional: Remove underline */
 }
@@ -160,18 +224,78 @@
 .orange-link:hover {
     text-decoration: underline; /* Optional: Add underline on hover */
 }
+.redirect-button {
+            display: inline-block;
+            margin: 20px auto;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(90deg, #f0883e, #ffcc00);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        .redirect-button:hover {
+            background-color: #ffcc00;
+            transform: translateY(-2px);
+        }
 
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome Back {{buyer.user_name}}</h1>
-        <a href="{% url 'market'  %}">
-            <button class="redirect-button">Marketplace</button>
+{% if is_buyer %}
+    <a href="{% url 'buyer_dashboard' %}" class="redirect-button">Go Back to Dashboard</a>
+{% else %}
+    <a href="{% url 'seller_dashboard' %}" class="redirect-button">Go Back to Dashboard</a>
+{% endif %}
+<h1>{{seller.user_name}}</h1>
+<div class="container">
+    <div class="stats-container">
+        <div class="card">
+            <h3>All-time Stats</h3>
+            {% for stat in all_time_stats %}
+                <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
+            {% endfor %}
+        </div>
+
+        <div class="card">
+            <h3>This Month's Stats</h3>
+                {% for stat in monthly %}
+                <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
+            {% endfor %}
+        </div>
+        <div class="card">
+            <h3>This Weeks's Stats</h3>
+            {% for stat in weekly %}
+                <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% if subscription %}
+    <h3>Subscribed until {{ subscription.subscribed_until }}</h3>
+    <h1>
+        <a href="{% url 'active_picks' seller_id=seller.id %}" style="color: #f0883e; font-weight: bold;">
+            Active Picks
         </a>
-    {% if seller_picks %}
-        <H2>Active Picks </H2>
-        {% for pick,seller in seller_picks %}
+    </h1>
+
+    {% if not active_picks %}
+        <h2 style="color: #ffcc00; font-size: 1.5rem;">No Active Picks to Display</h2>
+    {% endif %}
+{% else %}
+    <h2 style="color: #ffcc00; font-size: 1.5rem;">You are not subscribed yet. Please <a href="{% url 'subscribe_view' seller_id=seller.id %}" >subscribe</a> to view active picks.</h2>
+{% endif %}
+        {% for pick in active_picks|slice:":10" %}
             <div class="active_card">
                 <h3>{{ pick.game_data.away_team }} at {{ pick.game_data.home_team }}</h3>
                 <p><strong>Event Start:</strong> {{ pick.event_start }}</p>
@@ -179,15 +303,29 @@
                 <p><strong>Pick Odds:</strong> {{ pick.pick_data.odds }}</p>
                 <p><strong>Sportsbook:</strong> {{ pick.pick_data.book_maker }}</p>
                 <p><strong>Unit Amount:</strong> {{ pick.pick_data.bet_amount }}</p>
-                <p>Pick Sold by:<a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a></p>
             </div>
         {% endfor %}
-     {% else %}
-        <H2>No current Active Picks...</H2>
+    {% if not subscription %}
+         <h1>Free Active Picks</h1>
+            {% if free_active_picks %}
+                {% for pick in free_active_picks|slice:":10" %}
+                    <div class="active_card">
+                        <h3>{{ pick.game_data.away_team }} at {{ pick.game_data.home_team }}</h3>
+                        <p><strong>Event Start:</strong> {{ pick.event_start }}</p>
+                        <p><strong>Pick:</strong> {{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</p>
+                        <p><strong>Pick Odds:</strong> {{ pick.pick_data.odds }}</p>
+                        <p><strong>Sportsbook:</strong> {{ pick.pick_data.book_maker }}</p>
+                        <p><strong>Unit Amount:</strong> {{ pick.pick_data.bet_amount }}</p>
+                    </div>
+        {% endfor %}
+    {% else %}
+        <p class="no-picks">No active picks available.</p>
     {% endif %}
-    </div>
+        {% endif %}
+
+    <h1><a href="{% url 'historical_picks' seller_id=seller.id %}" style="color: #f0883e; font-weight: bold;">Historical Picks</a></h1>
         {% for pick in historical_picks|slice:":10" %}
-            <div class="card">
+            <div class="active_card">
                 <h3>{{ pick.game_event_result.team_1 }} ({{ pick.game_event_result.team_1_points }}) vs {{ pick.game_event_result.team_2 }} ({{ pick.game_event_result.team_2_points }})</h3>
                 <p><strong>Pick:</strong> {{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</p>
                 <p><strong>Odds:</strong> {{ pick.pick_data.odds }}</p>
@@ -201,5 +339,6 @@
                 {% endif %}
             </div>
         {% endfor %}
+    </div>
 </body>
 </html>

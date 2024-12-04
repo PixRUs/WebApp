@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from typing import Literal
+
 
 load_dotenv()
 
@@ -125,6 +127,10 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
+
+
+
+ALLOWED_STATS = [""]
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'America/New_York'

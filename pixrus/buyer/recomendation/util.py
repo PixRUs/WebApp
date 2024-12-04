@@ -2,6 +2,7 @@
 from product.models import HistoricalPick, ActivePick
 import heapq
 import math
+from pixrus.utils.probabilty_calculator import get_probability
 
 from seller.models import Seller
 
@@ -42,14 +43,7 @@ def get_recommended_picks(buyer,num_of_picks):
 
 
 
-def get_probability(odd:str):
-    if odd.startswith("-"):
-        odd = odd[1:]
-        odd = int(odd)
-        return odd / (odd + 100)
-    else:
-        odd = int(odd)
-        return 100 / (odd + 100)
+
     
 def get_pick_category(sport,league):
     return type_of_pick_map[league+"_"+sport]
@@ -125,6 +119,8 @@ def calculate_averages(all_historical_picks):
         amount_of_units += units
         type_of_pick += type
 
+    if total_picks == 0:
+        return 0,0,0
     average_amount_of_units = amount_of_units / total_picks
     average_pick_risk = total_risk_value / total_picks
     average_type_of_pick = type_of_pick / amount_of_units

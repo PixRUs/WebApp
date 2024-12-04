@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marketplace Seller</title>
+    <title>Title</title>
+</head>
     <style>
         /* General Styling */
         body {
@@ -38,7 +38,7 @@
         /* Card Styling */
         .card {
             border: 1px solid #444;
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 20px;
             margin: 16px 0;
             background: rgba(255, 255, 255, 0.1);
@@ -183,88 +183,102 @@
     gap: 20px;                    /* Adds space between cards */
     justify-content: center;      /* Center cards horizontally within the container */
 }
+            .orange-link {
+    color: orange;
+    text-decoration: none; /* Optional: Remove underline */
+}
+
+.orange-link:hover {
+    text-decoration: underline; /* Optional: Add underline on hover */
+}
+    .back-home-button {
+            display: inline-block;
+            margin: 20px auto;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(90deg, #f0883e, #ffcc00);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-home-button :hover {
+            background-color: #ffcc00;
+            transform: translateY(-2px);
+        }
     </style>
-</head>
 <body>
-    <h1>{{ seller.user_name }}</h1>
-<div class="stats-wrapper">
+    <a href="{% url 'buyer_dashboard' %}" class="back-home-button">Go Back Home</a>
+
+    <form method="get" action="{% url 'seller_search' %}">
+        <label>
+            <input type="text" name="query" placeholder="Search for a seller..." required>
+        </label>
+        <button type="submit">Search</button>
+    </form>
     <div class="stats-container">
         <div class="card">
-            <h3>All-time Stats</h3>
-            {% for stat in all_time_stats %}
-                <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
-            {% endfor %}
-        </div>
-
-        <div class="card">
-            <h3>This Month's Stats</h3>
-                {% for stat in monthly %}
-                <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
+            <h3>This week's top unit gainers</h3>
+            {% for seller, stat in top_three_seller_units_won_past_week %}
+                <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Units Gained this week : {{ stat }}</strong></p>
             {% endfor %}
         </div>
         <div class="card">
-            <h3>This Week's Stats</h3>
-            {% for stat in weekly %}
-                <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
+            <h3>This week's Most successful bets placed </h3>
+            {% for seller, stat in top_three_successful_bets_won_past_week %}
+                <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Successful bets placed this week : {{ stat }}</strong></p>
+            {% endfor %}
+        </div>
+        <div class="card">
+            <h3>This week's Safest sellers</h3>
+            {% for seller, stat in top_three_safest_sellers_past_week %}
+                <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Average risk taken this week : {{ stat }}</strong></p>
+            {% endfor %}
+        </div>
+        <div class="card">
+            <h3>This week's Riskiest sellers</h3>
+            {% for seller, stat in top_three_riskiest_sellers_past_week %}
+                <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Average risk taken this week : {{ stat }}</strong></p>
             {% endfor %}
         </div>
     </div>
-</div>
-
-
-    <div class="button-container">
-        <a href="{% url 'lookup' %}">
-            <button class="redirect-button">Post Picks</button>
-        </a>
-        <a href="{% url 'seller_dashboard'  %}">
-            <button class="redirect-button">Manage Profile</button>
-        </a>
-        <a href="{% url 'manage_buyers'  %}">
-            <button class="redirect-button">Manage Buyers</button>
-        </a>
-        <a href="{% url 'profile_view' seller.id %}">
-            <button class="redirect-button">Public View</button>
-        </a>
+    <div class="stats-container">
+        <div class="card">
+            <h3>This Month's top unit gainers</h3>
+            {% for seller, stat in top_three_seller_units_won_past_month %}
+                <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Units Gained this week : {{ stat }}</strong></p>
+            {% endfor %}
+        </div>
+        <div class="card">
+            <h3>This Month's Most successful bets placed </h3>
+            {% for seller, stat in top_three_successful_bets_won_past_month %}
+                <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Successful bets placed this week : {{ stat }}</strong></p>
+            {% endfor %}
+        </div>
+        <div class="card">
+            <h3>This Month's Safest sellers</h3>
+            {% for seller, stat in top_three_safest_sellers_past_month %}
+                <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Average risk taken this week : {{ stat }}</strong></p>
+            {% endfor %}
+        </div>
+        <div class="card">
+            <h3>This Month's Riskiest sellers</h3>
+            {% for seller, stat in top_three_successful_bets_won_past_month %}
+                <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Average risk taken this week : {{ stat }}</strong></p>
+            {% endfor %}
+        </div>
     </div>
-
-<a href="{% url 'active_picks' seller.id %}" class="redirect-button" style="font-size: 1.5rem; padding: 12px 20px; text-decoration: none;">Current Picks</a>
-
-
-    {% if active_picks %}
-        {% for pick in active_picks|slice:":10" %}
-            <div class="card">
-                <h3>{{ pick.game_data.away_team }} at {{ pick.game_data.home_team }}</h3>
-                <p><strong>Event Start:</strong> {{ pick.event_start }}</p>
-                <p><strong>Pick:</strong> {{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</p>
-                <p><strong>Pick Odds:</strong> {{ pick.pick_data.odds }}</p>
-                <p><strong>Sportsbook:</strong> {{ pick.pick_data.book_maker }}</p>
-                <p><strong>Unit Amount:</strong> {{ pick.pick_data.bet_amount }}</p>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p class="no-picks">No active picks available.</p>
-    {% endif %}
-
-<a href="{% url 'historical_picks' seller.id%}" class="redirect-button" style="font-size: 1.5rem; padding: 12px 20px; text-decoration: none;">Previous Picks</a>
-
-
-    {% if historical_picks %}
-        {% for pick in historical_picks|slice:":10" %}
-            <div class="card">
-                <h3>{{ pick.game_event_result.team_1 }} ({{ pick.game_event_result.team_1_points }}) vs. {{ pick.game_event_result.team_2 }} ({{ pick.game_event_result.team_2_points }})</h3>
-                <p><strong>Original Pick:</strong> {{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</p>
-                <p><strong>Pick Odds:</strong> {{ pick.pick_data.odds }}</p>
-                <p><strong>Sportsbook:</strong> {{ pick.pick_data.book_maker }}</p>
-                <p><strong>Unit Amount:</strong> {{ pick.pick_data.bet_amount }}</p>
-                {% if pick.pick_data.pick_success %}
-                    <p class="success">Bet Successful</p>
-                {% else %}
-                    <p class="failure">Bet Failed</p>
-                {% endif %}
-            </div>
-        {% endfor %}
-    {% else %}
-        <p class="no-picks">No historical picks available.</p>
-    {% endif %}
+    <h1>Recommended Sellers </h1>
+    {% for seller in recommended_sellers %}
+        <div class="card">
+                <p><strong><a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a></strong></p>
+        </div>
+    {% endfor %}
 </body>
 </html>

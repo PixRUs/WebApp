@@ -43,8 +43,7 @@ def profile_completion(request):
             if role == 'seller':
                 Seller.objects.get_or_create(user=request.user,
                 defaults={'user_name': user_name,
-                'meta_data': {},
-                'stats': {"num_of_success": 0, "num_of_failures": 0,"units_won":0,"total_picks_placed": 0},}
+                'meta_data': {}}
                 )
                 return redirect('seller_dashboard')  # Redirect to seller dashboard
             elif role == 'buyer':

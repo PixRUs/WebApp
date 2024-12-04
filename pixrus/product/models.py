@@ -82,6 +82,7 @@ class HistoricalPick(models.Model):
 
 
 class ApiRequest(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4,editable=False)
     endpoint = models.CharField(null=False,max_length=255)  # The API endpoint that was called
     request_time = models.DateTimeField(null=False,auto_now_add=True)  # Time of the API request
     response_data = models.JSONField(null=False, blank=True)  # Store the API response, if needed
@@ -128,7 +129,7 @@ class ApiRequest(models.Model):
 
             return None
 
-        return api_request.response_data
+        return api_request
 
 
 class Subscription(models.Model):
