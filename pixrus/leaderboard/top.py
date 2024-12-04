@@ -41,4 +41,7 @@ def get_top_sellers(time_unit: StatTimeUnits,stat_name: StatName,n,riskiest = No
             return tmp
 
     top_unit_winners_queries = Stat.objects.filter(time_period=time_unit,stat_name=stat_name).order_by("-stat_value")[:n]
-    return top_unit_winners_queries
+    tmp = []
+    for query in top_unit_winners_queries:
+        tmp.append(query.seller)
+    return tmp
