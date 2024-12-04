@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from typing import Literal
+
 
 load_dotenv()
 
@@ -124,7 +126,27 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
+ALLOWED_TIME_UNITS_FOR_LEADERBOARD = Literal["weekly", "monthly", "yearly", "all_time"]
 
+
+STAT_NAMES = Literal[
+    "total_units_won",
+    "number_of_successes",
+    "number_of_failed_picks",
+    "total_picks_placed",
+    "total_probability"
+]
+
+# Dictionary mapping stat_name to stat_verbal
+STAT_VERBALS = {
+    "total_units_won": "Units Won",
+    "number_of_successes": "Successful Bets",
+    "number_of_failed_picks": "Unsuccessful Bets",
+    "total_picks_placed": "Total Picks Placed",
+    "total_probability": "Average Risk Taken"
+}
+
+ALLOWED_STATS = [""]
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'America/New_York'

@@ -1,8 +1,8 @@
 """ For now current stats is storing  number of successful picks, and number of unsuccesful picks. 
     Each time we just update the sellers. Need the implementation to be such that I wont have to change the whole structure if I were to add another statistic / sport.
 """
-
-
+from seller.models import Stat
+from pixrus.utils.probabilty_calculator import get_probability
 def update_buyer_and_seller_stats(pick_data,result_data,seller,buyers,type_of_pick):
     """_summary_
 
@@ -24,15 +24,29 @@ def update_buyer_and_seller_stats(pick_data,result_data,seller,buyers,type_of_pi
 
 def update_seller_stats_h2h(seller,pick_data,result_data):
     #Moneyline: Betting on the team or player to win the game outright, regardless of the score.
-    seller_stats = seller.stats
-    seller_stats['total_picks_placed'] += 1
+    stat_query = Stat.objects.filter(seller=seller)
     if result_based_of_game_win(pick_data=pick_data, event_result=result_data):
-        seller_stats['num_of_success'] += 1
-        seller_stats['units_won'] += int(pick_data['bet_amount'])
+        for stat in stat_query:
+            if stat.stat_name == "total_picks_placed":
+                stat.stat_value += 1
+            if stat.stat_name == "total_units_won":
+                stat.stat_value += int(pick_data['bet_amount'])
+            if stat.stat_name == "number_of_successes":
+                stat.stat_value += 1
+            if stat.stat_name == "total_probability":
+                stat.stat_value += get_probability(str(pick_data['odds']))
         return True
     else:
-        seller_stats['num_of_failures'] += 1
-        seller_stats['units_won'] -= int(pick_data['bet_amount'])
+        for stat in stat_query:
+            if stat.stat_name == "total_picks_placed":
+                stat.stat_value += 1
+            if stat.stat_name == "total_units_lost":
+                stat.stat_value += int(pick_data['bet_amount'])
+            if stat.stat_name == "number_of_failed_picks":
+                stat.stat_value += 1
+            if stat.stat_name == "total_probability":
+                stat.stat_value += get_probability(str(pick_data['odds']))
+
         return False
 
             

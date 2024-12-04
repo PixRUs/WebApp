@@ -157,36 +157,27 @@
 </head>
 <body>
     <div class="container">
-        <h1>{{buyer.user_name}}</h1>
-    </div>
-    {% for pick,seller in seller_picks %}
-        <div class="card">
-            <h3>{{ pick.game_data.away_team }} at {{ pick.game_data.home_team }}</h3>
-            <p><strong>Event Start:</strong> {{ pick.event_start }}</p>
-            <p><strong>Pick:</strong> {{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</p>
-            <p><strong>Pick Odds:</strong> {{ pick.pick_data.odds }}</p>
-            <p><strong>Sportsbook:</strong> {{ pick.pick_data.book_maker }}</p>
-            <p><strong>Unit Amount:</strong> {{ pick.pick_data.bet_amount }}</p>
-            <p>Pick Sold by:<a href="{% url 'profile_view' seller.id %}">{{ seller.user_name }}</a></p>
-        </div>
-    {% endfor %}
-         <h1>Free Active Picks</h1>
-            {% if free_active_picks %}
-            {% for pick in free_active_picks|slice:":10" %}
-                <div class="card">
-                    <h3>{{ pick.game_data.away_team }} at {{ pick.game_data.home_team }}</h3>
-                    <p><strong>Event Start:</strong> {{ pick.event_start }}</p>
-                    <p><strong>Pick:</strong> {{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</p>
-                    <p><strong>Pick Odds:</strong> {{ pick.pick_data.odds }}</p>
-                    <p><strong>Sportsbook:</strong> {{ pick.pick_data.book_maker }}</p>
-                    <p><strong>Unit Amount:</strong> {{ pick.pick_data.bet_amount }}</p>
-                    <p>Pick Sold by:<a href="{% url 'profile_view' seller.id %}">{{ seller.user_name }}</a></p>
-                </div>
+        <h1>Welcome Back {{buyer.user_name}}</h1>
+        <a href="{% url 'market'  %}">
+            <button class="redirect-button">Marketplace</button>
+        </a>
+    {% if seller_picks %}
+        <H2>Active Picks </H2>
+        {% for pick,seller in seller_picks %}
+            <div class="card">
+                <h3>{{ pick.game_data.away_team }} at {{ pick.game_data.home_team }}</h3>
+                <p><strong>Event Start:</strong> {{ pick.event_start }}</p>
+                <p><strong>Pick:</strong> {{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</p>
+                <p><strong>Pick Odds:</strong> {{ pick.pick_data.odds }}</p>
+                <p><strong>Sportsbook:</strong> {{ pick.pick_data.book_maker }}</p>
+                <p><strong>Unit Amount:</strong> {{ pick.pick_data.bet_amount }}</p>
+                <p>Pick Sold by:<a href="{% url 'profile_view' seller.id %}">{{ seller.user_name }}</a></p>
+            </div>
         {% endfor %}
-    {% else %}
-        <p class="no-picks">No free picks available at this time</p>
+     {% else %}
+        <H2>No current Active Picks...</H2>
     {% endif %}
-
+    </div>
         {% for pick in historical_picks|slice:":10" %}
             <div class="card">
                 <h3>{{ pick.game_event_result.team_1 }} ({{ pick.game_event_result.team_1_points }}) vs {{ pick.game_event_result.team_2 }} ({{ pick.game_event_result.team_2_points }})</h3>
@@ -202,6 +193,5 @@
                 {% endif %}
             </div>
         {% endfor %}
-    </div>
 </body>
 </html>
