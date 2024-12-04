@@ -1,5 +1,5 @@
 from seller.models import Stat
-from pixrus.settings import ALLOWED_TIME_UNITS_FOR_LEADERBOARD,STAT_NAMES
+from seller.models import StatName,StatTimeUnits
 from typing import List
 
 
@@ -18,19 +18,19 @@ class Dist:
     def __lt__(self, other):
         return self.risk < other.risk
 
-def get_top_sellers(time_unit: ALLOWED_TIME_UNITS_FOR_LEADERBOARD,stat_name: STAT_NAMES,n,riskiest = None):
+def get_top_sellers(time_unit: StatTimeUnits,stat_name: StatName,n,riskiest = None):
     if stat_name == "total_probability":
-        riskiest: List[Dist] = []
-        total_probability = Stat.objects.filter(time_unit=time_unit,stat_name=stat_name)
+        risk_list: List[Dist] = []
+        total_probability = Stat.objects.filter(time_period=time_unit,stat_name=stat_name)
         for stat in total_probability:
             seller = stat.seller
-            total = Stat.objects.get(time_unit=time_unit,stat_name="total_picks_placed",seller=seller)
-            riskiest.append(Dist(total,total_probability,seller))
+            total = Stat.objects.get(time_period=time_unit,stat_name="total_picks_placed",seller=seller).stat_value
+            risk_list.append(Dist(total,total_probability,seller))
         if riskiest is True:
-            return riskiest.sort(reverse=True)[:n]
+            return risk_list.sort(reverse=True)[:n]
         else:
-            return riskiest.sort(reverse=False)[:n]
+            return risk_list.sort(reverse=False)[:n]
 
 
-    top_unit_winners_queries = Stat.objects.filter(time_unit=time_unit,stat_name=stat_name).order_by("-total_units_won")[:n]
+    top_unit_winners_queries = Stat.objects.filter(time_period=time_unit,stat_name=stat_name).order_by("-stat_value")[:n]
     return top_unit_winners_queries
