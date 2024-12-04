@@ -21,7 +21,7 @@ class Stat(models.Model):
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, related_name="stats")
     stat_name = models.CharField(max_length=255)
     stat_verbal = models.CharField(max_length=255)
-    stat_value = models.DecimalField(max_digits=10, decimal_places=5)
+    stat_value = models.FloatField()
     time_period = models.CharField(max_length=10, choices=[
         ('weekly', 'Weekly'),
         ('monthly', 'Monthly'),

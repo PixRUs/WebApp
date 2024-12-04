@@ -31,17 +31,17 @@ def get_top_sellers(time_unit: StatTimeUnits,stat_name: StatName,n,riskiest = No
             risk_list.sort(reverse=True)
             tmp = []
             for _ in range(n):
-                tmp.append(risk_list.pop().seller)
+                tmp.append((risk_list.pop().seller,risk_list.pop().total))
             return tmp
         else:
             risk_list.sort(reverse=False)
             tmp = []
             for _ in range(n):
-                tmp.append(risk_list.pop().seller)
+                tmp.append((risk_list.pop().seller,risk_list.pop().total))
             return tmp
 
     top_unit_winners_queries = Stat.objects.filter(time_period=time_unit,stat_name=stat_name).order_by("-stat_value")[:n]
     tmp = []
     for query in top_unit_winners_queries:
-        tmp.append(query.seller)
+        tmp.append((query.seller,query.stat_value))
     return tmp

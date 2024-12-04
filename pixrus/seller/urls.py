@@ -11,4 +11,5 @@ urlpatterns = [
     path('view/<uuid:seller_id>',views.profile_view, name='profile_view'),
     path('subscribe/<uuid:seller_id>',views.subscribe, name='subscribe_view'),
     path('lookup',views.look_up, name='lookup'),
+    path('search/', views.seller_search, name='seller_search'),
 ]

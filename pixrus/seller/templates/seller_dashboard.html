@@ -51,6 +51,58 @@
             box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
         }
 
+    .stat-card {
+    flex: 1;                /* Each card takes equal space */
+    min-width: 250px;       /* Prevent cards from getting too small */
+    max-width: 300px;       /* Limit the maximum size of each card */
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1); /* Same background as active_card */
+    border-radius: 12px;    /* Same border-radius as active_card */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Same shadow as active_card */
+    transition: transform 0.3s, box-shadow 0.3s; /* Smooth transition */
+    margin: 16px 0;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);  /* Lift the card on hover */
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4); /* Increase shadow on hover */
+}
+
+.stat-card h3 {
+    margin: 0 0 12px;
+    font-size: 1.5rem;
+    color: #ffcc00;  /* Same color for headings */
+}
+
+.stat-card p {
+    margin: 6px 0;
+    font-size: 1rem;
+    color: #d6d6d6;  /* Same color for text */
+}
+
+.stat-card .actions {
+    margin-top: 20px;
+}
+
+.stat-card .actions button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    background: linear-gradient(90deg, #f0883e, #ffcc00);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.stat-card .actions button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+
+
         .card h3 {
             margin: 0 0 12px;
             font-size: 1.5rem;
@@ -117,16 +169,48 @@
             text-align: center;
             margin-bottom: 30px;
         }
+.stats-wrapper {
+    display: flex;                /* Enable flexbox for the wrapper */
+    justify-content: center;      /* Center the stats-container horizontally */
+    align-items: center;          /* Center the stats-container vertically */
+    width: 100%;                  /* Ensure it takes the full width of its parent */
+    height: auto;                 /* Adjust height according to content */
+}
+
+.stats-container {
+    display: flex;                /* Enable flexbox for the container */
+    flex-wrap: wrap;              /* Allow the cards to wrap onto new rows */
+    gap: 20px;                    /* Adds space between cards */
+    justify-content: center;      /* Center cards horizontally within the container */
+}
     </style>
 </head>
 <body>
     <h1>{{ seller.user_name }}</h1>
-    <div class="header-info">
-        <p><strong>Total Picks Placed:</strong> {{ seller.stats.total_picks_placed }}</p>
-        <p><strong>Units Won:</strong> {{ seller.stats.units_won }}</p>
-        <p><strong>Number of Bets Won:</strong> {{ seller.stats.num_of_success }}</p>
-        <p><strong>Number of Bets Lost:</strong> {{ seller.stats.num_of_failures }}</p>
+<div class="stats-wrapper">
+    <div class="stats-container">
+        <div class="card">
+            <h3>All-time Stats</h3>
+            {% for stat in all_time_stats %}
+                <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
+            {% endfor %}
+        </div>
+
+        <div class="card">
+            <h3>This Month's Stats</h3>
+                {% for stat in monthly %}
+                <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
+            {% endfor %}
+        </div>
+        <div class="card">
+            <h3>This Week's Stats</h3>
+            {% for stat in weekly %}
+                <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
+            {% endfor %}
+        </div>
     </div>
+</div>
+
 
     <div class="button-container">
         <a href="{% url 'lookup' %}">

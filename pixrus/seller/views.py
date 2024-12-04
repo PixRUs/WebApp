@@ -17,6 +17,7 @@ from django.http import HttpResponseForbidden,JsonResponse,HttpResponseNotFound
 from .utils.pick_data_getter import get_odds
 from .forms import Subscription as SubscriptionForm,LookUp
 from product.models import Subscription as Subscription
+from .models import Stat
 @never_cache
 @role_required(required_role='seller')
 def seller_landing(request):
@@ -27,11 +28,17 @@ def seller_landing(request):
     seller = Seller.objects.get(user=request.user)
     active_picks = ActivePick.objects.filter(seller=seller)
     historical_picks = HistoricalPick.objects.filter(seller=seller)
+    all_time_stats = Stat.objects.filter(seller=seller,time_period = "all_time")
+    monthly = Stat.objects.filter(seller=seller,time_period = "monthly")
+    weekly = Stat.objects.filter(seller=seller,time_period = "weekly")
+
     context = {
         'seller': seller,
         'active_picks': active_picks,
         'historical_picks': historical_picks,
-        'stats':seller.stats,
+        'all_time_stats':all_time_stats,
+        'monthly':monthly,
+        'weekly':weekly,
     }
     return render(request, 'seller_dashboard.html', context)
 
@@ -138,7 +145,7 @@ def active_picks(request,seller_id):
     picks_page = paginator.get_page(page_number)
 
     return render(request, 'seller_current_picks.html', {
-        'picks_page': picks_page
+        'picks_page': picks_page,"active_picks":active_picks
     })
 
 @login_required
@@ -208,18 +215,34 @@ def profile_view(request,seller_id):
     curr_picks = None
 
     if buyer:
-        subscription = Subscription.objects.get(seller=seller,buyer=buyer)
+        is_buyer = True
+        try:
+            subscription = Subscription.objects.get(seller=seller,buyer=buyer)
+        except Subscription.DoesNotExist:
+            subscription = None
+
         if subscription and subscription.subscribed_until > timezone.now():
             curr_picks = ActivePick.objects.filter(seller=seller)
+    else:
+        is_buyer = False
 
     view_historical_picks = HistoricalPick.objects.filter(seller=seller).order_by('-posted_at')[:5]
     free_active_picks = ActivePick.objects.filter(seller=seller,is_free=True).order_by('-posted_at')
+
+    all_time_stats = Stat.objects.filter(seller = seller,time_period = "all_time")
+    monthly = Stat.objects.filter(seller = seller,time_period = "monthly")
+    weekly = Stat.objects.filter(seller = seller,time_period = "weekly")
+
     context = {
         "seller": seller,
         "subscription": subscription,
         "active_picks" : curr_picks,
         "historical_picks" : view_historical_picks,
         "free_active_picks" : free_active_picks,
+        "all_time_stats" : all_time_stats,
+        "monthly" : monthly,
+        "weekly" : weekly,
+        "is_buyer": is_buyer
     }
     return render(request, 'profile_view.html', context)
 @role_required(required_role="buyer")
@@ -229,24 +252,26 @@ def subscribe(request, seller_id):
     except Seller.DoesNotExist:
         return HttpResponseNotFound("Seller not found")
     buyer = Buyer.objects.get(user=request.user)
+
+    sub_until = None
     if request.method == 'POST':
         form = SubscriptionForm(request.POST)
         if form.is_valid():
             selected_plan = form.cleaned_data['plan']
             if selected_plan =="yearly":
-                subscribed_until = timezone.now() + relativedelta(years=1)
+                sub_until = timezone.now() + relativedelta(years=1)
             elif selected_plan =="monthly":
-                subscribed_until = timezone.now() + relativedelta(months=1)
+                sub_until = timezone.now() + relativedelta(months=1)
             elif selected_plan =="weekly":
-                subscribed_until = timezone.now() + relativedelta(weeks=1)
+                sub_until = timezone.now() + relativedelta(weeks=1)
             elif selected_plan =="daily":
-                subscribed_until = timezone.now() + relativedelta(days=1)
+                sub_until = timezone.now() + relativedelta(days=1)
 
-            Subscription.objects.get_or_create(buyer=buyer,seller=seller,defaults={'subscribed_until':subscribed_until})
+            Subscription.objects.get_or_create(buyer=buyer,seller=seller,defaults={'subscribed_until':sub_until})
             messages.success(request, f"Subscription Successful! You selected the {selected_plan} plan. You will now be redirected to the seller page")
             return redirect('profile_view', seller_id=seller_id)
 
-    return render(request, 'initialize_subscription.html', {'seller': seller,'form': Subscription})
+    return render(request, 'initialize_subscription.html', {'seller': seller,'form': SubscriptionForm})
 
 @role_required(required_role="seller")
 def look_up(request):
@@ -263,7 +288,9 @@ def look_up(request):
 
     return render(request, 'look_up.html',{'form':LookUp})
 
-
-
+def seller_search(request):
+    query = request.GET.get('query', '')
+    sellers = Seller.objects.filter(user_name__icontains=query)
+    return render(request, 'search_results.html', {'query': query, 'sellers': sellers})
 
 

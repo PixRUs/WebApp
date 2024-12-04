@@ -21,7 +21,7 @@
             margin-bottom: 20px;
         }
 
-        .card {
+        .active_card {
             border: 1px solid #444;
             border-radius: 12px;
             padding: 20px;
@@ -31,18 +31,18 @@
             transition: transform 0.3s, box-shadow 0.3s;
         }
 
-        .card:hover {
+        .active_card:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
         }
 
-        .card h3 {
+        .active_card h3 {
             margin: 0 0 12px;
             font-size: 1.5rem;
             color: #ffcc00;
         }
 
-        .card p {
+        .active_card p {
             margin: 6px 0;
             font-size: 1rem;
             color: #d6d6d6;
@@ -110,97 +110,47 @@
             font-size: 16px;
             cursor: pointer;
         }
+    .orange-link {
+    color: orange;
+    text-decoration: none; /* Optional: Remove underline */
+}
+
+.orange-link:hover {
+    text-decoration: underline; /* Optional: Add underline on hover */
+}
     </style>
 <body>
 
-    <div class="leaderboard">
-        <h2>Top 3 Sellers - Units Won (Past Week)</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Seller Name</th>
-                    <th>Units Won</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for seller in top_three_seller_units_won_past_week %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ seller.user_name }}</td>
-                        <td>{{ seller.units_won }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-        <!-- Search Bar -->
-
-
-    <div class="leaderboard">
-        <h2>Top 3 Sellers - Successful Bets Won (Past Week)</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Seller Name</th>
-                    <th>Successful Bets</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for seller in top_three_successful_bets_won_past_week %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ seller.user_name }}</td>
-                        <td>{{ seller.successful_bets }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <div class="leaderboard">
-        <h2>Top 3 Safest Sellers (Past Week)</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Seller Name</th>
-                    <th>Risk Ratio</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for seller in top_three_safest_sellers_past_week %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ seller.user_name }}</td>
-                        <td>{{ seller.risk_ratio }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <div class="leaderboard">
-        <h2>Top 3 Riskiest Sellers (Past Week)</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Seller Name</th>
-                    <th>Risk Ratio</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for seller in top_three_riskiest_sellers_past_week %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ seller.user_name }}</td>
-                        <td>{{ seller.risk_ratio }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <h1>Market</h1>
+    <form method="get" action="{% url 'seller_search' %}">
+        <label>
+            <input type="text" name="query" placeholder="Search for a seller..." required>
+        </label>
+        <button type="submit">Search</button>
+    </form>
+        <div class="active_card">
+            <h3>This week's top unit gainers</h3>
+            {% for seller, stat in top_three_seller_units_won_past_week %}
+                <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Units Gained this week : {{ stat }}</strong></p>
+            {% endfor %}
+        </div>
+        <div class="active_card">
+            <h3>This week's Most successful bets placed </h3>
+            {% for seller, stat in top_three_successful_bets_won_past_week %}
+                <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Successful bets placed this week : {{ stat }}</strong></p>
+            {% endfor %}
+        </div>
+        <div class="active_card">
+            <h3>This week's Safest sellers</h3>
+            {% for seller, stat in top_three_safest_sellers_past_week %}
+                <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Average risk taken this week : {{ stat }}</strong></p>
+            {% endfor %}
+        </div>
+        <div class="active_card">
+            <h3>This week's Riskiest sellers</h3>
+            {% for seller, stat in top_three_riskiest_sellers_past_week %}
+                <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Average risk taken this week : {{ stat }}</strong></p>
+            {% endfor %}
+        </div>
 </body>
 </html>

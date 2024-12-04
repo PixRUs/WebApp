@@ -49,7 +49,10 @@ def access_required():
                 return HttpResponseForbidden("You do not have permission to access this page.")
 
             if is_seller:
-                seller = Seller.objects.get(id=request.user.id)
+                try:
+                    seller = Seller.objects.get(user=request.user.id)
+                except Seller.DoesNotExist:
+                    return HttpResponseForbidden("You do not have permission to access this page.")
                 if seller != seller_accessed:
                     return HttpResponseForbidden("You do not have permission to access this page.")
             if is_buyer:

@@ -2,6 +2,8 @@
     Each time we just update the sellers. Need the implementation to be such that I wont have to change the whole structure if I were to add another statistic / sport.
 """
 from seller.models import Stat
+from decimal import Decimal
+
 from pixrus.utils.probabilty_calculator import get_probability
 def update_buyer_and_seller_stats(pick_data,result_data,seller,buyers,type_of_pick):
     """_summary_
@@ -45,7 +47,7 @@ def update_seller_stats_h2h(seller,pick_data,result_data):
             if stat.stat_name == "number_of_failed_picks":
                 stat.stat_value += 1
             if stat.stat_name == "total_probability":
-                stat.stat_value += get_probability(str(pick_data['odds']))
+                stat.stat_value += float(get_probability(str(pick_data['odds'])))
 
         return False
 
