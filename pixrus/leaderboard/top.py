@@ -21,23 +21,29 @@ class Dist:
 def get_top_sellers(time_unit: StatTimeUnits,stat_name: StatName,n,riskiest = None):
     if stat_name == "total_probability":
         risk_list: List[Dist] = []
-        total_probability = Stat.objects.filter(time_period=time_unit,stat_name=stat_name)
-        for stat in total_probability:
+        total_probability_queries = Stat.objects.filter(time_period=time_unit,stat_name=stat_name)
+        for stat in total_probability_queries:
             seller = stat.seller
             total = Stat.objects.get(time_period=time_unit,stat_name="total_picks_placed",seller=seller).stat_value
+            total_probability = Stat.objects.filter(time_period=time_unit,stat_name=stat_name,seller=seller).first().stat_value
             risk_list.append(Dist(total,total_probability,seller))
-            n = min(n,len(risk_list))
         if riskiest is True:
             risk_list.sort(reverse=True)
             tmp = []
-            for _ in range(n):
-                tmp.append((risk_list.pop().seller,risk_list.pop().total))
+            for _ in range(min(len(risk_list),n)):
+                dist = risk_list.pop()
+                seller = dist.seller
+                total = dist.total
+                tmp.append((seller,total))
             return tmp
         else:
             risk_list.sort(reverse=False)
             tmp = []
-            for _ in range(n):
-                tmp.append((risk_list.pop().seller,risk_list.pop().total))
+            for _ in range(min(len(risk_list),n)):
+                dist = risk_list.pop()
+                seller = dist.seller
+                total = dist.total
+                tmp.append((seller, total))
             return tmp
 
     top_unit_winners_queries = Stat.objects.filter(time_period=time_unit,stat_name=stat_name).order_by("-stat_value")[:n]

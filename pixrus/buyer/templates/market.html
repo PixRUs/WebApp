@@ -5,6 +5,7 @@
     <title>Title</title>
 </head>
     <style>
+        /* General Styling */
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -17,13 +18,27 @@
         h1 {
             color: #f0883e;
             font-size: 2.5rem;
-            text-align: center;
             margin-bottom: 20px;
+            text-align: center;
         }
 
-        .active_card {
+        p {
+            font-size: 1.1rem;
+            margin: 8px 0;
+        }
+
+        h2 {
+            color: #ffcc00;
+            font-size: 1.8rem;
+            margin: 40px 0 20px;
+            border-bottom: 2px solid #444;
+            padding-bottom: 5px;
+        }
+
+        /* Card Styling */
+        .card {
             border: 1px solid #444;
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 20px;
             margin: 16px 0;
             background: rgba(255, 255, 255, 0.1);
@@ -31,51 +46,154 @@
             transition: transform 0.3s, box-shadow 0.3s;
         }
 
-        .active_card:hover {
+        .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
         }
 
-        .active_card h3 {
+    .stat-card {
+    flex: 1;                /* Each card takes equal space */
+    min-width: 250px;       /* Prevent cards from getting too small */
+    max-width: 300px;       /* Limit the maximum size of each card */
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1); /* Same background as active_card */
+    border-radius: 12px;    /* Same border-radius as active_card */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Same shadow as active_card */
+    transition: transform 0.3s, box-shadow 0.3s; /* Smooth transition */
+    margin: 16px 0;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);  /* Lift the card on hover */
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4); /* Increase shadow on hover */
+}
+
+.stat-card h3 {
+    margin: 0 0 12px;
+    font-size: 1.5rem;
+    color: #ffcc00;  /* Same color for headings */
+}
+
+.stat-card p {
+    margin: 6px 0;
+    font-size: 1rem;
+    color: #d6d6d6;  /* Same color for text */
+}
+
+.stat-card .actions {
+    margin-top: 20px;
+}
+
+.stat-card .actions button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    background: linear-gradient(90deg, #f0883e, #ffcc00);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.stat-card .actions button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+
+
+        .card h3 {
             margin: 0 0 12px;
             font-size: 1.5rem;
             color: #ffcc00;
         }
 
-        .active_card p {
+        .card p {
             margin: 6px 0;
             font-size: 1rem;
             color: #d6d6d6;
         }
 
-        .pagination {
+        .success {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .failure {
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        /* Button Styling */
+        .button-container {
             display: flex;
             justify-content: center;
             margin: 20px 0;
         }
 
-        .pagination a, .pagination span {
-            color: #fff;
-            margin: 0 5px;
-            padding: 8px 15px;
+        .button-container a {
             text-decoration: none;
-            border: 1px solid #444;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.1);
+            margin: 0 10px;
         }
 
-        .pagination a:hover {
-            background: linear-gradient(90deg, #f0883e, #ffcc00);
-        }
-
-        .pagination .current-page {
-            background: linear-gradient(90deg, #f0883e, #ffcc00);
+        .redirect-button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
             font-weight: bold;
+            color: #fff;
+            background: linear-gradient(90deg, #f0883e, #ffcc00);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
-        .back-button {
-            display: block;
-            margin: 20px auto 0;
+        .redirect-button:hover {
+            transform: translateY(-5px);
+            background: linear-gradient(90deg, #ff7e00, #ffe700);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        /* No Picks Styling */
+        .no-picks {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #ccc;
+            margin-top: 20px;
+        }
+
+        /* Header Info Styling */
+        .header-info {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+.stats-wrapper {
+    display: flex;                /* Enable flexbox for the wrapper */
+    justify-content: center;      /* Center the stats-container horizontally */
+    align-items: center;          /* Center the stats-container vertically */
+    width: 100%;                  /* Ensure it takes the full width of its parent */
+    height: auto;                 /* Adjust height according to content */
+}
+
+.stats-container {
+    display: flex;                /* Enable flexbox for the container */
+    flex-wrap: wrap;              /* Allow the cards to wrap onto new rows */
+    gap: 20px;                    /* Adds space between cards */
+    justify-content: center;      /* Center cards horizontally within the container */
+}
+            .orange-link {
+    color: orange;
+    text-decoration: none; /* Optional: Remove underline */
+}
+
+.orange-link:hover {
+    text-decoration: underline; /* Optional: Add underline on hover */
+}
+    .back-home-button {
+            display: inline-block;
+            margin: 20px auto;
             padding: 15px 30px;
             font-size: 1.2rem;
             font-weight: bold;
@@ -90,67 +208,77 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
-        .back-button:hover {
-            transform: translateY(-5px);
-            background: linear-gradient(90deg, #ff7e00, #ffe700);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        .back-home-button :hover {
+            background-color: #ffcc00;
+            transform: translateY(-2px);
         }
-        .search-bar {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .search-bar input {
-            padding: 10px;
-            font-size: 16px;
-            width: 300px;
-            margin-right: 10px;
-        }
-        .search-bar button {
-            padding: 10px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-    .orange-link {
-    color: orange;
-    text-decoration: none; /* Optional: Remove underline */
-}
-
-.orange-link:hover {
-    text-decoration: underline; /* Optional: Add underline on hover */
-}
     </style>
 <body>
+    <a href="{% url 'buyer_dashboard' %}" class="back-home-button">Go Back Home</a>
 
-    <h1>Market</h1>
     <form method="get" action="{% url 'seller_search' %}">
         <label>
             <input type="text" name="query" placeholder="Search for a seller..." required>
         </label>
         <button type="submit">Search</button>
     </form>
-        <div class="active_card">
+    <div class="stats-container">
+        <div class="card">
             <h3>This week's top unit gainers</h3>
             {% for seller, stat in top_three_seller_units_won_past_week %}
                 <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Units Gained this week : {{ stat }}</strong></p>
             {% endfor %}
         </div>
-        <div class="active_card">
+        <div class="card">
             <h3>This week's Most successful bets placed </h3>
             {% for seller, stat in top_three_successful_bets_won_past_week %}
                 <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Successful bets placed this week : {{ stat }}</strong></p>
             {% endfor %}
         </div>
-        <div class="active_card">
+        <div class="card">
             <h3>This week's Safest sellers</h3>
             {% for seller, stat in top_three_safest_sellers_past_week %}
                 <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Average risk taken this week : {{ stat }}</strong></p>
             {% endfor %}
         </div>
-        <div class="active_card">
+        <div class="card">
             <h3>This week's Riskiest sellers</h3>
             {% for seller, stat in top_three_riskiest_sellers_past_week %}
                 <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Average risk taken this week : {{ stat }}</strong></p>
             {% endfor %}
         </div>
+    </div>
+    <div class="stats-container">
+        <div class="card">
+            <h3>This Month's top unit gainers</h3>
+            {% for seller, stat in top_three_seller_units_won_past_month %}
+                <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Units Gained this week : {{ stat }}</strong></p>
+            {% endfor %}
+        </div>
+        <div class="card">
+            <h3>This Month's Most successful bets placed </h3>
+            {% for seller, stat in top_three_successful_bets_won_past_month %}
+                <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Successful bets placed this week : {{ stat }}</strong></p>
+            {% endfor %}
+        </div>
+        <div class="card">
+            <h3>This Month's Safest sellers</h3>
+            {% for seller, stat in top_three_safest_sellers_past_month %}
+                <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Average risk taken this week : {{ stat }}</strong></p>
+            {% endfor %}
+        </div>
+        <div class="card">
+            <h3>This Month's Riskiest sellers</h3>
+            {% for seller, stat in top_three_successful_bets_won_past_month %}
+                <p><strong>{{ forloop.counter }}. <a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a> Average risk taken this week : {{ stat }}</strong></p>
+            {% endfor %}
+        </div>
+    </div>
+    <h1>Recommended Sellers </h1>
+    {% for seller in recommended_sellers %}
+        <div class="card">
+                <p><strong><a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a></strong></p>
+        </div>
+    {% endfor %}
 </body>
 </html>

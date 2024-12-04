@@ -54,10 +54,20 @@ def market(request):
     top_three_safest_sellers_past_week =get_top_sellers(time_unit="weekly",stat_name="total_probability",n=3,riskiest=True)
     top_three_riskiest_sellers_past_week =get_top_sellers(time_unit="weekly",stat_name="total_probability",n=3,riskiest=False)
 
+    top_three_seller_units_won_past_month =get_top_sellers(time_unit="monthly",stat_name='total_units_won',n=3)
+    top_three_successful_bets_won_past_month =get_top_sellers(time_unit="monthly",stat_name='number_of_successes',n=3)
+    top_three_safest_sellers_past_month =get_top_sellers(time_unit="monthly",stat_name="total_probability",n=3,riskiest=True)
+    top_three_riskiest_sellers_past_month =get_top_sellers(time_unit="monthly",stat_name="total_probability",n=3,riskiest=False)
 
     top_5_active_picks = get_recommended_picks(buyer,5)
     top_five_active_sellers = get_recommended_sellers(buyer,5)
     context = {'top_three_seller_units_won_past_week': top_three_seller_units_won_past_week,'top_three_successful_bets_won_past_week': top_three_successful_bets_won_past_week,
-               "top_three_safest_sellers_past_week":top_three_safest_sellers_past_week,"top_three_riskiest_sellers_past_week":top_three_riskiest_sellers_past_week}
+               "top_three_safest_sellers_past_week":top_three_safest_sellers_past_week,"top_three_riskiest_sellers_past_week":top_three_riskiest_sellers_past_week,
+               "top_three_seller_units_won_past_month":top_three_seller_units_won_past_month,
+               "top_three_successful_bets_won_past_month":top_three_successful_bets_won_past_month,
+               "top_three_safest_sellers_past_month":top_three_safest_sellers_past_month,
+               "top_three_riskiest_sellers_past_month":top_three_riskiest_sellers_past_month,
+               "recommended_sellers": top_five_active_sellers,
+               }
 
     return render(request, 'market.html',context)
