@@ -89,6 +89,10 @@ TEMPLATES = [
     },
 ]
 
+STATICFILES_DIRS = [
+     "static",  # Project-level static directory
+]
+STATIC_URL = '/static/'  # URL prefix for static files
 
 WSGI_APPLICATION = 'pixrus.wsgi.application'
 

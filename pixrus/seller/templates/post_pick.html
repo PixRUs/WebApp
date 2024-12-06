@@ -1,213 +1,104 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NBA Odds</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #1f1f1f, #333333);
-            color: #fff;
-            min-height: 100vh;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            color: #f0883e;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .filters {
-            margin-bottom: 20px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .filters form {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .filters select, .filters input, .filters button {
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #f0883e;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff; /* Ensures text is visible */
-            outline: none;
-            -webkit-appearance: none; /* For better styling in dropdowns */
-        }
-
-        .filters select option, .filters input::placeholder {
-            color: #aaa; /* Light gray for placeholder and dropdown options */
-        }
-
-        .filters button {
-            cursor: pointer;
-            background: linear-gradient(90deg, #f0883e, #ffcc00);
-            border: none;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-
-        .filters button:hover {
-            background: linear-gradient(90deg, #ff7e00, #ffe700);
-            transform: scale(1.05);
-        }
-
-        .game {
-            margin-bottom: 20px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .game:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
-        }
-
-        .game h2 {
-            margin: 0 0 10px;
-            color: #ffcc00;
-            font-size: 1.5rem;
-        }
-
-        .game p {
-            margin: 4px 0;
-            color: #ddd;
-        }
-
-        .bookmaker {
-            margin-top: 10px;
-        }
-
-        .outcome p {
-            margin-left: 20px;
-            font-size: 14px;
-            color: #ccc;
-        }
-
-        .details-button, .dashboard-button {
-            text-decoration: none;
-            color: #fff;
-            background: linear-gradient(90deg, #f0883e, #ffcc00);
-            padding: 10px 20px;
-            border-radius: 50px;
-            font-size: 14px;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .details-button:hover, .dashboard-button:hover {
-            background: linear-gradient(90deg, #ff7e00, #ffe700);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-        }
-
-        .dashboard-container {
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        p.no-games {
-            text-align: center;
-            color: #ddd;
-            font-size: 1.2rem;
-            margin-top: 20px;
-        }
-    </style>
+    <title>NBA Game Odds</title>
+    <link href="{% static 'css/tabler.css' %}" rel="stylesheet"/>
 </head>
 <body>
-    <div class="dashboard-container">
-        <a href="{% url 'seller_dashboard' %}" class="dashboard-button">
-            Back to Dashboard
-        </a>
-    </div>
+    <div class="container mt-5">
+        <!-- Back to Dashboard -->
+        <div class="mb-4">
+            <a href="{% url 'seller_dashboard' %}" class="btn btn-secondary">
+                Back to Dashboard
+            </a>
+        </div>
 
-    <h1>NBA Game Odds</h1>
+        <!-- Page Title -->
+        <h1 class="mb-4">NBA Game Odds</h1>
 
-    <!-- Filters -->
-    <div class="filters">
-        <form method="GET">
-            <!-- Team Filter -->
-            <select name="team">
-                <option value="">Filter by Team</option>
-                {% for pick in all_picks %}
-                    <option value="{{ pick.home_team }}">{{ pick.home_team }}</option>
-                    <option value="{{ pick.away_team }}">{{ pick.away_team }}</option>
-                {% endfor %}
-            </select>
+        <!-- Filters Section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title">Filter Games</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <!-- Team Filter -->
+                    <div class="col-md-4">
+                        <label for="team" class="form-label">Filter by Team</label>
+                        <select name="team" id="team" class="form-select">
+                            <option value="">Select a Team</option>
+                            {% for pick in all_picks %}
+                                <option value="{{ pick.home_team }}">{{ pick.home_team }}</option>
+                                <option value="{{ pick.away_team }}">{{ pick.away_team }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-            <!-- Sportsbook Filter -->
-            <select name="sportsbook">
-                <option value="">Filter by Sportsbook</option>
-                {% for sportsbook in unique_sportsbooks %}
-                    <option value="{{ sportsbook }}">{{ sportsbook }}</option>
-                {% endfor %}
-            </select>
+                    <!-- Sportsbook Filter -->
+                    <div class="col-md-4">
+                        <label for="sportsbook" class="form-label">Filter by Sportsbook</label>
+                        <select name="sportsbook" id="sportsbook" class="form-select">
+                            <option value="">Select a Sportsbook</option>
+                            {% for sportsbook in unique_sportsbooks %}
+                                <option value="{{ sportsbook }}">{{ sportsbook }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-            <!-- Date Filter -->
-            <input type="date" name="date" placeholder="Select Date">
+                    <!-- Date Filter -->
+                    <div class="col-md-4">
+                        <label for="date" class="form-label">Filter by Date</label>
+                        <input type="date" name="date" id="date" class="form-control" placeholder="Select Date">
+                    </div>
 
-            <!-- Submit Button -->
-            <button type="submit">Filter</button>
-        </form>
-    </div>
+                    <!-- Submit Button -->
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-    <!-- Display Picks -->
-    {% for pick in picks %}
-        {% if pick.bookmakers %}
-            <div class="game">
-                <!-- Game Details -->
-                <div>
-                    <h2>{{ pick.away_team }} at {{ pick.home_team }}</h2>
-                    <p><strong>Start Time:</strong> {{ pick.commence_time }}</p>
+        <!-- Display Picks Section -->
+        {% if picks %}
+            {% for pick in picks %}
+                {% if pick.bookmakers %}
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <!-- Game Details -->
+                            <h5 class="card-title">{{ pick.away_team }} at {{ pick.home_team }}</h5>
+                            <p><strong>Start Time:</strong> {{ pick.commence_time }}</p>
 
-                    {% for bookmaker in pick.bookmakers %}
-                        <div class="bookmaker">
-                            <p><strong>Bookmaker:</strong> {{ bookmaker.title }}</p>
+                            <!-- Bookmakers and Odds -->
+                            {% for bookmaker in pick.bookmakers %}
+                                <div class="mb-3">
+                                    <p><strong>Bookmaker:</strong> {{ bookmaker.title }}</p>
 
-                            {% for market in bookmaker.markets %}
-                                <div class="market">
-                                    {% for outcome in market.outcomes %}
-                                        <div class="outcome">
-                                            <p><strong>Outcome:</strong> {{ outcome.name }} - <strong>Odds:</strong> {{ outcome.multiplier }}</p>
+                                    {% for market in bookmaker.markets %}
+                                        <div class="ms-3">
+                                            {% for outcome in market.outcomes %}
+                                                <p><strong>Outcome:</strong> {{ outcome.name }} - <strong>Odds:</strong> {{ outcome.multiplier }}</p>
+                                            {% endfor %}
                                         </div>
                                     {% endfor %}
                                 </div>
                             {% endfor %}
+
+                            <!-- Post Pick Button -->
+                            <a href="{% url 'activate_pick' pick.id %}" class="btn btn-primary">
+                                Post Pick
+                            </a>
                         </div>
-                    {% endfor %}
-                </div>
-
-                <!-- Button to Redirect -->
-                <div>
-                    <a href="{% url 'activate_pick' pick.id %}" class="details-button">
-                        Post Pick
-                    </a>
-                </div>
-            </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">No games match your filter criteria.</p>
         {% endif %}
-    {% endfor %}
-
-    {% if not picks %}
-        <p class="no-games">No games match your filter criteria.</p>
-    {% endif %}
+    </div>
 </body>
 </html>
