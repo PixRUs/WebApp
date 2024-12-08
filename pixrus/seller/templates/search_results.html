@@ -1,105 +1,82 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Active Picks</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #1f1f1f, #333333);
-            color: #fff;
-            min-height: 100vh;
-        }
-
-        h1 {
-            color: #f0883e;
-            font-size: 2.5rem;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .orange-link {
-    color: orange;
-    text-decoration: none; /* Optional: Remove underline */
-}
-
-.orange-link:hover {
-    text-decoration: underline; /* Optional: Add underline on hover */
-}
-
-        /* Card Styling */
-        .active_card {
-            border: 1px solid #444;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 16px 0;
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .active_card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
-        }
-
-        .active_card h3 {
-            margin: 0 0 12px;
-            font-size: 1.5rem;
-            color: #ffcc00;
-        }
-
-        .active_card p {
-            margin: 6px 0;
-            font-size: 1rem;
-            color: #d6d6d6;
-        }
-
-        /* Button Styling */
-        .back-button {
-            display: block;
-            margin: 20px auto 0;
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #fff;
-            background: linear-gradient(90deg, #f0883e, #ffcc00);
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .back-button:hover {
-            transform: translateY(-5px);
-            background: linear-gradient(90deg, #ff7e00, #ffe700);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-        }
-
-        .no-picks {
-            text-align: center;
-            font-size: 1.2rem;
-            color: #ccc;
-            margin-top: 20px;
-        }
-    </style>
+    <title>Search Results</title>
+    <link href="{% static 'css/tabler.css' %}" rel="stylesheet"/>
 </head>
 <body>
-    <h1>Search results </h1>
-    {% if sellers %}
+<div class="page">
+  <!-- Sidebar -->
+  <aside class="navbar navbar-vertical navbar-expand-sm navbar-dark">
+    <div class="container-fluid">
+      <h1 class="navbar-brand navbar-brand-autodark">
+        <a href="#">
+          <img src="{% static 'images/logo.png' %}" width="110" height="32" alt="Marketplace Logo" class="navbar-brand-image">
+        </a>
+      </h1>
+      <div class="collapse navbar-collapse" id="sidebar-menu">
+        <ul class="navbar-nav pt-lg-3">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'buyer_dashboard' %}">
+              <span class="nav-link-title">Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'market' %}">
+              <span class="nav-link-title">Marketplace</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Page Content -->
+  <div class="page-wrapper">
+    <div class="container-xl">
+      <div class="page-header d-print-none">
+        <div class="row g-2 align-items-center">
+          <div class="col">
+            <h2 class="page-title">Search Results</h2>
+            <p class="text-muted">Results for "{{ query }}".</p>
+          </div>
+          <div class="col-auto">
+            <a href="{% url 'market' %}" class="btn btn-secondary">Back to Marketplace</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Section -->
+      <div class="row row-cards">
+        {% if sellers %}
         {% for seller in sellers %}
-            <div class="card">
-<p><strong><a href="{% url 'profile_view' seller.id %}" class="orange-link">{{ seller.user_name }}</a></strong></p>
+        <div class="col-md-6 col-lg-4">
+          <div class="card">
+            <div class="card-body">
+              <h3 class="card-title">{{ seller.user_name }}</h3>
+              <p><strong>Total Picks Sold:</strong> {{ seller.picks_sold }}</p>
+              <p><strong>Success Rate:</strong> {{ seller.success_rate }}%</p>
+              <p><strong>Average Odds:</strong> {{ seller.average_odds }}</p>
+              <div class="mt-3">
+                <a href="{% url 'profile_view' seller.id %}" class="btn btn-primary w-100">View Profile</a>
+              </div>
             </div>
+          </div>
+        </div>
         {% endfor %}
-    {% else %}
-        <p class="no-picks">No Sellers matched search .</p>
-    {% endif %}
-    <a href="{% url 'market' %}" class="back-button">Back to Market</a>
+        {% else %}
+        <div class="col-12">
+          <div class="alert alert-warning text-center">
+            No sellers found matching "{{ query }}". Please try another search.
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>

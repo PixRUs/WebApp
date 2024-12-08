@@ -22,18 +22,23 @@
       <div class="collapse navbar-collapse" id="sidebar-menu">
         <ul class="navbar-nav pt-lg-3">
           <li class="nav-item">
-            <a class="nav-link" href="#">
-              <span class="nav-link-title">Manage Profile</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="./">
               <span class="nav-link-title">Dashboard</span>
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">
-              <span class="nav-link-title">Analytics</span>
+              <span class="nav-link-title">Manage Subscriptions</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <span class="nav-link-title">Manage Profile </span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'market' %}">
+              <span class="nav-link-title">Market</span>
             </a>
           </li>
         </ul>
@@ -55,10 +60,9 @@
                             </div>
                             <div class="col-auto ms-auto">
                                 <div class="btn-list">
-                                    <a href="{% url 'lookup' %}" class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#modal-report">
-                                      Post a new Pick to Subscribers
+                                    <a href="{% url 'market' %}" class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#modal-report">
+                                      Go to Marketplace
                                     </a>
-                                    <a href="{% url 'lookup' %}" class="btn btn-primary d-sm-none btn-icon" data-bs-toggle="modal" data-bs-target="#modal-report" aria-label="Create new report"></a>
                                 </div>
                             </div>
                         </div>
@@ -70,56 +74,59 @@
 
     <!-- Page Body -->
     <div class="page-body">
-        <div class="container-xl">
-            <div class="row row-deck row-cards">
-                <!-- All-time Stats Card -->
-                <div class="col-4">
-                    <div class="card">
-                        <div class="card-body" style="height: 15rem">
-                            <h3>All-time Stats</h3>
-                            {% for stat in all_time_stats %}
-                                <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
-                            {% endfor %}
-                        </div>
-                    </div>
+          <div class="container-xl">
+            <!-- Subscribed Sellers Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">All Subscribed Sellers</h5>
                 </div>
-
-                <!-- Monthly Stats Card -->
-                <div class="col-4">
-                    <div class="card">
-                        <div class="card-body" style="height: 15rem">
-                            <h3>Monthly Stats</h3>
-                            {% for stat in monthly %}
-                                <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Weekly Stats Card -->
-
-                <div class="col-4">
-                    <div class="card">
-                        <div class="card-body" style="height: 15rem">
-                            <h3>Weekly Stats</h3>
-                            {% for stat in weekly %}
-                                <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
-                            {% endfor %}
-                        </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th>Seller User Name</th>
+                                    <th>Total Subscribers</th>
+                                    <th>Number of Successful Picks</th>
+                                    <th>Number of Picks Placed</th>
+                                    <th>Total Units Won</th>
+                                    <th>Profile</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for total_units_won, total_number_of_success, number_of_picks_placed, subscriber_count,seller in seller_stat %}
+                                <tr>
+                                    <td>{{ seller.user_name }}</td>
+                                    <td>{{ subscriber_count }}</td>
+                                    <td>{{ total_units_won }}</td>
+                                    <td>{{ number_of_picks_placed }}</td>
+                                   <td>{{ total_number_of_success }}</td>
+                                    <td>
+                                        <a href="{% url 'profile_view' seller.id %}" class="btn btn-primary btn-sm">
+                                            View Profile
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No subscribed sellers found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-        </div>
-
+          </div>
 
             <!-- Active Picks Table -->
-        <div class="container-xl" style="padding-top: 0.2in;">
-            <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title">Active Picks</h5>
-                </div>
-                <div class="card-body">
+<div class="container-xl" style="padding-top: 0.2in;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Active Picks</h5>
+            </div>
+            <div class="card-body">
                     <table class="table table-vcenter">
                         <thead>
                             <tr>
@@ -131,20 +138,30 @@
                                 <th>Pick Odds</th>
                                 <th>Sportsbook</th>
                                 <th>Unit Amount</th>
+                                <th>Seller</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for pick in active_picks %}
-                            <tr>
-                                <td>{{ pick.game_data.away_team }}</td>
-                                <td>{{ pick.game_data.home_team }}</td>
-                                <td>{{ pick.event_start }}</td>
-                                <td>{{ pick.type_of_pick }}</td>
-                                <td>{{ pick.pick_data.target_winner }}</td>
-                                <td>{{ pick.pick_data.odds }}</td>
-                                <td>{{ pick.pick_data.book_maker }}</td>
-                                <td>{{ pick.pick_data.bet_amount }}</td>
-                            </tr>
+                            {% for pick, seller in seller_picks %}
+                                <tr>
+                                    <td>{{ pick.game_data.away_team }}</td>
+                                    <td>{{ pick.game_data.home_team }}</td>
+                                    <td>{{ pick.event_start }}</td>
+                                    <td>{{ pick.type_of_pick }}</td>
+                                    <td>{{ pick.pick_data.target_winner }}</td>
+                                    <td>{{ pick.pick_data.odds }}</td>
+                                    <td>{{ pick.pick_data.book_maker }}</td>
+                                    <td>{{ pick.pick_data.bet_amount }}</td>
+                                    <td>
+                                        <a href="{% url 'profile_view' seller.id %}" class="orange-link">
+                                            {{ seller.user_name }}
+                                        </a>
+                                    </td>
+                                </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9">No Active picks available.</td>
+                        </tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -174,7 +191,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for pick in historical_picks %}
+                {% for pick in historical_picks %}
                 <tr>
                     <td>{{ pick.game_event_result.team_1 }}</td>
                     <td>{{ pick.game_event_result.team_2 }}</td>
@@ -203,6 +220,7 @@
             </div>
         </div>
 </div>
+  </div>
   </div>
 </div>
 </body>

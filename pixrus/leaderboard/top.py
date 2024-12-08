@@ -28,22 +28,25 @@ def get_top_sellers(time_unit: StatTimeUnits,stat_name: StatName,n,riskiest = No
             total_probability = Stat.objects.filter(time_period=time_unit,stat_name=stat_name,seller=seller).first().stat_value
             risk_list.append(Dist(total,total_probability,seller))
         if riskiest is True:
-            risk_list.sort(reverse=True)
-            tmp = []
-            for _ in range(min(len(risk_list),n)):
-                dist = risk_list.pop()
-                seller = dist.seller
-                total = dist.total
-                tmp.append((seller,total))
-            return tmp
-        else:
             risk_list.sort(reverse=False)
             tmp = []
             for _ in range(min(len(risk_list),n)):
                 dist = risk_list.pop()
                 seller = dist.seller
-                total = dist.total
-                tmp.append((seller, total))
+                if dist.calculate_risk()  == 0:
+                    continue
+                tmp.append((seller, dist.calculate_risk()))
+
+            return tmp
+        else:
+            risk_list.sort(reverse=True)
+            tmp = []
+            for _ in range(min(len(risk_list),n)):
+                dist = risk_list.pop()
+                seller = dist.seller
+                if dist.calculate_risk()  == 0:
+                    continue
+                tmp.append((seller, dist.calculate_risk()))
             return tmp
 
     top_unit_winners_queries = Stat.objects.filter(time_period=time_unit,stat_name=stat_name).order_by("-stat_value")[:n]

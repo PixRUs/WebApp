@@ -32,6 +32,21 @@ def seller_landing(request):
     monthly = Stat.objects.filter(seller=seller,time_period = "monthly")
     weekly = Stat.objects.filter(seller=seller,time_period = "weekly")
 
+    all_time_placed = Stat.objects.filter(seller=seller,time_period = "all_time",stat_name="total_picks_placed").first().stat_value
+    monthly_placed = Stat.objects.filter(seller=seller,time_period = "monthly",stat_name="total_picks_placed").first().stat_value
+    weekly_placed = Stat.objects.filter(seller=seller,time_period = "weekly",stat_name="total_picks_placed").first().stat_value
+    for stat in all_time_stats:
+        if stat.stat_name == "total_probability":
+            stat.stat_value = stat.stat_value / all_time_placed
+
+    for stat in monthly:
+        if stat.stat_name == "total_probability":
+            stat.stat_value = stat.stat_value / all_time_placed
+    for stat in weekly:
+        if stat.stat_name == "total_probability":
+            stat.stat_value = stat.stat_value / all_time_placed
+
+
     context = {
         'seller': seller,
         'active_picks': active_picks,

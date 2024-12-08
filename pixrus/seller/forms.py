@@ -6,7 +6,11 @@ class Subscription(forms.Form):
         ('weekly', 'Weekly Plan - $10/week'),
         ('yearly', 'Yearly Plan - $8/month'),
     ]
-    plan = forms.ChoiceField(choices=SUB_CHOICES, widget=forms.RadioSelect, label='Select Your Subscription Plan')
+    plan = forms.ChoiceField(
+        choices=SUB_CHOICES,
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        label='Select Your Subscription Plan'
+    )
 
 class LookUp(forms.Form):
     SPORT_LEAGUE_CHOICES = [
