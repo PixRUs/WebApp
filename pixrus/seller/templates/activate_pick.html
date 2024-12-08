@@ -1,177 +1,109 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pick Details</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #1f1f1f, #333333);
-            color: #fff;
-            margin: 20px;
-        }
-        .container {
-            max-width: 700px;
-            margin: 0 auto;
-            background: #2a2a2a;
-            border: 1px solid #444;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-            padding: 20px;
-        }
-        h1, h2, h3, h4 {
-            text-align: center;
-            color: #f0883e;
-        }
-        .game-details, .bookmakers {
-            margin-top: 20px;
-        }
-        .bookmaker {
-            margin-top: 10px;
-            padding: 15px;
-            background: #1f1f1f;
-            border: 1px solid #555;
-            border-radius: 12px;
-        }
-        .market {
-            margin-left: 10px;
-            margin-top: 10px;
-        }
-        .outcome {
-            margin-left: 20px;
-        }
-        .activate-button, .back-button {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 12px 20px;
-            background: linear-gradient(90deg, #f0883e, #ffcc00);
-            color: #fff;
-            text-decoration: none;
-            border: none;
-            border-radius: 50px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .activate-button:hover, .back-button:hover {
-            background: linear-gradient(90deg, #ff7e00, #ffe700);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-        }
-        .button-container {
-            text-align: center;
-            margin-top: 20px;
-        }
-        p {
-            margin: 5px 0;
-            color: #ddd;
-        }
-        strong {
-            color: #ffcc00;
-        }
-    </style>
+    <link href="{% static 'css/tabler.css' %}" rel="stylesheet" />
     <script>
-        function confirmActivation(commence_time, home_team, away_team, game, bookmaker, outcome, multiplier,sport,league,type) {
-            const unit_amount = prompt(`Please enter a unit size for the following game activation:\n\nGame: ${game}\nBookmaker: ${bookmaker}\nOutcome: ${outcome}\nOdds: ${multiplier}`);
-            if (!unit_amount || isNaN(unit_amount) || !Number.isInteger(Number(unit_amount)) || Number(unit_amount) <= 0) {
-                alert("Invalid unit size. Please enter a positive integer.");
-                return;
-            }
-            if (confirm(`Are you sure you want to activate the following?\n\nGame: ${game}\nBookmaker: ${bookmaker}\nOutcome: ${outcome}\nOdds: ${multiplier}\nUnit Amount: ${unit_amount}`)) {
-                const formData = new FormData();
-                formData.append("bookmaker", bookmaker);
-                formData.append("outcome", outcome);
-                formData.append("multiplier", multiplier);
-                formData.append("home_team", home_team);
-                formData.append("away_team", away_team);
-                commence_time = new Date(commence_time).toISOString();
-                formData.append("commence_time", commence_time);
-                formData.append("unit_size", unit_amount);
-                formData.append("sport", sport);
-                formData.append("league", league);
-                formData.append("type", type);
-                // Send POST request to the same URL
-                fetch(window.location.href, {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": getCSRFToken(), // Include CSRF token for security
-                    },
-                    body: formData,
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(data.message);
-                    } else {
-                        alert(`Error: ${data.error}`);
-                    }
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                    alert("An error occurred while activating the pick.");
-                });
-            }
-        }
+function confirmActivation(commence_time, home_team, away_team, game, bookmaker, outcome, multiplier, sport, league, type) {
+    const unit_amount = prompt(`Please enter a unit size for the following game activation:\n\nGame: ${game}\nBookmaker: ${bookmaker}\nOutcome: ${outcome}\nOdds: ${multiplier}`);
+    if (!unit_amount || isNaN(unit_amount) || !Number.isInteger(Number(unit_amount)) || Number(unit_amount) <= 0) {
+        alert("Invalid unit size. Please enter a positive integer.");
+        return;
+    }
+    if (confirm(`Are you sure you want to activate the following?\n\nGame: ${game}\nBookmaker: ${bookmaker}\nOutcome: ${outcome}\nOdds: ${multiplier}\nUnit Amount: ${unit_amount}`)) {
+        const formData = new FormData();
+        formData.append("bookmaker", bookmaker);
+        formData.append("outcome", outcome);
+        formData.append("multiplier", multiplier);
+        formData.append("home_team", home_team);
+        formData.append("away_team", away_team);
+        commence_time = new Date(commence_time).toISOString();
+        formData.append("commence_time", commence_time);
+        formData.append("unit_size", unit_amount);
+        formData.append("sport", sport);
+        formData.append("league", league);
+        formData.append("type", type);
 
-        // Utility function to get CSRF token from cookies
-        function getCSRFToken() {
-            const name = "csrftoken";
-            const cookies = document.cookie.split(";");
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.startsWith(name + "=")) {
-                    return cookie.substring(name.length + 1);
-                }
-            }
-            return "";
-        }
+        // Send POST request
+        fetch(window.location.href, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCSRFToken(), // Include CSRF token for security
+            },
+            body: formData,
+        })
+        .then(response => response.json())
+    }
+}
 
-        // Navigate back to the previous page
+// Utility function to get CSRF token
+function getCSRFToken() {
+    const name = "csrftoken";
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith(name + "=")) {
+            return cookie.substring(name.length + 1);
+        }
+    }
+    return "";
+}
+
         function goBack() {
             window.history.back();
         }
     </script>
 </head>
 <body>
-    <div class="container">
-        <h1>Pick Details</h1>
-        <div class="game-details">
-            <h2>{{ pick.home_team }} vs {{ pick.away_team }}</h2>
-            <p><strong>Commence Time:</strong> {{ pick.commence_time }}</p>
-        </div>
 
-        <div class="bookmakers">
-            <h3>Bookmakers:</h3>
-            {% for bookmaker in pick.bookmakers %}
-                <div class="bookmaker">
-                    <p><strong>Bookmaker:</strong> {{ bookmaker.title }}</p>
-                    <div class="markets">
-                        {% for market in bookmaker.markets %}
-                            <div class="market">
-                                <h4>Market Outcomes:</h4>
-                                {% for outcome in market.outcomes %}
-                                    <div class="outcome">
-                                        <p><strong>Outcome:</strong> {{ outcome.name }}</p>
-                                        <p><strong>Multiplier:</strong> {{ outcome.multiplier }}</p>
-                                        <!-- Activate Button -->
-                                        <button class="activate-button" onclick="confirmActivation('{{ pick.commence_time }}','{{ pick.home_team }}', '{{ pick.away_team }}', '{{ pick.home_team }} vs {{ pick.away_team }}', '{{ bookmaker.title }}', '{{ outcome.name }}', '{{ outcome.multiplier }}','{{ pick.sport }}','{{ pick.league }}','{{ pick.type }}')">
-                                            Activate
-                                        </button>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% endfor %}
-                    </div>
+<div class="position-absolute top-0 start-0 m-3">
+    <a href="{% url 'lookup' %}" class="btn btn-secondary">Back to Post Picks</a>
+</div>
+    <div class="container my-5">
+        <div class="card shadow-lg">
+            <div class="card-header bg-light text-dark">
+                <h1 class="card-title">Pick Details</h1>
+            </div>
+            <div class="card-body">
+                <div class="game-details mb-4">
+                    <h2 class="text-center text-primary">{{ pick.home_team }} vs {{ pick.away_team }}</h2>
+                    <p><strong>Commence Time:</strong> {{ pick.commence_time }}</p>
                 </div>
-            {% endfor %}
-        </div>
 
-        <!-- Back to Post Picks Button -->
-        <div class="button-container">
-            <button class="back-button" onclick="goBack()">Back to Post Picks</button>
+                <div class="bookmakers">
+                    <h3>Bookmakers:</h3>
+                    {% for bookmaker in pick.bookmakers %}
+                        <div class="card my-3">
+                            <div class="card-body">
+                                <p><strong>Bookmaker:</strong> {{ bookmaker.title }}</p>
+                                <div class="markets">
+                                    {% for market in bookmaker.markets %}
+                                        <div class="market my-2">
+                                            <h5 class="text-secondary">Market Outcomes:</h5>
+                                            {% for outcome in market.outcomes %}
+                                                <div class="outcome">
+                                                    <p><strong>Outcome:</strong> {{ outcome.name }}</p>
+                                                    <p><strong>Multiplier:</strong> {{ outcome.multiplier }}</p>
+                                                    <button class="btn btn-primary" onclick="confirmActivation('{{ pick.commence_time }}', '{{ pick.home_team }}', '{{ pick.away_team }}', '{{ pick.home_team }} vs {{ pick.away_team }}', '{{ bookmaker.title }}', '{{ outcome.name }}', '{{ outcome.multiplier }}', '{{ pick.sport }}', '{{ pick.league }}', '{{ pick.type }}')">
+                                                        Activate
+                                                    </button>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="text-center mt-4">
+<a href="{% url 'seller_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                </div>
+            </div>
         </div>
     </div>
 </body>

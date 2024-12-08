@@ -37,6 +37,7 @@ def update_seller_stats_h2h(seller,pick_data,result_data):
                 stat.stat_value += 1
             if stat.stat_name == "total_probability":
                 stat.stat_value += get_probability(str(pick_data['odds']))
+            stat.save()
         return True
     else:
         for stat in stat_query:
@@ -48,7 +49,7 @@ def update_seller_stats_h2h(seller,pick_data,result_data):
                 stat.stat_value += 1
             if stat.stat_name == "total_probability":
                 stat.stat_value += float(get_probability(str(pick_data['odds'])))
-
+            stat.save()
         return False
 
             

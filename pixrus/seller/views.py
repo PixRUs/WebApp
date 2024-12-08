@@ -18,6 +18,8 @@ from .utils.pick_data_getter import get_odds
 from .forms import Subscription as SubscriptionForm,LookUp
 from product.models import Subscription as Subscription
 from .models import Stat
+from .utils.analytics import get_new_subs,get_total_subs
+
 @never_cache
 @role_required(required_role='seller')
 def seller_landing(request):
@@ -32,6 +34,24 @@ def seller_landing(request):
     monthly = Stat.objects.filter(seller=seller,time_period = "monthly")
     weekly = Stat.objects.filter(seller=seller,time_period = "weekly")
 
+    all_time_placed = Stat.objects.filter(seller=seller,time_period = "all_time",stat_name="total_picks_placed").first().stat_value
+    monthly_placed = Stat.objects.filter(seller=seller,time_period = "monthly",stat_name="total_picks_placed").first().stat_value
+    weekly_placed = Stat.objects.filter(seller=seller,time_period = "weekly",stat_name="total_picks_placed").first().stat_value
+    for stat in all_time_stats:
+        if stat.stat_name == "total_probability":
+            stat.stat_value = stat.stat_value / all_time_placed
+
+    for stat in monthly:
+        if stat.stat_name == "total_probability":
+            stat.stat_value = stat.stat_value / all_time_placed
+    for stat in weekly:
+        if stat.stat_name == "total_probability":
+            stat.stat_value = stat.stat_value / all_time_placed
+
+
+    new_subs_chart_data = get_new_subs(seller)
+    total_subs = get_total_subs(seller)
+
     context = {
         'seller': seller,
         'active_picks': active_picks,
@@ -39,8 +59,10 @@ def seller_landing(request):
         'all_time_stats':all_time_stats,
         'monthly':monthly,
         'weekly':weekly,
+        "chart_data": new_subs_chart_data,
+        "total_subscribers":total_subs
     }
-    return render(request, 'seller_dashboard.html', context)
+    return render(request, 'seller_page.html', context)
 
 
 @role_required(required_role='seller')
@@ -106,26 +128,59 @@ def post_pick_view(request,data_id):
 
 
 @role_required(required_role='seller')
-def activate_pick(request,pick_id):
+def activate_pick(request, pick_id):
     seller_query = Seller.objects.filter(user=request.user)
     if not seller_query:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    picks = request.session['odds']['games']
-    sport = request.session['odds']['sport']
-    type_of_pick = request.session['odds']['type']
-    league = request.session['odds']['league']
 
+    try:
+        picks = request.session['odds']['games']
+        sport = request.session['odds']['sport']
+        type_of_pick = request.session['odds']['type']
+        league = request.session['odds']['league']
+    except KeyError:
+        messages.error(request, "Session data is missing or invalid.")
+        return redirect('seller_dashboard')
 
     pick = next((pick for pick in picks if pick["id"] == pick_id), None)
+    if not pick:
+        messages.error(request, "Pick not found.")
+        return redirect('seller_dashboard')
+
     seller = seller_query.first()
+
     if request.method == "POST":
-        pick_data = {"target_winner": request.POST.get("outcome"), "odds": request.POST.get("multiplier"),
-                     "book_maker": request.POST.get("bookmaker"),"bet_amount": request.POST.get("unit_size"),"type":request.POST.get("type"),}
-        game_data = {"home_team": request.POST.get("home_team"), "away_team": request.POST.get("away_team"),"sport": sport,"league":league,}
-        ActivePick.objects.create(seller=seller,event_start=request.POST.get("commence_time"),pick_data=pick_data,game_data=game_data,type_of_pick=type_of_pick)
-        return JsonResponse({"success": True, "message": "Pick activated successfully!"})
-    else:
-        return render(request,"activate_pick.html",{"pick":pick})
+        required_fields = ["outcome", "multiplier", "bookmaker", "unit_size", "home_team", "away_team", "commence_time"]
+        missing_fields = [field for field in required_fields if not request.POST.get(field)]
+        if missing_fields:
+            messages.error(request, f"Missing fields: {', '.join(missing_fields)}")
+            return redirect('seller_dashboard')
+
+        pick_data = {
+            "target_winner": request.POST["outcome"],
+            "odds": request.POST["multiplier"],
+            "book_maker": request.POST["bookmaker"],
+            "bet_amount": request.POST["unit_size"],
+            "type": request.POST["type"],
+        }
+        game_data = {
+            "home_team": request.POST["home_team"],
+            "away_team": request.POST["away_team"],
+            "sport": sport,
+            "league": league,
+        }
+
+        ActivePick.objects.create(
+            seller=seller,
+            event_start=request.POST["commence_time"],
+            pick_data=pick_data,
+            game_data=game_data,
+            type_of_pick=type_of_pick,
+        )
+
+
+        return redirect('seller_dashboard')
+    return render(request, "activate_pick.html", {"pick": pick})
 
 
 @login_required

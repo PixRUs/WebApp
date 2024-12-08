@@ -9,7 +9,7 @@ from django.views.decorators.cache import never_cache
 
 # Landing page or any publicly accessible entry point
 def landing(request):
-    return render(request, 'landing.html')
+    return render(request, 'index.html')
 
 # Redirect directly to Google login
 def login_view(request):
