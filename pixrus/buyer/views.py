@@ -37,6 +37,8 @@ def buyer_landing(request):
     #top_5_active_picks = get_recommended_picks(buyer,5)
 
 
+
+
     context = {
         'buyer': buyer,
         'seller_picks': all_active,
@@ -75,6 +77,7 @@ def market(request):
 
     top_5_active_picks = get_recommended_picks(buyer,5)
     top_five_active_sellers = get_recommended_sellers(buyer,5)
+
 
     context = {'top_three_seller_units_won_past_week': top_three_seller_units_won_past_week,'top_three_successful_bets_won_past_week': top_three_successful_bets_won_past_week,
                "top_three_safest_sellers_past_week":top_three_safest_sellers_past_week,"top_three_riskiest_sellers_past_week":top_three_riskiest_sellers_past_week,

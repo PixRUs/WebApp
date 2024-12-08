@@ -18,6 +18,8 @@ from .utils.pick_data_getter import get_odds
 from .forms import Subscription as SubscriptionForm,LookUp
 from product.models import Subscription as Subscription
 from .models import Stat
+from .utils.analytics import get_new_subs,get_total_subs
+
 @never_cache
 @role_required(required_role='seller')
 def seller_landing(request):
@@ -47,6 +49,9 @@ def seller_landing(request):
             stat.stat_value = stat.stat_value / all_time_placed
 
 
+    new_subs_chart_data = get_new_subs(seller)
+    total_subs = get_total_subs(seller)
+
     context = {
         'seller': seller,
         'active_picks': active_picks,
@@ -54,6 +59,8 @@ def seller_landing(request):
         'all_time_stats':all_time_stats,
         'monthly':monthly,
         'weekly':weekly,
+        "chart_data": new_subs_chart_data,
+        "total_subscribers":total_subs
     }
     return render(request, 'seller_page.html', context)
 

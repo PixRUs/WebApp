@@ -4,9 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Your Page Title{% endblock %}</title>
-    <link href="{% static 'css/tabler.css' %}" rel="stylesheet"/>
+<!-- Tabler Core JS (Includes Bootstrap) -->
+<link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/libs/apexcharts/dist/apexcharts.min.js" defer></script>
+<script src="{% static 'js/performance-chart.js' %}"></script>
+
+
 </head>
 <body>
+<script id="chart-data" type="application/json">
+    {{ chart_data }}
+</script>
+
+
 <div class="page">
   <!-- Sidebar -->
   <aside class="navbar navbar-vertical navbar-expand-sm navbar-dark" >
@@ -16,7 +26,7 @@
       </button>
       <h1 class="navbar-brand navbar-brand-autodark">
         <a href="#">
-          <img src="..." width="110" height="32" alt="Tabler" class="navbar-brand-image">
+          <img src="#" width="110" height="32" alt="Tabler" class="navbar-brand-image">
         </a>
       </h1>
       <div class="collapse navbar-collapse" id="sidebar-menu">
@@ -55,10 +65,9 @@
                             </div>
                             <div class="col-auto ms-auto">
                                 <div class="btn-list">
-                                    <a href="{% url 'lookup' %}" class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#modal-report">
+                                    <a href="{% url 'lookup' %}" class="btn btn-primary d-none d-sm-inline-block" >
                                       Post a new Pick to Subscribers
                                     </a>
-                                    <a href="{% url 'lookup' %}" class="btn btn-primary d-sm-none btn-icon" data-bs-toggle="modal" data-bs-target="#modal-report" aria-label="Create new report"></a>
                                 </div>
                             </div>
                         </div>
@@ -67,10 +76,21 @@
             </div>
         </div>
     </div>
-
     <!-- Page Body -->
     <div class="page-body">
+    <div class="container-xl text-center mb-4">
+            <h2 class="text-muted">Total Subscribers: {{ total_subscribers }}</h2>
+        </div>
         <div class="container-xl">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title">Subscribers Chart</h5>
+            </div>
+            <div class="card-body">
+                <div id="performance-chart" class="chart-lg"></div>
+            </div>
+        </div>
+
             <div class="row row-deck row-cards">
                 <!-- All-time Stats Card -->
                 <div class="col-4">
@@ -204,6 +224,7 @@
         </div>
 </div>
   </div>
+</div>
 </div>
 </body>
 </html>
