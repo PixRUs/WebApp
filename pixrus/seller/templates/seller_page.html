@@ -4,22 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Your Page Title{% endblock %}</title>
-<!-- Tabler Core JS (Includes Bootstrap) -->
-<link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/libs/apexcharts/dist/apexcharts.min.js" defer></script>
-<script src="{% static 'js/performance-chart.js' %}"></script>
-
-
+    <!-- Tabler Core JS (Includes Bootstrap) -->
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/libs/apexcharts/dist/apexcharts.min.js" defer></script>
+    <script src="{% static 'js/seller/performance-chart.js' %}"></script>
+    <script src="{% static 'js/seller/togglePick.js' %}"></script>
 </head>
 <body>
 <script id="chart-data" type="application/json">
     {{ chart_data }}
 </script>
 
-
 <div class="page">
   <!-- Sidebar -->
-  <aside class="navbar navbar-vertical navbar-expand-sm navbar-dark" >
+  <aside class="navbar navbar-vertical navbar-expand-sm navbar-dark">
     <div class="container-fluid">
       <button class="navbar-toggler" type="button">
         <span class="navbar-toggler-icon"></span>
@@ -60,7 +58,7 @@
                     <div class="page-header">
                         <div class="row align-items-center">
                             <div class="col">
-                                <div class="page-pretitle">Overview</div>
+                                <div class="page-pretitle">Welcome Back {{seller.user_name}}</div>
                                 <h2 class="page-title">Dashboard</h2>
                             </div>
                             <div class="col-auto ms-auto">
@@ -78,153 +76,201 @@
     </div>
     <!-- Page Body -->
     <div class="page-body">
-    <div class="container-xl text-center mb-4">
-            <h2 class="text-muted">Total Subscribers: {{ total_subscribers }}</h2>
-        </div>
-        <div class="container-xl">
-        <div class="card mb-4">
-            <div class="card-header">
+      <div class="container-xl text-center mb-4">
+          <h2 class="text-muted">Total Subscribers: {{ total_subscribers }}</h2>
+      </div>
+      <div class="container-xl">
+        <div class="row row-deck row-cards mb-4"> <!-- Added margin-bottom -->
+          <div class="col-xl">
+            <div class="card">
+              <div class="card-header">
                 <h5 class="card-title">Subscribers Chart</h5>
-            </div>
-            <div class="card-body">
+              </div>
+              <div class="card-body">
                 <div id="performance-chart" class="chart-lg"></div>
+              </div>
             </div>
-        </div>
+          </div>
 
-            <div class="row row-deck row-cards">
-                <!-- All-time Stats Card -->
-                <div class="col-4">
-                    <div class="card">
-                        <div class="card-body" style="height: 15rem">
-                            <h3>All-time Stats</h3>
-                            {% for stat in all_time_stats %}
-                                <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Monthly Stats Card -->
-                <div class="col-4">
-                    <div class="card">
-                        <div class="card-body" style="height: 15rem">
-                            <h3>Monthly Stats</h3>
-                            {% for stat in monthly %}
-                                <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Weekly Stats Card -->
-
-                <div class="col-4">
-                    <div class="card">
-                        <div class="card-body" style="height: 15rem">
-                            <h3>Weekly Stats</h3>
-                            {% for stat in weekly %}
-                                <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-            <!-- Active Picks Table -->
-        <div class="container-xl" style="padding-top: 0.2in;">
-            <div class="col-12">
+          <div class="col-lg-5">
             <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title">Active Picks</h5>
+              <div class="card-header">
+                <h5 class="card-title">Most recent Subs</h5>
+              </div>
+<div class="card-body">
+    <div class="list-group list-group-flush overflow-auto" style="max-height: 15rem">
+        {% for letter, subscribers in all_subscribers_by_letters %}
+            <div class="list-group-header sticky-top">{{ letter }}</div>
+            {% for subscriber in subscribers %}
+                <div class="list-group-item">
+                    <div class="row">
+                        <div class="col text-truncate">
+                            <!-- Display the subscriber's username -->
+                            <span class="text-body d-block">{{ subscriber.user_name }}</span>
+                            <!-- Display the subscriber's first and last name -->
+                            <div class="text-secondary text-truncate mt-n1">
+                                {{ subscriber.user.first_name }} {{ subscriber.user.last_name }}
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-                <div class="card-body">
-                    <table class="table table-vcenter">
-                        <thead>
-                            <tr>
-                                <th>Away Team</th>
-                                <th>Home Team</th>
-                                <th>Event Start</th>
-                                <th>Pick Type</th>
-                                <th>Pick Target Winner</th>
-                                <th>Pick Odds</th>
-                                <th>Sportsbook</th>
-                                <th>Unit Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for pick in active_picks %}
-                            <tr>
-                                <td>{{ pick.game_data.away_team }}</td>
-                                <td>{{ pick.game_data.home_team }}</td>
-                                <td>{{ pick.event_start }}</td>
-                                <td>{{ pick.type_of_pick }}</td>
-                                <td>{{ pick.pick_data.target_winner }}</td>
-                                <td>{{ pick.pick_data.odds }}</td>
-                                <td>{{ pick.pick_data.book_maker }}</td>
-                                <td>{{ pick.pick_data.bet_amount }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        </div>
-<div class="container-xl" style="padding-top: 0.2in;">
-            <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title">Historical Picks</h5>
-                </div>
-                <div class="card-body">
-                    <table class="table table-vcenter">
-                        <thead>
-                            <tr>
-                    <th>Away Team</th>
-                    <th>Home Team</th>
-                    <th>Event Start</th>
-                    <th>Pick Type</th>
-                    <th>Pick Target Winner</th>
-                    <th>Pick Odds</th>
-                    <th>Sportsbook</th>
-                    <th>Unit Amount</th>
-                    <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for pick in historical_picks %}
-                <tr>
-                    <td>{{ pick.game_event_result.team_1 }}</td>
-                    <td>{{ pick.game_event_result.team_2 }}</td>
-                    <td>{{ pick.event_start }}</td>
-                    <td>{{ pick.type_of_pick }}</td>
-                    <td>{{ pick.pick_data.target_winner }}</td>
-                    <td>{{ pick.pick_data.odds }}</td>
-                    <td>{{ pick.pick_data.book_maker }}</td>
-                    <td>{{ pick.pick_data.bet_amount }}</td>
-                    <td>
-                        {% if pick.pick_data.pick_success %}
-                            <span style="color: #4caf50;">Bet Successful</span>
-                        {% else %}
-                            <span style="color: #f44336;">Bet Failed</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="9">No historical picks available.</td>
-                    </tr>
-                {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
 </div>
+
+</div>
+</div>
+</div>
+
+
+
+        <div class="row row-deck row-cards">
+          <!-- All-time Stats Card -->
+          <div class="col-4">
+              <div class="card">
+                  <div class="card-body" style="height: 15rem">
+                      <h3>All-time Stats</h3>
+                      {% for stat in all_time_stats %}
+                          <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
+                      {% endfor %}
+                  </div>
+              </div>
+          </div>
+
+          <!-- Monthly Stats Card -->
+          <div class="col-4">
+              <div class="card">
+                  <div class="card-body" style="height: 15rem">
+                      <h3>Monthly Stats</h3>
+                      {% for stat in monthly %}
+                          <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
+                      {% endfor %}
+                  </div>
+              </div>
+          </div>
+
+          <!-- Weekly Stats Card -->
+          <div class="col-4">
+              <div class="card">
+                  <div class="card-body" style="height: 15rem">
+                      <h3>Weekly Stats</h3>
+                      {% for stat in weekly %}
+                          <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
+                      {% endfor %}
+                  </div>
+              </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Picks Table -->
+      <div class="container-xl" style="padding-top: 0.2in;">
+        <div class="col-12">
+          <div class="card">
+              <div class="card-header">
+                  <h5 class="card-title">Active Picks</h5>
+              </div>
+              <div class="card-body">
+                  <table class="table table-vcenter">
+                      <thead>
+                          <tr>
+                              <th>Away Team</th>
+                              <th>Home Team</th>
+                              <th>Event Start</th>
+                              <th>Pick Type</th>
+                              <th>Pick Target Winner</th>
+                              <th>Pick Odds</th>
+                              <th>Sportsbook</th>
+                              <th>Unit Amount</th>
+                              <th>Free</th> <!-- New column for the switch/button -->
+                          </tr>
+                      </thead>
+                      <tbody>
+                          {% for pick in active_picks %}
+                          <tr>
+                              <td>{{ pick.game_data.away_team }}</td>
+                              <td>{{ pick.game_data.home_team }}</td>
+                              <td>{{ pick.event_start }}</td>
+                              <td>{{ pick.type_of_pick }}</td>
+                              <td>{{ pick.pick_data.target_winner }}</td>
+                              <td>{{ pick.pick_data.odds }}</td>
+                              <td>{{ pick.pick_data.book_maker }}</td>
+                              <td>{{ pick.pick_data.bet_amount }}</td>
+                              <td>
+                              <label class="switch">
+                                  <input type="checkbox"
+                                         data-pick-id="{{ pick.id }}"
+                                         {% if pick.some_boolean %}checked{% endif %}
+                                         onchange="togglePick(this)">
+                                  <span class="slider round"></span>
+                              </label>
+                             </td>
+                          </tr>
+                          {% endfor %}
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historical Picks Table -->
+      <div class="container-xl" style="padding-top: 0.2in;">
+        <div class="col-12">
+          <div class="card">
+              <div class="card-header">
+                  <h5 class="card-title">Historical Picks</h5>
+              </div>
+              <div class="card-body">
+                  <table class="table table-vcenter">
+                      <thead>
+                          <tr>
+                              <th>Away Team</th>
+                              <th>Home Team</th>
+                              <th>Event Start</th>
+                              <th>Pick Type</th>
+                              <th>Pick Target Winner</th>
+                              <th>Pick Odds</th>
+                              <th>Sportsbook</th>
+                              <th>Unit Amount</th>
+                              <th>Status</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          {% for pick in historical_picks %}
+                          <tr>
+                              <td>{{ pick.game_event_result.team_1 }}</td>
+                              <td>{{ pick.game_event_result.team_2 }}</td>
+                              <td>{{ pick.event_start }}</td>
+                              <td>{{ pick.type_of_pick }}</td>
+                              <td>{{ pick.pick_data.target_winner }}</td>
+                              <td>{{ pick.pick_data.odds }}</td>
+                              <td>{{ pick.pick_data.book_maker }}</td>
+                              <td>{{ pick.pick_data.bet_amount }}</td>
+                              <td>
+                                  {% if pick.pick_data.pick_success %}
+                                      <span style="color: #4caf50;">Bet Successful</span>
+                                  {% else %}
+                                      <span style="color: #f44336;">Bet Failed</span>
+                                  {% endif %}
+                              </td>
+                          </tr>
+                          {% empty %}
+                              <tr>
+                                  <td colspan="9">No historical picks available.</td>
+                              </tr>
+                          {% endfor %}
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 </body>
 </html>
