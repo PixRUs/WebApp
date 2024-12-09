@@ -58,7 +58,17 @@ function getCSRFToken() {
     </script>
 </head>
 <body>
-
+        <div class="steps">
+  <a href="#" class="step-item">
+    Look up the relevant pick
+  </a>
+  <a href="#" class="step-item">
+    Find the exact Game
+  </a>
+  <a href="#" class="step-item active">
+    Activate with the necessary units
+  </a>
+</div>
 <div class="position-absolute top-0 start-0 m-3">
     <a href="{% url 'lookup' %}" class="btn btn-secondary">Back to Post Picks</a>
 </div>

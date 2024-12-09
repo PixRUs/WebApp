@@ -19,6 +19,8 @@ from .forms import Subscription as SubscriptionForm,LookUp
 from product.models import Subscription as Subscription
 from .models import Stat
 from .utils.analytics import get_new_subs,get_total_subs
+from collections import defaultdict
+
 
 @never_cache
 @role_required(required_role='seller')
@@ -48,9 +50,23 @@ def seller_landing(request):
         if stat.stat_name == "total_probability":
             stat.stat_value = stat.stat_value / all_time_placed
 
+    subscribers_q = Subscription.objects.filter(
+        seller=seller,
+        subscribed_until__gt=timezone.now()
+    ).order_by('buyer__user_name')
+
+    subscribers_by_letters = defaultdict(list)
+
+    for sub in subscribers_q:
+        first_letter = sub.buyer.user_name[0].upper()
+        subscribers_by_letters[first_letter].append(sub.buyer)
+
+    all_subscribers_by_letters = sorted(subscribers_by_letters.items())
 
     new_subs_chart_data = get_new_subs(seller)
     total_subs = get_total_subs(seller)
+    all_subscribers_by_letters = list(all_subscribers_by_letters)
+    print(all_subscribers_by_letters)
 
     context = {
         'seller': seller,
@@ -60,7 +76,8 @@ def seller_landing(request):
         'monthly':monthly,
         'weekly':weekly,
         "chart_data": new_subs_chart_data,
-        "total_subscribers":total_subs
+        "total_subscribers":total_subs,
+        "all_subscribers_by_letters":all_subscribers_by_letters
     }
     return render(request, 'seller_page.html', context)
 
