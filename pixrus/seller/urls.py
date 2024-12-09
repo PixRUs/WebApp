@@ -12,4 +12,5 @@ urlpatterns = [
     path('subscribe/<uuid:seller_id>',views.subscribe, name='subscribe_view'),
     path('lookup',views.look_up, name='lookup'),
     path('search/', views.seller_search, name='seller_search'),
+    path('update-pick/<uuid:pick_id>/',views.update_pick, name='update_pick'),
 ]

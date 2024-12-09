@@ -6,13 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subscription Form</title>
     <!-- Link to external CSS -->
-    <link href="{% static 'css/tabler.css' %}" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css" rel="stylesheet">
+
     <style>
         body, html {
             height: 100%;
         }
         .form-container {
             height: 100%; /* Full height */
+        }
+        .back-button {
+            margin-top: 15px; /* Adds some spacing above the back button */
         }
     </style>
 </head>
@@ -33,6 +37,7 @@
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Look Up Now</button>
             </form>
+            <a href="{% url 'seller_dashboard' %}" class="btn btn-secondary w-100 back-button">Back to Dashboard</a>
         </div>
     </div>
 

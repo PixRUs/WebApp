@@ -348,4 +348,13 @@ def seller_search(request):
     sellers = Seller.objects.filter(user_name__icontains=query)
     return render(request, 'search_results.html', {'query': query, 'sellers': sellers})
 
+def update_pick(request, pick_id):
+    print(f"Received pick_id: {pick_id}")  # Log the pick_id for debugging
 
+    if request.method == 'POST':
+        pick = ActivePick.objects.get(id=pick_id)
+        pick.is_free = not pick.is_free
+        pick.save()
+
+        return JsonResponse({'success': True, 'is_free': pick.is_free})
+    return JsonResponse({'success': False}, status=400)

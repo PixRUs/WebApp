@@ -7,7 +7,8 @@
 <!-- Tabler Core JS (Includes Bootstrap) -->
 <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/libs/apexcharts/dist/apexcharts.min.js" defer></script>
-<script src="{% static 'js/performance-chart.js' %}"></script>
+<script src="{% static 'js/seller/performance-chart.js' %}"></script>
+<script src="{% static 'js/seller/togglePick.js' %}"></script>
 
 
 </head>
@@ -15,6 +16,7 @@
 <script id="chart-data" type="application/json">
     {{ chart_data }}
 </script>
+
 
 
 <div class="page">
@@ -60,7 +62,7 @@
                     <div class="page-header">
                         <div class="row align-items-center">
                             <div class="col">
-                                <div class="page-pretitle">Overview</div>
+                                <div class="page-pretitle">Welcome Back {{seller.user_name}}</div>
                                 <h2 class="page-title">Dashboard</h2>
                             </div>
                             <div class="col-auto ms-auto">
@@ -151,6 +153,7 @@
                                 <th>Pick Odds</th>
                                 <th>Sportsbook</th>
                                 <th>Unit Amount</th>
+                                <th>Free</th> <!-- New column for the switch/button -->
                             </tr>
                         </thead>
                         <tbody>
@@ -164,6 +167,15 @@
                                 <td>{{ pick.pick_data.odds }}</td>
                                 <td>{{ pick.pick_data.book_maker }}</td>
                                 <td>{{ pick.pick_data.bet_amount }}</td>
+                                <td>
+                                <label class="switch">
+                                    <input type="checkbox"
+                                           data-pick-id="{{ pick.id }}"
+                                           {% if pick.some_boolean %}checked{% endif %}
+                                           onchange="togglePick(this)">
+                                    <span class="slider round"></span>
+                                </label>
+                             </td>
                             </tr>
                             {% endfor %}
                         </tbody>
