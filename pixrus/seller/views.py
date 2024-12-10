@@ -41,14 +41,23 @@ def seller_landing(request):
     weekly_placed = Stat.objects.filter(seller=seller,time_period = "weekly",stat_name="total_picks_placed").first().stat_value
     for stat in all_time_stats:
         if stat.stat_name == "total_probability":
-            stat.stat_value = stat.stat_value / all_time_placed
+            if all_time_placed == 0:
+                stat.stat_value = 0
+            else:
+                stat.stat_value = stat.stat_value / all_time_placed
 
     for stat in monthly:
         if stat.stat_name == "total_probability":
-            stat.stat_value = stat.stat_value / all_time_placed
+            if all_time_placed == 0:
+                stat.stat_value = 0
+            else:
+                stat.stat_value = stat.stat_value / all_time_placed
     for stat in weekly:
         if stat.stat_name == "total_probability":
-            stat.stat_value = stat.stat_value / all_time_placed
+            if all_time_placed == 0:
+                stat.stat_value = 0
+            else:
+                stat.stat_value = stat.stat_value / all_time_placed
 
     subscribers_q = Subscription.objects.filter(
         seller=seller,
@@ -356,9 +365,14 @@ def look_up(request):
                 if form_type_of_bet == "money_line":
                     api_obj = get_odds(sport="basketball", league="nba",type_of_pick='h2h')
                     return redirect('post_pick', api_obj.id)
-
-
-    return render(request, 'look_up.html',{'form':LookUp})
+                else:
+                    return HttpResponseNotFound("Type of bet not permitted")
+            else:
+                return HttpResponseNotFound("Sports League choice not found")
+        else:
+            return HttpResponseNotFound("Form is invalid")
+    else:
+       return render(request, 'look_up.html', {'form': LookUp})
 
 def seller_search(request):
     query = request.GET.get('query', '')

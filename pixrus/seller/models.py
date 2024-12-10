@@ -16,6 +16,8 @@ class Seller(models.Model):
     meta_data = models.JSONField(null=True, blank=True)
 
 
+
+
 class Stat(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, related_name="stats")

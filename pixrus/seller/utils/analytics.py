@@ -40,6 +40,8 @@ def get_new_subs(seller):
     }
 
     return mark_safe(json.dumps(chart_data))
+
+
 def get_total_subs(seller):
     current_date = now().date()
 
