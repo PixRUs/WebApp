@@ -16,7 +16,6 @@ django.setup()
 
 from datetime import datetime
 from product.models import ActivePick
-from pixrus.tasks.utils.update import update_buyer_and_seller_stats
 from pixrus.tasks.utils.game_results_getter import get_score_result
 
 all_active_picks = ActivePick.objects.all()
@@ -43,10 +42,9 @@ for active_pick in all_active_picks:
         seller = active_pick.seller
         buyers = active_pick.buyers_with_access
         pick_data = active_pick.pick_data
-        pick_success = update_buyer_and_seller_stats(seller=seller,buyers=buyers,pick_data=pick_data,result_data=result,type_of_pick=type_of_pick)
-        seller.save()
-        pick_data['pick_success'] = pick_success
-        ActivePick.make_historical(active_pick,event_result=result,pick_data=pick_data)
+        ActivePick.make_historical(active_pick, event_result=result, pick_data=pick_data)
+
+
 
 
         

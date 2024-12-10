@@ -1,56 +1,64 @@
-from seller.models import Stat
-from seller.models import StatName,StatTimeUnits
 from typing import List
+from django.db.models import Sum,Count,Avg
+
+from product.models import HistoricalPick
+from datetime import datetime, timedelta
+
+from seller.models import Seller
 
 
-class Dist:
-    def __init__(self, total, prob, seller):
-        self.total = total
-        self.prob = prob
-        self.seller = seller
-        self.risk = self.calculate_risk()
+def get_top_sellers(time_delta,num_sellers):
+    if time_delta == 0:
+        return get_top(HistoricalPick.objects.all(), num_sellers)
+    delta = datetime.now() - timedelta(days=time_delta)
+    historical_pick_queries = HistoricalPick.objects.filter(posted_at__gte=delta)
+    return get_top(historical_pick_queries,num_sellers)
 
-    def calculate_risk(self):
-        if self.total == 0:
-            return 0
-        return self.prob / self.total
+def get_top(historical_pick_queries,num_sellers):
 
-    def __lt__(self, other):
-        return self.risk < other.risk
+    sellers_with_most_number_of_units_made = [
+        (Seller.objects.get(id=seller['seller']), seller['total_units'])
+        for seller in (
+            historical_pick_queries
+            .values('seller')
+            .annotate(total_units=Sum('units_won'))
+            .order_by('-total_units')[:num_sellers]
+        )
+    ]
 
-def get_top_sellers(time_unit: StatTimeUnits,stat_name: StatName,n,riskiest = None):
-    if stat_name == "total_probability":
-        risk_list: List[Dist] = []
-        total_probability_queries = Stat.objects.filter(time_period=time_unit,stat_name=stat_name)
-        for stat in total_probability_queries:
-            seller = stat.seller
-            total = Stat.objects.get(time_period=time_unit,stat_name="total_picks_placed",seller=seller).stat_value
-            total_probability = Stat.objects.filter(time_period=time_unit,stat_name=stat_name,seller=seller).first().stat_value
-            risk_list.append(Dist(total,total_probability,seller))
-        if riskiest is True:
-            risk_list.sort(reverse=False)
-            tmp = []
-            for _ in range(min(len(risk_list),n)):
-                dist = risk_list.pop()
-                seller = dist.seller
-                if dist.calculate_risk()  == 0:
-                    continue
-                tmp.append((seller, dist.calculate_risk()))
+    sellers_with_most_number_of_successful_bets = [
+        (Seller.objects.get(id=seller['seller']), seller['successful_bets'])
+        for seller in (
+            historical_pick_queries
+            .values('seller')
+            .annotate(successful_bets=Count('id'))
+            .order_by('-successful_bets')[:num_sellers]
+        )
+    ]
 
-            return tmp
-        else:
-            risk_list.sort(reverse=True)
-            tmp = []
-            for _ in range(min(len(risk_list),n)):
-                dist = risk_list.pop()
-                seller = dist.seller
-                if dist.calculate_risk()  == 0:
-                    continue
-                tmp.append((seller, dist.calculate_risk()))
-            return tmp
+    safest_sellers = [
+        (Seller.objects.get(id=seller['seller']), seller['average_probability'])
+        for seller in (
+            historical_pick_queries
+            .values('seller')
+            .annotate(average_probability=Avg('probability'))
+            .order_by('-average_probability')[:num_sellers]
+        )
+    ]
 
-    top_unit_winners_queries = Stat.objects.filter(time_period=time_unit,stat_name=stat_name).order_by("-stat_value")[:n]
-    tmp = []
-    for query in top_unit_winners_queries:
-        tmp.append((query.seller,query.stat_value))
-    return tmp
+    riskiest_sellers = [
+        (Seller.objects.get(id=seller['seller']), seller['average_probability'])
+        for seller in (
+            historical_pick_queries
+            .values('seller')
+            .annotate(average_probability=Avg('probability'))
+            .order_by('average_probability')[:num_sellers]
+        )
+    ]
+
+    return {
+        "sellers_with_most_number_of_units_made": sellers_with_most_number_of_units_made,
+        "sellers_with_most_number_of_successful_bets": sellers_with_most_number_of_successful_bets,
+        "riskiest_sellers": riskiest_sellers,
+        "safest_sellers": safest_sellers,
+    }

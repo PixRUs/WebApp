@@ -88,20 +88,20 @@
                                 <tr>
                                     <th>Seller User Name</th>
                                     <th>Total Subscribers</th>
-                                    <th>Number of Successful Picks</th>
                                     <th>Number of Picks Placed</th>
+                                    <th>Number of Successful Picks</th>
                                     <th>Total Units Won</th>
                                     <th>Profile</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for total_units_won, total_number_of_success, number_of_picks_placed, subscriber_count,seller in seller_stat %}
+                                {% for seller_stats, subscriber_count , seller in seller_stat %}
                                 <tr>
                                     <td>{{ seller.user_name }}</td>
                                     <td>{{ subscriber_count }}</td>
-                                    <td>{{ total_units_won }}</td>
-                                    <td>{{ number_of_picks_placed }}</td>
-                                   <td>{{ total_number_of_success }}</td>
+                                    {% for stat in seller_stats %}
+                                        <td>{{ stat.stat_value }} </td>
+                                    {% endfor %}
                                     <td>
                                         <a href="{% url 'profile_view' seller.id %}" class="btn btn-primary btn-sm">
                                             View Profile

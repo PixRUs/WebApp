@@ -95,7 +95,7 @@
           <div class="col-lg-5">
             <div class="card">
               <div class="card-header">
-                <h5 class="card-title">Most recent Subs</h5>
+                <h5 class="card-title">Subs</h5>
               </div>
 <div class="card-body">
     <div class="list-group list-group-flush overflow-auto" style="max-height: 15rem">
@@ -131,8 +131,10 @@
           <!-- All-time Stats Card -->
           <div class="col-4">
               <div class="card">
+            <div class="card-header">
+                  <h5 class="card-title">All-time Stats</h5>
+              </div>
                   <div class="card-body" style="height: 15rem">
-                      <h3>All-time Stats</h3>
                       {% for stat in all_time_stats %}
                           <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
                       {% endfor %}
@@ -143,8 +145,10 @@
           <!-- Monthly Stats Card -->
           <div class="col-4">
               <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title">Monthly Stats</h5>
+              </div>
                   <div class="card-body" style="height: 15rem">
-                      <h3>Monthly Stats</h3>
                       {% for stat in monthly %}
                           <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
                       {% endfor %}
@@ -152,11 +156,14 @@
               </div>
           </div>
 
+
           <!-- Weekly Stats Card -->
           <div class="col-4">
               <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title">Yearly Stats</h5>
+              </div>
                   <div class="card-body" style="height: 15rem">
-                      <h3>Weekly Stats</h3>
                       {% for stat in weekly %}
                           <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
                       {% endfor %}
@@ -165,6 +172,7 @@
           </div>
         </div>
       </div>
+    </div>
 
       <!-- Active Picks Table -->
       <div class="container-xl" style="padding-top: 0.2in;">
@@ -203,7 +211,7 @@
                               <label class="switch">
                                   <input type="checkbox"
                                          data-pick-id="{{ pick.id }}"
-                                         {% if pick.some_boolean %}checked{% endif %}
+                                         {% if pick.is_free %}checked{% endif %}
                                          onchange="togglePick(this)">
                                   <span class="slider round"></span>
                               </label>
