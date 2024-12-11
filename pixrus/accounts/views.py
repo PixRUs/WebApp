@@ -9,14 +9,15 @@ from django.views.decorators.cache import never_cache
 
 # Landing page or any publicly accessible entry point
 def landing(request):
-    if not request.user.is_authenticated:
+    if request.user.is_anonymous:
         return render(request, 'index.html')
-    
     if Buyer.objects.filter(user=request.user).exists():
         return redirect('buyer_dashboard')  # Replace with the actual buyer dashboard URL name
     # Check if the user is associated with the Seller model
     elif Seller.objects.filter(user=request.user).exists():
         return redirect('seller_dashboard')
+
+    return render(request, 'index.html')
 
 # Redirect directly to Google login
 def login_view(request):
