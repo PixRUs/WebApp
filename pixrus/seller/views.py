@@ -15,7 +15,7 @@ from buyer.models import Buyer
 from product.models import ActivePick,HistoricalPick,ApiRequest
 from pixrus.utils.decorators import role_required,access_required
 from seller.models import Seller
-from django.http import HttpResponseForbidden,JsonResponse,HttpResponseNotFound
+from django.http import HttpResponseForbidden, JsonResponse, HttpResponseNotFound, Http404
 from .utils.pick_data_getter import get_odds
 from .forms import Subscription as SubscriptionForm,LookUp
 from product.models import Subscription as Subscription
@@ -393,39 +393,43 @@ def update_pick(request, pick_id):
     return JsonResponse({'success': False}, status=400)
 
 def manage_seller(request, seller_id):
-    seller = Seller.objects.filter(user=request.user)
-    if not seller.exists() or Seller.objects.filter(user=request.user).get(id=seller_id) is None:
-        return HttpResponseForbidden("You do not have permission to access this page.")
+    try:
+        seller = Seller.objects.filter(user=request.user)
+        if not seller.exists() or Seller.objects.filter(user=request.user).get(id=seller_id) is None:
+            return HttpResponseForbidden("You do not have permission to access this page.")
 
-    # Retrieve the seller object associated with the user
-    seller = Seller.objects.filter(user=request.user).get(id=seller_id)
-    old_picture = seller.profile_picture.path
+        # Retrieve the seller object associated with the user
+        seller = Seller.objects.filter(user=request.user).get(id=seller_id)
+        old_picture = seller.profile_picture.path
 
-    if request.method == 'POST':
-        form = SellerProfileForm(request.POST, request.FILES , instance=seller)
-        if form.is_valid():
-            if 'profile_picture' in request.FILES:
+        if request.method == 'POST':
+            form = SellerProfileForm(request.POST, request.FILES , instance=seller)
+            if form.is_valid():
+                if 'profile_picture' in request.FILES:
 
-                # Delete the old profile pic if exists and not default
-                if old_picture and 'default.jpg' not in old_picture:
-                    import os
-                    if os.path.exists(old_picture):
-                        os.remove(old_picture)
+                    # Delete the old profile pic if exists and not default
+                    if old_picture and 'default.jpg' not in old_picture:
+                        import os
+                        if os.path.exists(old_picture):
+                            os.remove(old_picture)
 
-            form.save()
-            messages.success(request, 'Your profile has been updated!')
-            return redirect('manage_seller', seller_id=seller_id)
+                form.save()
+                messages.success(request, 'Your profile has been updated!')
+                return redirect('manage_seller', seller_id=seller_id)
+            else:
+                messages.error(request, 'This username is already taken.')
         else:
-            messages.error(request, 'This username is already taken.')
-    else:
-        form = SellerProfileForm(instance=seller)
+            form = SellerProfileForm(instance=seller)
 
-    context = {
-        'seller': seller,
-        'form': form
-    }
+        context = {
+            'seller': seller,
+            'form': form
+        }
 
-    return render(request, 'seller_manage.html', context=context)
+        return render(request, 'seller_manage.html', context=context)
+    except (TypeError):
+        return redirect('landing')
+
 
 
 def delete_seller(request, seller_id):
