@@ -13,4 +13,6 @@ urlpatterns = [
     path('lookup',views.look_up, name='lookup'),
     path('search/', views.seller_search, name='seller_search'),
     path('update-pick/<uuid:pick_id>/',views.update_pick, name='update_pick'),
+    path('manage/<uuid:seller_id>',views.manage_seller, name='manage_seller'),
+    path('<uuid:seller_id>/delete', views.delete_seller, name='delete_seller'),
 ]
