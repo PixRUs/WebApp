@@ -8,13 +8,15 @@ from django.core.paginator import Paginator
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.shortcuts import redirect
+from .forms import SellerProfileForm
+from django.contrib.auth import logout
 
 from buyer.models import Buyer
 from product.models import ActivePick,HistoricalPick,ApiRequest
 from pixrus.utils.decorators import role_required,access_required
 from pixrus.utils.stat import get_stats
 from seller.models import Seller
-from django.http import HttpResponseForbidden,JsonResponse,HttpResponseNotFound
+from django.http import HttpResponseForbidden, JsonResponse, HttpResponseNotFound, Http404
 from .utils.pick_data_getter import get_odds
 from .forms import Subscription as SubscriptionForm,LookUp
 from product.models import Subscription as Subscription
@@ -379,3 +381,71 @@ def update_pick(request, pick_id):
 
         return JsonResponse({'success': True, 'is_free': pick.is_free})
     return JsonResponse({'success': False}, status=400)
+
+def manage_seller(request, seller_id):
+    try:
+        seller = Seller.objects.filter(user=request.user)
+        if not seller.exists() or Seller.objects.filter(user=request.user).get(id=seller_id) is None:
+            return HttpResponseForbidden("You do not have permission to access this page.")
+
+        # Retrieve the seller object associated with the user
+        seller = Seller.objects.filter(user=request.user).get(id=seller_id)
+        old_picture = seller.profile_picture.path
+
+        if request.method == 'POST':
+            form = SellerProfileForm(request.POST, request.FILES , instance=seller)
+            if form.is_valid():
+                if 'profile_picture' in request.FILES:
+
+                    # Delete the old profile pic if exists and not default
+                    if old_picture and 'default.jpg' not in old_picture:
+                        import os
+                        if os.path.exists(old_picture):
+                            os.remove(old_picture)
+
+                form.save()
+                messages.success(request, 'Your profile has been updated!')
+                return redirect('manage_seller', seller_id=seller_id)
+            else:
+                messages.error(request, 'This username is already taken.')
+        else:
+            form = SellerProfileForm(instance=seller)
+
+        context = {
+            'seller': seller,
+            'form': form
+        }
+
+        return render(request, 'seller_manage.html', context=context)
+    except (TypeError):
+        return redirect('landing')
+
+
+
+def delete_seller(request, seller_id):
+    seller = Seller.objects.filter(user=request.user)
+    if not seller.exists() or Seller.objects.filter(user=request.user).get(id=seller_id) is None:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+
+    # Retrieve the seller object associated with the user
+    seller = Seller.objects.filter(user=request.user).get(id=seller_id)
+    user = seller.user
+    if request.method == 'POST':
+        # Delete associates Seller profile pic if not default
+        old_picture = seller.profile_picture.path
+        if old_picture and 'default.jpg' not in old_picture:
+            import os
+            if os.path.exists(old_picture):
+                os.remove(old_picture)
+
+        # Delete the seller profile and user
+        seller.delete()
+        user.delete()
+
+        # Log the user out
+        logout(request)
+
+        messages.success(request, 'Your account has been successfully deleted.')
+        return redirect('landing')  # or whatever your home URL is
+
+    return redirect('manage_seller', seller_id=seller_id)
