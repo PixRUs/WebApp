@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Your Page Title{% endblock %}</title>
+    <title>{% block title %}Seller Dashboard{% endblock %}</title>
     <!-- Tabler Core JS (Includes Bootstrap) -->
     <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/libs/apexcharts/dist/apexcharts.min.js" defer></script>
@@ -30,7 +30,7 @@
       <div class="collapse navbar-collapse" id="sidebar-menu">
         <ul class="navbar-nav pt-lg-3">
           <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="{% url 'manage_seller' seller_id=seller.id %}">
               <span class="nav-link-title">Manage Profile</span>
             </a>
           </li>
