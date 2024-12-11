@@ -6,6 +6,8 @@ from buyer.models import Buyer
 from seller.models import Seller
 from django.utils import timezone
 from zoneinfo import ZoneInfo  # Use pytz if your Python version is < 3.9
+from pixrus.tasks.utils.update import did_game_hit
+
 
 class ActivePick(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -17,17 +19,27 @@ class ActivePick(models.Model):
     game_data = models.JSONField(null=True, blank=True)
     is_free = models.BooleanField(default=True)
     buyers_with_access = models.ManyToManyField(Buyer, related_name='active_picks_buyer_access', blank=True)
-
+    probability = models.FloatField(default=0.0)
     def has_access(self, buyer):
         return self.buyers_with_access.filter(id=buyer.id).exists()
 
-    def make_historical(self,pick_data,event_result):
+    def make_historical(self,pick_data,event_result,):
+        if did_game_hit(pick_data,event_result,self.type_of_pick):
+            did_seller_succeed = True
+            units_won = pick_data['bet_amount']
+        else:
+            did_seller_succeed = False
+            units_won = -int(pick_data['bet_amount'])
+
         historical_pick = HistoricalPick.objects.create(
             seller=self.seller,
             posted_at=self.posted_at,
             game_event_result=event_result,
             type_of_pick=self.type_of_pick,
             pick_data=pick_data,
+            did_seller_succeed=did_seller_succeed,
+            units_won=units_won,
+            probability=self.probability,
         )
         historical_pick.buyers_with_access.set(self.buyers_with_access.all())
         self.delete()
@@ -62,6 +74,9 @@ class HistoricalPick(models.Model):
     pick_data = models.JSONField()
     type_of_pick = models.CharField(max_length=50, null=True, blank=True)
     buyers_with_access = models.ManyToManyField(Buyer, related_name='historical_pick_buyer', blank=True)
+    units_won = models.IntegerField(default=0)
+    did_seller_succeed = models.BooleanField(default=False)
+    probability = models.FloatField(default=0.0)
 
     def has_access(self, buyer):
         return self.buyers_with_access.filter(id=buyer.id).exists()

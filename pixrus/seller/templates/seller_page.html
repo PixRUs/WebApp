@@ -95,7 +95,7 @@
           <div class="col-lg-5">
             <div class="card">
               <div class="card-header">
-                <h5 class="card-title">Most recent Subs</h5>
+                <h5 class="card-title">Subs</h5>
               </div>
 <div class="card-body">
     <div class="list-group list-group-flush overflow-auto" style="max-height: 15rem">
@@ -131,8 +131,10 @@
           <!-- All-time Stats Card -->
           <div class="col-4">
               <div class="card">
+            <div class="card-header">
+                  <h5 class="card-title">All-time Stats</h5>
+              </div>
                   <div class="card-body" style="height: 15rem">
-                      <h3>All-time Stats</h3>
                       {% for stat in all_time_stats %}
                           <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
                       {% endfor %}
@@ -143,8 +145,10 @@
           <!-- Monthly Stats Card -->
           <div class="col-4">
               <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title">Monthly Stats</h5>
+              </div>
                   <div class="card-body" style="height: 15rem">
-                      <h3>Monthly Stats</h3>
                       {% for stat in monthly %}
                           <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
                       {% endfor %}
@@ -152,11 +156,14 @@
               </div>
           </div>
 
+
           <!-- Weekly Stats Card -->
           <div class="col-4">
               <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title">Yearly Stats</h5>
+              </div>
                   <div class="card-body" style="height: 15rem">
-                      <h3>Weekly Stats</h3>
                       {% for stat in weekly %}
                           <p><strong>{{ stat.stat_verbal }}:</strong> {{ stat.stat_value }}</p>
                       {% endfor %}
@@ -165,6 +172,7 @@
           </div>
         </div>
       </div>
+    </div>
 
       <!-- Active Picks Table -->
       <div class="container-xl" style="padding-top: 0.2in;">
@@ -185,11 +193,12 @@
                               <th>Pick Odds</th>
                               <th>Sportsbook</th>
                               <th>Unit Amount</th>
+                              <th>Current data odds </th>
                               <th>Free</th> <!-- New column for the switch/button -->
                           </tr>
                       </thead>
                       <tbody>
-                          {% for pick in active_picks %}
+                          {% for pick,current_data in active_picks %}
                           <tr>
                               <td>{{ pick.game_data.away_team }}</td>
                               <td>{{ pick.game_data.home_team }}</td>
@@ -199,11 +208,12 @@
                               <td>{{ pick.pick_data.odds }}</td>
                               <td>{{ pick.pick_data.book_maker }}</td>
                               <td>{{ pick.pick_data.bet_amount }}</td>
+                                <td>{{ current_data }}</td>
                               <td>
                               <label class="switch">
                                   <input type="checkbox"
                                          data-pick-id="{{ pick.id }}"
-                                         {% if pick.some_boolean %}checked{% endif %}
+                                         {% if pick.is_free %}checked{% endif %}
                                          onchange="togglePick(this)">
                                   <span class="slider round"></span>
                               </label>
@@ -217,59 +227,60 @@
         </div>
       </div>
 
-      <!-- Historical Picks Table -->
-      <div class="container-xl" style="padding-top: 0.2in;">
-        <div class="col-12">
-          <div class="card">
-              <div class="card-header">
-                  <h5 class="card-title">Historical Picks</h5>
-              </div>
-              <div class="card-body">
-                  <table class="table table-vcenter">
-                      <thead>
-                          <tr>
-                              <th>Away Team</th>
-                              <th>Home Team</th>
-                              <th>Event Start</th>
-                              <th>Pick Type</th>
-                              <th>Pick Target Winner</th>
-                              <th>Pick Odds</th>
-                              <th>Sportsbook</th>
-                              <th>Unit Amount</th>
-                              <th>Status</th>
-                          </tr>
-                      </thead>
-                      <tbody>
-                          {% for pick in historical_picks %}
-                          <tr>
-                              <td>{{ pick.game_event_result.team_1 }}</td>
-                              <td>{{ pick.game_event_result.team_2 }}</td>
-                              <td>{{ pick.event_start }}</td>
-                              <td>{{ pick.type_of_pick }}</td>
-                              <td>{{ pick.pick_data.target_winner }}</td>
-                              <td>{{ pick.pick_data.odds }}</td>
-                              <td>{{ pick.pick_data.book_maker }}</td>
-                              <td>{{ pick.pick_data.bet_amount }}</td>
-                              <td>
-                                  {% if pick.pick_data.pick_success %}
-                                      <span style="color: #4caf50;">Bet Successful</span>
-                                  {% else %}
-                                      <span style="color: #f44336;">Bet Failed</span>
-                                  {% endif %}
-                              </td>
-                          </tr>
-                          {% empty %}
-                              <tr>
-                                  <td colspan="9">No historical picks available.</td>
-                              </tr>
-                          {% endfor %}
-                      </tbody>
-                  </table>
-              </div>
-          </div>
-        </div>
-      </div>
+        <!-- Historical Picks -->
+<div class="container-xl" style="padding-top: 0.2in;">
+                  <div class="card mt-4">
+            <div class="card-header">
+                <h3 class="card-title">Historical Picks</h3>
+            </div>
+            <div class="card-body">
+                {% if historical_picks %}
+                <div class="table-responsive">
+                    <table class="table table-vcenter">
+                        <thead>
+                            <tr>
+                                <th>Match</th>
+                                <th>Pick</th>
+                                <th>Odds</th>
+                                <th>Sportsbook</th>
+                                <th>Unit Amount</th>
+                                <th>Result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pick in historical_picks %}
+                            <tr>
+                                <td>{{ pick.game_event_result.team_1 }} ({{ pick.game_event_result.team_1_points }})
+                                    vs {{ pick.game_event_result.team_2 }} ({{ pick.game_event_result.team_2_points }})</td>
+                                <td>{{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</td>
+                                <td>{{ pick.pick_data.odds }}</td>
+                                <td>{{ pick.pick_data.book_maker }}</td>
+                                <td>{{ pick.pick_data.bet_amount }}</td>
+                                <td>
+                        {% if pick.did_seller_succeed %}
+                            <span style="color: #4caf50;">Bet Successful</span>
+                        {% else %}
+                            <span style="color: #f44336;">Bet Failed</span>
+                        {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center">No historical picks available.</p>
+                {% endif %}
+            </div>
     </div>
+</div>
+  <div class="container-xl" style="padding-top: 0.1in;">
+
+    <div class="hr-text">See also</div>
+<p>
+  Dicta error hic illo iure necessitatibus nihil officiis omnis perferendis, praesentium repellendus rerum, saepe sed, sit!
+</p>
+</div>
   </div>
 </div>
 </body>
