@@ -10,7 +10,7 @@ from django.views.decorators.cache import never_cache
 # Landing page or any publicly accessible entry point
 def landing(request):
     if not request.user.is_authenticated:
-        return render(request, 'landing.html')
+        return render(request, 'index.html')
     
     if Buyer.objects.filter(user=request.user).exists():
         return redirect('buyer_dashboard')  # Replace with the actual buyer dashboard URL name
