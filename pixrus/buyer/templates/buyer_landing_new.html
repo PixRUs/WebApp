@@ -89,8 +89,9 @@
                                     <th>Seller User Name</th>
                                     <th>Total Subscribers</th>
                                     <th>Number of Picks Placed</th>
-                                    <th>Number of Successful Picks</th>
-                                    <th>Total Units Won</th>
+                                    <th>Number of Units Won</th>
+                                    <th>Average Probability</th>
+                                    <th>Total Bets won</th>
                                     <th>Profile</th>
                                 </tr>
                             </thead>
@@ -137,13 +138,14 @@
                                 <th>Pick Type</th>
                                 <th>Pick Target Winner</th>
                                 <th>Pick Odds</th>
+                                <th>Current Odds</th>
                                 <th>Sportsbook</th>
                                 <th>Unit Amount</th>
                                 <th>Seller</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for pick, seller in seller_picks %}
+                            {% for pick,current_data in seller_picks %}
                                 <tr>
                                     <td>{{ pick.game_data.away_team }}</td>
                                     <td>{{ pick.game_data.home_team }}</td>
@@ -151,11 +153,12 @@
                                     <td>{{ pick.type_of_pick }}</td>
                                     <td>{{ pick.pick_data.target_winner }}</td>
                                     <td>{{ pick.pick_data.odds }}</td>
+                                    <td>{{ current_data }}</td>
                                     <td>{{ pick.pick_data.book_maker }}</td>
                                     <td>{{ pick.pick_data.bet_amount }}</td>
                                     <td>
-                                        <a href="{% url 'profile_view' seller.id %}" class="orange-link">
-                                            {{ seller.user_name }}
+                                        <a href="{% url 'profile_view' pick.seller.id %}" class="orange-link">
+                                            {{ pick.seller.user_name }}
                                         </a>
                                     </td>
                                 </tr>
@@ -170,6 +173,7 @@
             </div>
         </div>
         </div>
+
 <div class="container-xl" style="padding-top: 0.2in;">
             <div class="col-12">
             <div class="card">

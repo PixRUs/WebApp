@@ -85,18 +85,20 @@
                                 <th>Event Start</th>
                                 <th>Pick</th>
                                 <th>Odds</th>
+                                <th>Current Odds</th>
                                 <th>Sportsbook</th>
                                 <th>Unit Amount</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for pick in active_picks %}
+                            {% for pick, odds in active_picks %}
                             <tr>
                                 <td>{{ pick.game_data.away_team }}</td>
                                 <td>{{ pick.game_data.home_team }}</td>
                                 <td>{{ pick.event_start }}</td>
                                 <td>{{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</td>
                                 <td>{{ pick.pick_data.odds }}</td>
+                                <td>{{ odds }}</td>
                                 <td>{{ pick.pick_data.book_maker }}</td>
                                 <td>{{ pick.pick_data.bet_amount }}</td>
                             </tr>
@@ -134,18 +136,20 @@
                                 <th>Event Start</th>
                                 <th>Pick</th>
                                 <th>Odds</th>
+                                <th>Current Odds</th>
                                 <th>Sportsbook</th>
                                 <th>Unit Amount</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for pick in free_active_picks %}
+                            {% for pick, odds in free_active_picks %}
                             <tr>
                                 <td>{{ pick.game_data.away_team }}</td>
                                 <td>{{ pick.game_data.home_team }}</td>
                                 <td>{{ pick.event_start }}</td>
                                 <td>{{ pick.type_of_pick }} - {{ pick.pick_data.target_winner }}</td>
                                 <td>{{ pick.pick_data.odds }}</td>
+                                <td>{{ odds }}</td>
                                 <td>{{ pick.pick_data.book_maker }}</td>
                                 <td>{{ pick.pick_data.bet_amount }}</td>
                             </tr>
@@ -188,7 +192,7 @@
                                 <td>{{ pick.pick_data.book_maker }}</td>
                                 <td>{{ pick.pick_data.bet_amount }}</td>
                                 <td>
-                        {% if pick.pick_data.pick_success %}
+                        {% if pick.did_seller_succeed%}
                             <span style="color: #4caf50;">Bet Successful</span>
                         {% else %}
                             <span style="color: #f44336;">Bet Failed</span>
@@ -205,6 +209,13 @@
             </div>
         </div>
     </div>
+</div>
+  <div class="container-xl" style="padding-top: 0.1in;">
+
+    <div class="hr-text">See also</div>
+<p>
+  Dicta error hic illo iure necessitatibus nihil officiis omnis perferendis, praesentium repellendus rerum, saepe sed, sit!
+</p>
 </div>
 </body>
 </html>

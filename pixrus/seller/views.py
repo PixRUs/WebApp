@@ -20,6 +20,7 @@ from .forms import Subscription as SubscriptionForm,LookUp
 from product.models import Subscription as Subscription
 from pixrus.utils.probabilty_calculator import get_probability
 from .utils.analytics import get_new_subs,get_total_subs
+from .utils.current_pick_data import get_current_pick_data
 from collections import defaultdict
 
 
@@ -30,11 +31,18 @@ def seller_landing(request):
         return HttpResponseForbidden("You do not have permission to access this page.")
     # Retrieve the seller object associated with the user
     seller = Seller.objects.get(user=request.user)
-    active_picks = ActivePick.objects.filter(seller= seller)
+    active_picks = ActivePick.objects.filter(seller = seller)
     historical_picks = HistoricalPick.objects.filter(seller= seller)
     all_time_stats = get_stats(seller,0)
     monthly = get_stats(seller,30)
     weekly = get_stats(seller,7)
+
+    picks_and_current_data = get_current_pick_data(active_picks)
+
+
+
+
+
 
     subscribers_q = Subscription.objects.filter(
         seller=seller,
@@ -56,7 +64,7 @@ def seller_landing(request):
 
     context = {
         'seller': seller,
-        'active_picks': active_picks,
+        'active_picks': picks_and_current_data,
         'historical_picks': historical_picks,
         'all_time_stats':all_time_stats,
         'monthly':monthly,
@@ -271,7 +279,7 @@ def profile_view(request,seller_id):
     except Buyer.DoesNotExist:
         buyer = None
     subscription = None
-    curr_picks = None
+    current_picks = None
 
     if buyer:
         is_buyer = True
@@ -282,11 +290,14 @@ def profile_view(request,seller_id):
 
         if subscription and subscription.subscribed_until > timezone.now():
             curr_picks = ActivePick.objects.filter(seller=seller)
+            current_picks = get_current_pick_data(curr_picks)
     else:
         is_buyer = False
 
     view_historical_picks = HistoricalPick.objects.filter(seller=seller).order_by('-posted_at')[:5]
     free_active_picks = ActivePick.objects.filter(seller=seller,is_free=True).order_by('-posted_at')
+    free_picks = get_current_pick_data(free_active_picks)
+
 
     all_time_stats = get_stats(seller,0)
     monthly = get_stats(seller,30)
@@ -296,9 +307,9 @@ def profile_view(request,seller_id):
     context = {
         "seller": seller,
         "subscription": subscription,
-        "active_picks" : curr_picks,
+        "active_picks" : current_picks,
         "historical_picks" : view_historical_picks,
-        "free_active_picks" : free_active_picks,
+        "free_active_picks" : free_picks,
         "all_time_stats" : all_time_stats,
         "monthly" : monthly,
         "weekly" : weekly,

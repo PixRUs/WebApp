@@ -7,6 +7,7 @@ from .recomendation.util import get_recommended_picks,get_recommended_sellers
 from django.utils import timezone
 from leaderboard.top import get_top_sellers
 from pixrus.utils.stat import get_stats
+from seller.utils.current_pick_data import get_current_pick_data
 
 @role_required(required_role='buyer')
 def buyer_landing(request):
@@ -16,11 +17,9 @@ def buyer_landing(request):
     for subscription in subscriptions:
         if subscription.subscribed_until > timezone.now():
             sellers.append(subscription.seller)
-    all_active = []
-    for seller in sellers:
-        curr_active = ActivePick.objects.filter(seller=seller)
-        for pick in curr_active:
-            all_active.append((pick,seller))
+
+    all_active = ActivePick.objects.filter(seller__in=sellers)
+    picks = get_current_pick_data(all_active)
 
     seller_stat = []
     for seller in sellers:
@@ -34,7 +33,7 @@ def buyer_landing(request):
 
     context = {
         'buyer': buyer,
-        'seller_picks': all_active,
+        'seller_picks': picks,
         'seller_stat': seller_stat,
     }
 
