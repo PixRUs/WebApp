@@ -17,6 +17,7 @@ class ActivePick(models.Model):
     pick_data = models.JSONField(null=True, blank=True)
     type_of_pick = models.CharField(max_length=50, null=True, blank=True)
     game_data = models.JSONField(null=True, blank=True)
+    sport_league = models.CharField(max_length=100)
     is_free = models.BooleanField(default=True)
     buyers_with_access = models.ManyToManyField(Buyer, related_name='active_picks_buyer_access', blank=True)
     probability = models.FloatField(default=0.0)
@@ -101,9 +102,8 @@ class ApiRequest(models.Model):
     endpoint = models.CharField(null=False,max_length=255)  # The API endpoint that was called
     request_time = models.DateTimeField(null=False,auto_now_add=True)  # Time of the API request
     response_data = models.JSONField(null=False, blank=True)  # Store the API response, if needed
-    sport = models.CharField(null=False,max_length=100)
-    league = models.CharField(max_length=100,blank=True,null=True)
-    type_of_pick = models.CharField(null=False,max_length=50, blank=True)
+    sport_league = models.CharField(null=False,max_length=100)
+    type_of_pick = models.CharField(max_length=100)
     delta = models.IntegerField(null=False,default=30)  # or any default integer value
 
     class Meta:
@@ -129,8 +129,8 @@ class ApiRequest(models.Model):
         return time_difference.total_seconds() < delta_in_seconds
 
     @classmethod
-    def get_request_data(cls, sport, league, type_of_pick):
-        queryset = cls.objects.filter(sport=sport,league=league,type_of_pick=type_of_pick)
+    def get_request_data(cls, sport_league, type_of_pick):
+        queryset = cls.objects.filter(sport_league=sport_league,type_of_pick=type_of_pick)
         if not queryset.exists(): # Check if queryset is empty
             return None
 

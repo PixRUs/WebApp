@@ -18,12 +18,14 @@ class Subscription(forms.Form):
 class LookUp(forms.Form):
     SPORT_LEAGUE_CHOICES = [
         ('basketball_nba', 'Basketball: NBA'),
-        ('any', 'any')
+        ('americanfootball_nfl','Football: NFL'),
+        ('americanfootball_ncaaf','Football: NCAA'),
+        ('icehockey_nhl', 'US Icehockey: NHL'),
     ]
     sports_league_choice = forms.ChoiceField(choices=SPORT_LEAGUE_CHOICES, widget=forms.RadioSelect, label='Select Your sport and league')
 
     TYPE_OF_BETS = [
-        ('money_line', 'Money Line'),
+        ('h2h', 'Money Line'),
         ('any','any')
     ]
     type_of_bets = forms.ChoiceField(choices=TYPE_OF_BETS, widget=forms.RadioSelect, label='Select your type of bet')
