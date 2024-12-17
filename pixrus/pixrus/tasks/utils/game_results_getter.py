@@ -52,20 +52,39 @@ def has_game_happened_h2h(query_data):
     return is_final, game_result_data
 
 
-def get_score_result(game_query_data,type_of_pick):
-    bet_type_functions = {
-        "h2h": score_result_h2h,
+def get_score_result(game_query_data,type_of_pick,sport_league):
+    league_functions = {
+        "icehockey_nhl": score_result_ice_hockey_nhl,
+        "basketball_nba": score_result_basketball_nba,
     }
-    bet_type_function = bet_type_functions.get(type_of_pick)
+    bet_type_function = league_functions.get(sport_league)
     if bet_type_function:
-        return bet_type_function(game_query_data)
+        return bet_type_function(type_of_pick,game_query_data)
 
-def score_result_h2h(game_query_data):
+def score_result_ice_hockey_nhl(type_of_pick,game_query_data):
+    bet_type_functions = {
+        "h2h": score_result_h2h_hockey
+    }
+    function = bet_type_functions.get(type_of_pick)
+    if function:
+        return function(game_query_data)
+
+
+def score_result_basketball_nba(type_of_pick,game_query_data):
+    bet_type_functions = {
+        "h2h" : score_result_h2h_nba
+    }
+    function = bet_type_functions.get(type_of_pick)
+    if function:
+        return function(game_query_data)
+
+def score_result_h2h_nba(game_query_data):
     has_happened,game_result_data = has_game_happened_h2h(game_query_data)
     if not has_happened or game_result_data is None:
         return False,{}
 
-    teams = game_result_data["game_spotlight"]["teams"] 
+    teams = game_result_data["game_spotlight"]["teams"]
+    print(teams)
     team1_score = int(teams[0]["score"]["T"])
     team2_score = int(teams[1]["score"]["T"])
 
@@ -88,6 +107,35 @@ def score_result_h2h(game_query_data):
         "game_winner":team_winner,
     }
 
+
+def score_result_h2h_hockey(game_query_data):
+    has_happened, game_result_data = has_game_happened_h2h(game_query_data)
+    if not has_happened or game_result_data is None:
+        return False, {}
+
+    teams = game_result_data["game_spotlight"]["teams"]
+    print(teams)
+    team1_score = int(teams[0]["score"])
+    team2_score = int(teams[1]["score"])
+
+    differential_team1 = team1_score - team2_score
+    differential_team2 = team2_score - team1_score
+    if team2_score > team1_score:
+        team_winner = teams[1]['name']
+    elif team1_score > team2_score:
+        team_winner = teams[0]['name']
+    else:
+        team_winner = "Draw"
+
+    return True, {
+        "team_1": teams[0]['name'],
+        "team_2": teams[1]['name'],
+        "team_1_points": team1_score,
+        "team_2_points": team2_score,
+        "team_1_differential": differential_team1,
+        "team_2_differential": differential_team2,
+        "game_winner": team_winner,
+    }
         
 
     

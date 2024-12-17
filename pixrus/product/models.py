@@ -105,6 +105,7 @@ class ApiRequest(models.Model):
     sport_league = models.CharField(null=False,max_length=100)
     type_of_pick = models.CharField(max_length=100)
     delta = models.IntegerField(null=False,default=30)  # or any default integer value
+    type_of_pick_verbal = models.CharField(max_length=255)
 
     class Meta:
         verbose_name = "Vendor API Request"

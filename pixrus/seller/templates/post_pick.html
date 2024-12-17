@@ -51,7 +51,7 @@
                 <div class="row align-items-center">
                     <div class="col">
                         <div class="page-pretitle">Available Games</div>
-                        <h2 class="page-title">NBA Game Odds</h2>
+                        <h2 class="page-title">NBA Game Odds For {{ type_of_pick }}</h2>
                     </div>
                 </div>
             </div>
@@ -83,15 +83,12 @@
                     <div class="card-body">
                         <form method="GET" class="row g-3">
                             <div class="col-md-4">
-                                <label class="form-label">Team</label>
+                                <label class="form-label">Teams</label>
                                 <select name="team" class="form-select">
                                     <option value="">All Teams</option>
-                                    {% for pick in all_picks %}
-                                        <option value="{{ pick.home_team }}" {% if request.GET.team == pick.home_team %}selected{% endif %}>
-                                            {{ pick.home_team }}
-                                        </option>
-                                        <option value="{{ pick.away_team }}" {% if request.GET.team == pick.away_team %}selected{% endif %}>
-                                            {{ pick.away_team }}
+                                    {% for team in unique_teams %}
+                                        <option value="{{ team }}" {% if request.GET.team == team %}selected{% endif %}>
+                                            {{ team }}
                                         </option>
                                     {% endfor %}
                                 </select>
@@ -142,7 +139,7 @@
                                         <div class="card-body overflow-auto"> <!-- Made scrollable -->
                                             <div class="mb-3">
                                                 <strong>Start Time:</strong>
-                                                <span class="ms-2">{{ pick.commence_time }}</span>
+                                                <span>{{ pick.commence_time}}</span>
                                             </div>
 
                                             {% for bookmaker in pick.bookmakers %}
@@ -152,7 +149,7 @@
                                                         {% for outcome in market.outcomes %}
                                                             <div class="d-flex justify-content-between align-items-center mb-1">
                                                                 <span>{{ outcome.name }}</span>
-                                                                <span class="badge bg-blue">{{ outcome.multiplier }}</span>
+                                                                <span class="badge bg-blue">{{ outcome.price }}</span>
                                                             </div>
                                                         {% endfor %}
                                                     {% endfor %}
