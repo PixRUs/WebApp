@@ -40,12 +40,6 @@ def seller_landing(request):
     weekly = get_stats(seller,7)
 
     picks_and_current_data = get_current_pick_data(active_picks)
-
-
-
-
-
-
     subscribers_q = Subscription.objects.filter(
         seller=seller,
         subscribed_until__gt=timezone.now()
@@ -75,7 +69,7 @@ def seller_landing(request):
         "total_subscribers":total_subs,
         "all_subscribers_by_letters":all_subscribers_by_letters
     }
-    return render(request, 'seller_page.html', context)
+    return render(request, 'seller_dashboard.html', context)
 
 
 @role_required(required_role='seller')
@@ -83,6 +77,7 @@ def post_pick_view(request,data_id):
     if not Seller.objects.filter(user=request.user).exists():
         return HttpResponseForbidden("You do not have permission to access this page.")
 
+    seller = Seller.objects.get(user=request.user)
 
     # Get current filter parameters or defaults
     team_filter = request.GET.get("team", request.session.get("team_filter", "")).lower()
@@ -135,6 +130,7 @@ def post_pick_view(request,data_id):
         "picks": filtered_picks,
         "all_picks": current_pick_data,
         "unique_sportsbooks": sorted(unique_sportsbooks),
+        "seller": seller,
     }
 
     return render(request, "post_pick.html", context)
@@ -143,6 +139,8 @@ def post_pick_view(request,data_id):
 @role_required(required_role='seller')
 def activate_pick(request, pick_id):
     seller_query = Seller.objects.filter(user=request.user)
+    seller = seller_query.first()
+
     if not seller_query:
         return HttpResponseForbidden("You do not have permission to access this page.")
 
@@ -194,7 +192,7 @@ def activate_pick(request, pick_id):
 
 
         return redirect('seller_dashboard')
-    return render(request, "activate_pick.html", {"pick": pick})
+    return render(request, "activate_pick.html", {"pick": pick, 'seller': seller})
 
 
 @login_required
@@ -348,6 +346,7 @@ def subscribe(request, seller_id):
 
 @role_required(required_role="seller")
 def look_up(request):
+    seller = Seller.objects.get(user=request.user)
     if request.method == 'POST':
         form = LookUp(request.POST)
         if form.is_valid():
@@ -364,7 +363,7 @@ def look_up(request):
         else:
             return HttpResponseNotFound("Form is invalid")
     else:
-       return render(request, 'look_up.html', {'form': LookUp})
+       return render(request, 'look_up.html', {'form': LookUp, 'seller': seller})
 
 def seller_search(request):
     query = request.GET.get('query', '')
@@ -416,7 +415,7 @@ def manage_seller(request, seller_id):
             'form': form
         }
 
-        return render(request, 'seller_manage.html', context=context)
+        return render(request, 'seller_profile.html', context=context)
     except (TypeError):
         return redirect('landing')
 

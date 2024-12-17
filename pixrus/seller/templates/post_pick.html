@@ -5,111 +5,191 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NBA Game Odds</title>
-<link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css" rel="stylesheet">
 </head>
 <body>
-        <div class="steps">
-  <a href="#" class="step-item">
-    Look up the relevant pick
-  </a>
-  <a href="#" class="step-item active">
-    Find the exact Game
-  </a>
-  <a href="#" class="step-item">
-    Activate with the necessary units
-  </a>
-</div>
-    <div class="container mt-5">
-        <!-- Back to Dashboard -->
-        <div class="mb-4">
-            <a href="{% url 'seller_dashboard' %}" class="btn btn-secondary">
-                Back to Dashboard
-            </a>
-        </div>
-
-        <!-- Page Title -->
-        <h1 class="mb-4">NBA Game Odds</h1>
-
-        <!-- Filters Section -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="card-title">Filter Games</h5>
+<div class="page">
+    <!-- Horizontal Navbar -->
+    <header class="navbar navbar-expand-md navbar-light d-print-none">
+        <div class="container-xl">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
+                <a href="#">
+                    <span class="fs-3 fw-bold text-primary">PIXRUS</span>
+                </a>
+            </h1>
+            <div class="collapse navbar-collapse" id="navbar-menu">
+                <div class="d-flex flex-column flex-md-row flex-fill align-items-stretch align-items-md-center">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'seller_dashboard' %}">
+                                <span class="nav-link-title">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'manage_seller' seller_id=seller.id %}">
+                                <span class="nav-link-title">Manage Profile</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <span class="nav-link-title">Analytics</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <div class="card-body">
-                <form method="GET" class="row g-3">
-                    <!-- Team Filter -->
-                    <div class="col-md-4">
-                        <label for="team" class="form-label">Filter by Team</label>
-                        <select name="team" id="team" class="form-select">
-                            <option value="">Select a Team</option>
-                            {% for pick in all_picks %}
-                                <option value="{{ pick.home_team }}">{{ pick.home_team }}</option>
-                                <option value="{{ pick.away_team }}">{{ pick.away_team }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+        </div>
+    </header>
 
-                    <!-- Sportsbook Filter -->
-                    <div class="col-md-4">
-                        <label for="sportsbook" class="form-label">Filter by Sportsbook</label>
-                        <select name="sportsbook" id="sportsbook" class="form-select">
-                            <option value="">Select a Sportsbook</option>
-                            {% for sportsbook in unique_sportsbooks %}
-                                <option value="{{ sportsbook }}">{{ sportsbook }}</option>
-                            {% endfor %}
-                        </select>
+    <div class="page-wrapper">
+        <!-- Page Header -->
+        <div class="page-header d-print-none">
+            <div class="container-xl">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <div class="page-pretitle">Available Games</div>
+                        <h2 class="page-title">NBA Game Odds</h2>
                     </div>
-
-                    <!-- Date Filter -->
-                    <div class="col-md-4">
-                        <label for="date" class="form-label">Filter by Date</label>
-                        <input type="date" name="date" id="date" class="form-control" placeholder="Select Date">
-                    </div>
-
-                    <!-- Submit Button -->
-                    <div class="col-12">
-                        <button type="submit" class="btn btn-primary">Apply Filters</button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
 
-        <!-- Display Picks Section -->
-        {% if picks %}
-            {% for pick in picks %}
-                {% if pick.bookmakers %}
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <!-- Game Details -->
-                            <h5 class="card-title">{{ pick.away_team }} at {{ pick.home_team }}</h5>
-                            <p><strong>Start Time:</strong> {{ pick.commence_time }}</p>
+        <!-- Steps Indicator -->
+        <div class="container-xl py-4">
+            <div class="steps steps-counter steps-blue">
+                <a href="#" class="step-item">
+                    Look up the relevant pick
+                </a>
+                <a href="#" class="step-item active">
+                    Find the exact Game
+                </a>
+                <a href="#" class="step-item">
+                    Activate with the necessary units
+                </a>
+            </div>
+        </div>
 
-                            <!-- Bookmakers and Odds -->
-                            {% for bookmaker in pick.bookmakers %}
-                                <div class="mb-3">
-                                    <p><strong>Bookmaker:</strong> {{ bookmaker.title }}</p>
+        <!-- Page Body -->
+        <div class="page-body">
+            <div class="container-xl">
+                <!-- Filters Card -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title">Filter Games</h3>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Team</label>
+                                <select name="team" class="form-select">
+                                    <option value="">All Teams</option>
+                                    {% for pick in all_picks %}
+                                        <option value="{{ pick.home_team }}" {% if request.GET.team == pick.home_team %}selected{% endif %}>
+                                            {{ pick.home_team }}
+                                        </option>
+                                        <option value="{{ pick.away_team }}" {% if request.GET.team == pick.away_team %}selected{% endif %}>
+                                            {{ pick.away_team }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
 
-                                    {% for market in bookmaker.markets %}
-                                        <div class="ms-3">
-                                            {% for outcome in market.outcomes %}
-                                                <p><strong>Outcome:</strong> {{ outcome.name }} - <strong>Odds:</strong> {{ outcome.multiplier }}</p>
+                            <div class="col-md-4">
+                                <label class="form-label">Sportsbook</label>
+                                <select name="sportsbook" class="form-select">
+                                    <option value="">All Sportsbooks</option>
+                                    {% for sportsbook in unique_sportsbooks %}
+                                        <option value="{{ sportsbook }}" {% if request.GET.sportsbook == sportsbook %}selected{% endif %}>
+                                            {{ sportsbook }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Date</label>
+                                <input type="date" name="date" class="form-control" value="{{ request.GET.date|default:'' }}">
+                            </div>
+
+
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    Apply Filters
+                                </button>
+                                <a href="?" class="btn btn-secondary">
+                                    Reset Filters
+                                </a>
+                                <a href="{% url 'seller_dashboard' %}" class="btn btn-secondary">
+                                    Back to Dashboard
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Games Grid -->
+                {% if picks %}
+                    <div class="row row-cards">
+                        {% for pick in picks %}
+                            {% if pick.bookmakers %}
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <div class="card" style="height: 400px;"> <!-- Fixed height -->
+                                        <div class="card-header">
+                                            <h3 class="card-title">{{ pick.away_team }} at {{ pick.home_team }}</h3>
+                                        </div>
+                                        <div class="card-body overflow-auto"> <!-- Made scrollable -->
+                                            <div class="mb-3">
+                                                <strong>Start Time:</strong>
+                                                <span class="ms-2">{{ pick.commence_time }}</span>
+                                            </div>
+
+                                            {% for bookmaker in pick.bookmakers %}
+                                                <div class="mb-3 p-3 bg-light rounded">
+                                                    <div class="fw-bold mb-2">{{ bookmaker.title }}</div>
+                                                    {% for market in bookmaker.markets %}
+                                                        {% for outcome in market.outcomes %}
+                                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                <span>{{ outcome.name }}</span>
+                                                                <span class="badge bg-blue">{{ outcome.multiplier }}</span>
+                                                            </div>
+                                                        {% endfor %}
+                                                    {% endfor %}
+                                                </div>
                                             {% endfor %}
                                         </div>
-                                    {% endfor %}
+                                        <div class="card-footer"> <!-- Footer stays fixed at bottom -->
+                                            <a href="{% url 'activate_pick' pick.id %}" class="btn btn-primary w-100">
+                                                Post Pick
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
-                            {% endfor %}
-
-                            <!-- Post Pick Button -->
-                            <a href="{% url 'activate_pick' pick.id %}" class="btn btn-primary">
-                                Post Pick
-                            </a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty">
+                        <div class="empty-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mood-sad" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
+                                <path d="M9 10l.01 0"></path>
+                                <path d="M15 10l.01 0"></path>
+                                <path d="M9.5 15.25a3.5 3.5 0 0 1 5 0"></path>
+                            </svg>
                         </div>
+                        <p class="empty-title">No games found</p>
+                        <p class="empty-subtitle text-muted">No games match your filter criteria. Try adjusting your filters.</p>
                     </div>
                 {% endif %}
-            {% endfor %}
-        {% else %}
-            <p class="text-muted">No games match your filter criteria.</p>
-        {% endif %}
+            </div>
+        </div>
     </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
 </body>
 </html>
