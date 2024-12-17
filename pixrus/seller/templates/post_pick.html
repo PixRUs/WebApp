@@ -92,7 +92,7 @@
                                     {% for market in bookmaker.markets %}
                                         <div class="ms-3">
                                             {% for outcome in market.outcomes %}
-                                                <p><strong>Outcome:</strong> {{ outcome.name }} - <strong>Odds:</strong> {{ outcome.multiplier }}</p>
+                                                <p><strong>Outcome:</strong> {{ outcome.name }} - <strong>Odds:</strong> {{ outcome.price }}</p>
                                             {% endfor %}
                                         </div>
                                     {% endfor %}
