@@ -9,7 +9,6 @@ from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.shortcuts import redirect
 
-from pixrus.tasks.update_pick_and_user_data import type_of_pick
 from .forms import SellerProfileForm
 from django.contrib.auth import logout
 
@@ -99,7 +98,7 @@ def post_pick_view(request,data_id):
 
     api_req = ApiRequest.objects.get(id=data_id)
     current_pick_data = api_req.response_data
-
+    request.session["type_of_pick"] = api_req.type_of_pick
     request.session["odds"] = api_req.response_data
     filtered_picks = []
     unique_sportsbooks = set()
@@ -167,7 +166,6 @@ def activate_pick(request, pick_id):
             "odds": odds,
             "book_maker": request.POST["bookmaker"],
             "bet_amount": request.POST["unit_size"],
-            "type": request.POST["type"],
         }
         game_data = {
             "home_team": request.POST["home_team"],
@@ -179,7 +177,7 @@ def activate_pick(request, pick_id):
             event_start=request.POST["commence_time"],
             pick_data=pick_data,
             game_data=game_data,
-            type_of_pick=type_of_pick,
+            type_of_pick=request.session["type_of_pick"],
             probability=get_probability(request.POST["multiplier"]),
             sport_league = request.session['sport_league']
         )
@@ -347,6 +345,7 @@ def look_up(request):
             form_type_of_bet = form.cleaned_data['type_of_bets']
             api_obj = get_odds(sport_league = sports_league_choice,type_of_pick=form_type_of_bet)
             request.session['sport_league'] = form.cleaned_data['sports_league_choice']
+            request.session['type_of_sport_bet'] = form_type_of_bet
             return redirect('post_pick', api_obj.id)
         else:
             return HttpResponseNotFound("Form is invalid")
