@@ -28,9 +28,6 @@ def buyer_landing(request):
         seller_stat.append((seller_stats, subscriber_count,seller))
     #top_5_active_picks = get_recommended_picks(buyer,5)
 
-
-
-
     context = {
         'buyer': buyer,
         'seller_picks': picks,
