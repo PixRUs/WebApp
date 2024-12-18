@@ -20,7 +20,7 @@ class ActivePick(models.Model):
     sport_league = models.CharField(max_length=100)
     is_free = models.BooleanField(default=True)
     buyers_with_access = models.ManyToManyField(Buyer, related_name='active_picks_buyer_access', blank=True)
-    probability = models.FloatField(default=0.0)
+    probability = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
     def has_access(self, buyer):
         return self.buyers_with_access.filter(id=buyer.id).exists()
 
@@ -77,7 +77,7 @@ class HistoricalPick(models.Model):
     buyers_with_access = models.ManyToManyField(Buyer, related_name='historical_pick_buyer', blank=True)
     units_won = models.IntegerField(default=0)
     did_seller_succeed = models.BooleanField(default=False)
-    probability = models.FloatField(default=0.0)
+    probability = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
 
     def has_access(self, buyer):
         return self.buyers_with_access.filter(id=buyer.id).exists()

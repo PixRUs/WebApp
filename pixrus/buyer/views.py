@@ -87,4 +87,4 @@ def market(request):
                "recommended_sellers": recommended_sellers,
                }
 
-    return render(request, 'market_new.html',context)
+    return render(request, 'market.html',context)

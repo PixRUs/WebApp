@@ -46,23 +46,35 @@
 
     <div class="page-wrapper">
         <!-- Page Header -->
-        <div class="page-header d-print-none">
-            <div class="container-xl">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <div class="page-pretitle">Seller Profile</div>
-                        <h2 class="page-title">{{ seller.user_name }}</h2>
-                    </div>
-                    {% if not subscription %}
-                        <div class="col-auto">
-                            <a href="{% url 'subscribe_view' seller_id=seller.id %}" class="btn btn-primary">
-                                Subscribe Now
-                            </a>
-                        </div>
-                    {% endif %}
-                </div>
+<div class="container-xl">
+    <div class="row align-items-center">
+        <div class="col-auto">
+            <!-- Profile Picture -->
+            <div
+                class="avatar avatar-lg rounded-circle"
+                style="background-image: url({{ seller.profile_picture.url }});"
+                data-bs-toggle="modal"
+                data-bs-target="#profileImageModal">
             </div>
         </div>
+        <div class="col">
+            <div class="page-pretitle">Seller Profile</div>
+            <h2 class="page-title">{{ seller.user_name }}</h2>
+            <!-- Bio -->
+            <p class="text-muted mt-2">{{ seller.bio }}</p>
+        </div>
+        {% if not subscription %}
+            <div class="col-auto">
+                <a href="{% url 'subscribe_view' seller_id=seller.id %}" class="btn btn-primary">
+                    Subscribe Now
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+
+
 
         <!-- Page Body -->
         <div class="page-body">
@@ -297,7 +309,7 @@
                                         {{ pick.type_of_pick }}<br>
                                         <small class="text-muted">{{ pick.pick_data.target_winner }}</small>
                                     </td>
-                                    <td class="{% if pick.pick_data.odds < 0 %}text-success{% else %}text-danger{% endif %} fw-bold">
+                                    <td class="fw-bold">
                                         {{ pick.pick_data.odds }}
                                     </td>
                                     <td>{{ pick.pick_data.book_maker }}</td>

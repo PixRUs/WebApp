@@ -21,9 +21,9 @@ def did_game_hit(pick_data,result_data,type_of_pick):
 
 
 def h2h_game_hit(pick_data,event_result):
-    seller_selected_outcome = pick_data['target_winner']
-    actual_outcome = event_result['game_winner']
-    return seller_selected_outcome == actual_outcome
+    seller_selected_outcome = pick_data['target_winner'].lower()
+    actual_outcome = event_result['game_winner'].lower()
+    return seller_selected_outcome in actual_outcome or actual_outcome in seller_selected_outcome
 
 def pointspread_game_hit(pick_data,event_result):
     pass
