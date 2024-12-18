@@ -52,11 +52,9 @@ def market(request):
     #sellers that have the most successful bets in the past week month and year.
     #Sellers that have taken the safes bets.
     #sellers that have taken the riskiest bets.
-
     buyer = Buyer.objects.get(user=request.user)
     get_top_month = get_top_sellers(30,3)
     top_three_seller_units_won_past_month = get_top_month["sellers_with_most_number_of_units_made"]
-    print(top_three_seller_units_won_past_month)
     top_three_successful_bets_won_past_month = get_top_month["sellers_with_most_number_of_successful_bets"]
     top_three_safest_sellers_past_month = get_top_month["safest_sellers"]
     top_three_riskiest_sellers_past_month = get_top_month["riskiest_sellers"]
@@ -67,7 +65,6 @@ def market(request):
     top_three_riskiest_sellers_past_week = get_top_weekly["riskiest_sellers"]
     top_three_successful_bets_won_past_week = get_top_weekly["sellers_with_most_number_of_successful_bets"]
 
-    top_5_active_picks = get_recommended_picks(buyer,5)
     top_five_active_sellers = get_recommended_sellers(buyer,5)
 
     recommended_sellers = []
@@ -79,7 +76,7 @@ def market(request):
         else:
             success_rate = HistoricalPick.objects.filter(seller = seller,did_seller_succeed = True).count()/ picks_sold
             average_odds = HistoricalPick.objects.filter(seller=seller).aggregate(average_probability=Avg('probability'))['average_probability']
-        recommended_sellers.append((picks_sold,success_rate,average_odds,seller ))
+        recommended_sellers.append((picks_sold,success_rate,average_odds,seller))
 
     context = {'top_three_seller_units_won_past_week': top_three_seller_units_won_past_week,'top_three_successful_bets_won_past_week': top_three_successful_bets_won_past_week,
                "top_three_safest_sellers_past_week":top_three_safest_sellers_past_week,"top_three_riskiest_sellers_past_week":top_three_riskiest_sellers_past_week,
