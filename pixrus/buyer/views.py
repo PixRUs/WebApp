@@ -34,7 +34,7 @@ def buyer_landing(request):
         'seller_stat': seller_stat,
     }
 
-    return render(request, 'buyer_landing_new.html',context)
+    return render(request, 'buyer_landing.html',context)
 @role_required(required_role='buyer')
 def buyer_recommended(request):
     buyer = Buyer.objects.get(user=request.user)
