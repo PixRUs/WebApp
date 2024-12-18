@@ -32,7 +32,7 @@ def get_recommended_picks(buyer, num_of_picks):
         sport = active_pick.game_data['sport']
         league = active_pick.game_data['league']
         risk, pick_type, units = calculate_pick_values(
-            category=[sport, league], pick_data=active_pick.pick_data, game_data=active_pick.game_data
+            category=[sport, league], pick_data=active_pick.pick_data, type_of_bet= active_pick.type_of_pick, game_data=active_pick.game_data
         )
         distance = calculate_distance(
             risk_1=average_pick_risk,
@@ -91,8 +91,8 @@ def get_recommended_sellers(buyer, num_of_sellers):
     return sellers
 
 
-def calculate_pick_values(category, pick_data, game_data):
-    pick_prob = get_probability(pick_data['odds']) if pick_data['type'] == 'h2h' else 0.5
+def calculate_pick_values(category, pick_data, type_of_bet,  game_data):
+    pick_prob = get_probability(pick_data['odds']) if type_of_bet == 'h2h' else 0.5
     category_val = get_pick_category(sport=category[0], league=category[1])
     amount_of_units = int(pick_data['bet_amount'])
     return pick_prob, category_val, amount_of_units
@@ -118,7 +118,7 @@ def calculate_averages(all_historical_picks):
         sport = pick.game_event_result.get('sport', 'basketball')
         league = pick.game_event_result.get('league', 'nba')
         pick_prob, pick_type, units = calculate_pick_values(
-            category=[sport, league], pick_data=pick.pick_data, game_data=pick.game_event_result
+            category=[sport, league], pick_data=pick.pick_data, type_of_bet=pick.type_of_pick, game_data=pick.game_event_result
         )
         total_risk_value += pick_prob
         amount_of_units += units
@@ -130,4 +130,4 @@ def calculate_averages(all_historical_picks):
     average_amount_of_units = amount_of_units / total_picks
     average_pick_risk = total_risk_value / total_picks
     average_type_of_pick = type_of_pick / total_picks
-    return average_amount_of_units, average_pick_risk, average_type_of_pick
+    return average_amount_of_units, round(average_pick_risk,2), average_type_of_pick

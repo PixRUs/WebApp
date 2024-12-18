@@ -21,7 +21,7 @@ def calculate_with_q(historical_pick_queries):
             number_of_successful_picks += 1
 
     stats = {'number_of_placed_picks': number_of_placed_picks, 'units_won': units_won,
-             'total_probability': total_probability / number_of_placed_picks if number_of_placed_picks > 0 else 0,
+             'average_probability': total_probability / number_of_placed_picks if number_of_placed_picks > 0 else 0,
              'number_of_successful_picks': number_of_successful_picks}
     stats = [{'stat_verbal': key.replace('_', ' ').capitalize(), 'stat_value': value} for key, value in stats.items()]
 

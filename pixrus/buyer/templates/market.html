@@ -26,9 +26,9 @@
                         <input type="text" name="query" class="form-control" placeholder="Search sellers...">
                         <button type="submit" class="btn btn-primary">
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                                <circle cx="10" cy="10" r="7" />
-                                <line x1="21" y1="21" x2="15" y2="15" />
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                <circle cx="10" cy="10" r="7"></circle>
+                                <line x1="21" y1="21" x2="15" y2="15"></line>
                             </svg>
                             Search
                         </button>
@@ -276,12 +276,12 @@
                                                 </div>
                                                 <div class="datagrid-item">
                                                     <div class="datagrid-title">Success Rate</div>
-                                                    <div class="datagrid-content">{{ success_rate }}%</div>
+                                                    <div class="datagrid-content">{{ success_rate}}%</div>
                                                 </div>
                                                 <div class="datagrid-item">
                                                     <div class="datagrid-title">Average Odds</div>
                                                     <div class="datagrid-content">
-                                                        {{ average_odds }}
+                                                        {{ average_odds|floatformat:2 }}
                                                     </div>
                                                 </div>
                                             </div>
