@@ -1,9 +1,10 @@
-from product.models import HistoricalPick, ActivePick
+from product.models import HistoricalPick, ActivePick, Subscription
 import heapq
 import math
 from pixrus.utils.probabilty_calculator import get_probability
 
 from seller.models import Seller
+from seller.views import historical_picks
 
 type_of_pick_map = {
     "nba_basketball": 1,
@@ -99,7 +100,12 @@ def calculate_pick_values(category, pick_data, type_of_bet,  game_data):
 
 
 def calculate_buyer_averages(buyer):
-    all_historical_picks = buyer.historical_pick_buyer.all()
+    # Get all sellers from subscriptions
+    sellers = [query.seller for query in Subscription.objects.filter(buyer=buyer)]
+
+    # Get historical picks for all sellers and flatten the results
+
+    all_historical_picks = HistoricalPick.objects.filter(seller__in=sellers)
     return calculate_averages(all_historical_picks)
 
 

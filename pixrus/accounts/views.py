@@ -58,7 +58,7 @@ def profile_completion(request):
                 Buyer.objects.get_or_create(user=request.user,
                 defaults={'user_name':user_name,
                 'meta_data':{},
-                'stats':{}}
+                }
                 )
                 return redirect('buyer_dashboard')  # Redirect to buyer dashboard
         else:
