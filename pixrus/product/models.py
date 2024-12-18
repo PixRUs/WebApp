@@ -19,10 +19,8 @@ class ActivePick(models.Model):
     game_data = models.JSONField(null=True, blank=True)
     sport_league = models.CharField(max_length=100)
     is_free = models.BooleanField(default=True)
-    buyers_with_access = models.ManyToManyField(Buyer, related_name='active_picks_buyer_access', blank=True)
     probability = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
-    def has_access(self, buyer):
-        return self.buyers_with_access.filter(id=buyer.id).exists()
+
 
     def make_historical(self,pick_data,event_result,):
         if did_game_hit(pick_data,event_result,self.type_of_pick):
@@ -42,14 +40,9 @@ class ActivePick(models.Model):
             units_won=units_won,
             probability=self.probability,
         )
-        historical_pick.buyers_with_access.set(self.buyers_with_access.all())
         self.delete()
         return historical_pick
 
-    def give_buyer_access(self, buyer):
-        if not self.buyers_with_access.filter(id=buyer.id).exists():
-            self.buyers_with_access.add(buyer)
-        return True
 
     @classmethod
     def get_active_picks_for_buyer(cls, buyer):
@@ -74,13 +67,10 @@ class HistoricalPick(models.Model):
     game_event_result = models.JSONField()
     pick_data = models.JSONField()
     type_of_pick = models.CharField(max_length=50, null=True, blank=True)
-    buyers_with_access = models.ManyToManyField(Buyer, related_name='historical_pick_buyer', blank=True)
     units_won = models.IntegerField(default=0)
     did_seller_succeed = models.BooleanField(default=False)
     probability = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
 
-    def has_access(self, buyer):
-        return self.buyers_with_access.filter(id=buyer.id).exists()
 
     @classmethod
     def get_historical_picks_for_buyer(cls, buyer):

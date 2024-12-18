@@ -41,7 +41,6 @@ for active_pick in all_active_picks:
     has_happened,result = get_score_result(game_query_data, type_of_pick,sport_league)
     if has_happened:
         seller = active_pick.seller
-        buyers = active_pick.buyers_with_access
         pick_data = active_pick.pick_data
         ActivePick.make_historical(active_pick, event_result=result, pick_data=pick_data)
 
