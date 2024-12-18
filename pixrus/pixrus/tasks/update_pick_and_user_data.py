@@ -37,7 +37,8 @@ for active_pick in all_active_picks:
                 "team_2": away_team,
                 "event_time": event_start
             }
-    has_happened,result = get_score_result(game_query_data, type_of_pick)
+    sport_league = active_pick.sport_league
+    has_happened,result = get_score_result(game_query_data, type_of_pick,sport_league)
     if has_happened:
         seller = active_pick.seller
         buyers = active_pick.buyers_with_access

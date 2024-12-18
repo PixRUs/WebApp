@@ -11,7 +11,6 @@ def get_current_pick_data(active_picks):
         target_winner = pick.pick_data['target_winner']
         type_of_pick = pick.type_of_pick
         vendor_req = ApiRequest.objects.filter(sport_league=sport_league,type_of_pick=type_of_pick).first().response_data
-        print(vendor_req)
         found = False
         for game in vendor_req:
             if game['home_team'] == home_team and game['away_team'] == away_team:

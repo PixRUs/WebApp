@@ -30,7 +30,7 @@ def get_upcoming_odds(sport_league,markets, regions='us', odds_format='american'
         return None
 from zoneinfo import ZoneInfo
 
-def get_odds(sport_league,type_of_pick):
+def get_odds(sport_league,type_of_pick,verbal_type_of_pick):
     response_data = {}
     request_object = ApiRequest.get_request_data(sport_league=sport_league, type_of_pick=type_of_pick)
     if request_object is None or request_object.response_data == {}:
@@ -46,6 +46,7 @@ def get_odds(sport_league,type_of_pick):
             'sport_league': sport_league,
             'type_of_pick': type_of_pick,
             'response_data': response_data,
+            'type_of_pick_verbal': verbal_type_of_pick
         }
     )
     if not created:

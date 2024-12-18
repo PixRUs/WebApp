@@ -3,6 +3,10 @@ from django.core.exceptions import ValidationError
 
 from .models import Seller
 
+TYPE_OF_BETS = [
+    ('h2h', 'Money Line'),
+    ('any', 'any')
+]
 class Subscription(forms.Form):
     SUB_CHOICES = [
         ('monthly', 'Monthly Plan - $20/month'),
@@ -24,10 +28,7 @@ class LookUp(forms.Form):
     ]
     sports_league_choice = forms.ChoiceField(choices=SPORT_LEAGUE_CHOICES, widget=forms.RadioSelect, label='Select Your sport and league')
 
-    TYPE_OF_BETS = [
-        ('h2h', 'Money Line'),
-        ('any','any')
-    ]
+
     type_of_bets = forms.ChoiceField(choices=TYPE_OF_BETS, widget=forms.RadioSelect, label='Select your type of bet')
 
 class SellerProfileForm(forms.ModelForm):

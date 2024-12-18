@@ -145,9 +145,7 @@
                                                                 <div class="h4 m-0">{{ outcome.name }}</div>
                                                                 <div class="d-flex align-items-center">
                                                                     <span class="me-1">Odds:</span>
-                                                                    <span class="{% if outcome.multiplier < 0 %}text-success{% else %}text-danger{% endif %} fw-bold">
-                                                                        {{ outcome.multiplier }}
-                                                                    </span>
+                                                                        {{ outcome.price }}
                                                                 </div>
                                                             </div>
                                                             <div class="col-auto">
@@ -159,7 +157,7 @@
                                                                                 '{{ pick.home_team }} vs {{ pick.away_team }}',
                                                                                 '{{ bookmaker.title }}',
                                                                                 '{{ outcome.name }}',
-                                                                                '{{ outcome.multiplier }}',
+                                                                                '{{ outcome.price }}',
                                                                                 '{{ pick.sport }}',
                                                                                 '{{ pick.league }}',
                                                                                 '{{ pick.type }}'

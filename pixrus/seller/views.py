@@ -19,7 +19,7 @@ from pixrus.utils.stat import get_stats
 from seller.models import Seller
 from django.http import HttpResponseForbidden, JsonResponse, HttpResponseNotFound, Http404
 from .utils.pick_data_getter import get_odds
-from .forms import Subscription as SubscriptionForm,LookUp
+from .forms import Subscription as SubscriptionForm,LookUp, TYPE_OF_BETS
 from product.models import Subscription as Subscription
 from pixrus.utils.probabilty_calculator import get_probability
 from .utils.analytics import get_new_subs,get_total_subs
@@ -57,7 +57,6 @@ def seller_landing(request):
     new_subs_chart_data = get_new_subs(seller)
     total_subs = get_total_subs(seller)
     all_subscribers_by_letters = list(all_subscribers_by_letters)
-    print(all_subscribers_by_letters)
 
     context = {
         'seller': seller,
@@ -73,67 +72,78 @@ def seller_landing(request):
     return render(request, 'seller_dashboard.html', context)
 
 
+from django.http import HttpResponseForbidden
+from django.shortcuts import get_object_or_404, render
+
+
 @role_required(required_role='seller')
-def post_pick_view(request,data_id):
+def post_pick_view(request, data_id):
+    # Ensure the user is a seller
     if not Seller.objects.filter(user=request.user).exists():
         return HttpResponseForbidden("You do not have permission to access this page.")
 
-    seller = Seller.objects.get(user=request.user)
+    seller = get_object_or_404(Seller, user=request.user)
 
     # Get current filter parameters or defaults
-    team_filter = request.GET.get("team", request.session.get("team_filter", "")).lower()
-    sportsbook_filter = request.GET.get("sportsbook", request.session.get("sportsbook_filter", "")).lower()
-    date_filter = request.GET.get("date", request.session.get("date_filter", "")).lower()
+    team_filter = request.GET.get("team", "").lower().strip()
+    sportsbook_filter = request.GET.get("sportsbook", "").lower().strip()
+    date_filter = request.GET.get("date", "").strip()
 
+    # Fetch API request data
+    api_req = get_object_or_404(ApiRequest, id=data_id)
+    current_pick_data = api_req.response_data or []
 
-    # Store filters in session for persistence
-    request.session["team_filter"] = team_filter
-    request.session["sportsbook_filter"] = sportsbook_filter
-    request.session["date_filter"] = date_filter
-
-    api_req = ApiRequest.objects.get(id=data_id)
-    current_pick_data = api_req.response_data
+    # Store type of pick and odds in the session
     request.session["type_of_pick"] = api_req.type_of_pick
     request.session["odds"] = api_req.response_data
+
+    # Initialize filterable data
     filtered_picks = []
     unique_sportsbooks = set()
+    unique_teams = set()
 
-    # Extract unique sportsbooks
+    # Collect unique sportsbooks and teams
     for pick in current_pick_data:
-        for bookmaker in pick["bookmakers"]:
-            unique_sportsbooks.add(bookmaker["title"])
+        unique_teams.update([pick.get("away_team", ""), pick.get("home_team", "")])
+        for bookmaker in pick.get("bookmakers", []):
+            unique_sportsbooks.add(bookmaker.get("title", ""))
 
     # Apply filters
     for pick in current_pick_data:
         # Check team filter
-        if team_filter and team_filter not in pick["home_team"].lower() and team_filter not in pick[
-            "away_team"].lower():
+        if team_filter and team_filter not in pick.get("home_team", "").lower() \
+                        and team_filter not in pick.get("away_team", "").lower():
             continue
 
         # Check date filter
-        if date_filter and not pick["commence_time"].startswith(date_filter):
+        if date_filter and not pick.get("commence_time", "").startswith(date_filter):
             continue
 
-        # Check sportsbook filter
+        # Check sportsbook filter and filter bookmakers
         if sportsbook_filter:
             matching_bookmakers = [
-                bookmaker for bookmaker in pick["bookmakers"]
-                if sportsbook_filter in bookmaker["title"].lower()
+                bookmaker for bookmaker in pick.get("bookmakers", [])
+                if sportsbook_filter in bookmaker.get("title", "").lower()
             ]
             if not matching_bookmakers:
                 continue
-            pick["bookmakers"] = matching_bookmakers
+            pick["bookmakers"] = matching_bookmakers  # Replace with filtered bookmakers
 
+        # Add the pick after all filters
         filtered_picks.append(pick)
 
+    # Prepare context for the template
     context = {
         "picks": filtered_picks,
         "all_picks": current_pick_data,
-        "unique_sportsbooks": sorted(unique_sportsbooks),
+        "unique_sportsbooks": sorted(filter(None, unique_sportsbooks)),  # Remove empty values
+        "unique_teams": sorted(filter(None, unique_teams)),  # Remove empty values
         "seller": seller,
+        "type_of_pick": api_req.type_of_pick_verbal,
     }
 
     return render(request, "post_pick.html", context)
+
 
 
 @role_required(required_role='seller')
@@ -150,7 +160,6 @@ def activate_pick(request, pick_id):
         messages.error(request, "Pick not found.")
         return redirect('seller_dashboard')
 
-    seller = seller_query.first()
 
     if request.method == "POST":
         required_fields = ["outcome", "multiplier", "bookmaker", "unit_size", "home_team", "away_team", "commence_time"]
@@ -179,7 +188,6 @@ def activate_pick(request, pick_id):
             probability=get_probability(request.POST["multiplier"]),
             sport_league = request.session['sport_league']
         )
-
 
         return redirect('seller_dashboard')
     return render(request, "activate_pick.html", {"pick": pick, 'seller': seller})
@@ -342,7 +350,7 @@ def look_up(request):
         if form.is_valid():
             sports_league_choice = form.cleaned_data['sports_league_choice']
             form_type_of_bet = form.cleaned_data['type_of_bets']
-            api_obj = get_odds(sport_league = sports_league_choice,type_of_pick=form_type_of_bet)
+            api_obj = get_odds(sport_league = sports_league_choice,type_of_pick=form_type_of_bet,verbal_type_of_pick = dict(TYPE_OF_BETS).get(form_type_of_bet))
             request.session['sport_league'] = form.cleaned_data['sports_league_choice']
             request.session['type_of_sport_bet'] = form_type_of_bet
             return redirect('post_pick', api_obj.id)
