@@ -74,7 +74,7 @@ def market(request):
             success_rate = 0
             average_odds = 0
         else:
-            success_rate = HistoricalPick.objects.filter(seller = seller,did_seller_succeed = True).count()/ picks_sold
+            success_rate = (HistoricalPick.objects.filter(seller = seller,did_seller_succeed = True).count()/picks_sold) * 100
             average_odds = HistoricalPick.objects.filter(seller=seller).aggregate(average_probability=Avg('probability'))['average_probability']
         recommended_sellers.append((picks_sold,success_rate,average_odds,seller))
 

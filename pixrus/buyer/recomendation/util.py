@@ -130,4 +130,4 @@ def calculate_averages(all_historical_picks):
     average_amount_of_units = amount_of_units / total_picks
     average_pick_risk = total_risk_value / total_picks
     average_type_of_pick = type_of_pick / total_picks
-    return average_amount_of_units, average_pick_risk, average_type_of_pick
+    return average_amount_of_units, round(average_pick_risk,2), average_type_of_pick

@@ -37,7 +37,7 @@ def get_top(historical_pick_queries,num_sellers):
     ]
 
     safest_sellers = [
-        (Seller.objects.get(id=seller['seller']), seller['average_probability'])
+        (Seller.objects.get(id=seller['seller']), round(seller['average_probability'], 2))
         for seller in (
             historical_pick_queries
             .values('seller')
@@ -47,7 +47,7 @@ def get_top(historical_pick_queries,num_sellers):
     ]
 
     riskiest_sellers = [
-        (Seller.objects.get(id=seller['seller']), seller['average_probability'])
+        (Seller.objects.get(id=seller['seller']), round(seller['average_probability'], 2))
         for seller in (
             historical_pick_queries
             .values('seller')
